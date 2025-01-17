@@ -1,0 +1,30 @@
+// Bootstrap 5.0.0-Beta2
+@import "~bootstrap/scss/bootstrap";
+
+// Global
+@import "../assets/global/fonts";
+@import "../assets/global/themes";
+@import "../assets/global/variables";
+@import "../assets/global/mixins";
+@import "../assets/global/general";
+@import "../assets/global/rtl-mode";
+
+
+// Custom Bootstrap Components
+@import "../assets/bootstrap/custom";
+
+// Generic
+@import "../assets/generic/helpers";
+@import "../assets/generic/animate";
+
+// Skeleton
+@import "../assets/skeleton/mytask-layout";
+
+// Plugin scss
+@import "../assets/plugin/calendar";
+@import "../assets/plugin/chat";
+@import "../assets/plugin/timeline";
+@import "../assets/plugin/taskbord";
+
+// Application widgets
+@import "../assets/widgets/card";
