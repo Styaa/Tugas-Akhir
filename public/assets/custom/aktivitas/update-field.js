@@ -18,7 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const updateField = `/${encodeURIComponent(kodeOrmawa)}/program-kerja/${encodeURIComponent(prokerNama)}/divisi/${encodeURIComponent(namaDivisi)}/aktivitas/${encodeURIComponent(activityId)}/update`;
 
             const payload = {};
-            payload[fieldName.split('_')[0]] = fieldValue;
+            payload[fieldName] = fieldValue;
+
+            console.log(fieldName);
 
             // Kirim permintaan AJAX ke server
             fetch(updateField, {

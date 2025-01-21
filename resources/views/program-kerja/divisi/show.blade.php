@@ -43,11 +43,10 @@
                                         @endphp
                                         <td>
                                             <input type="text" class="form-control fs-10 update-field"
-                                                value="{{ $activity->nama }}" name="activity_name_{{ $activity->id }}" />
+                                                value="{{ $activity->nama }}" name="nama" />
                                         </td>
                                         <td>
-                                            <select class="form-select fs-11 update-field"
-                                                name="person_in_charge_{{ $activity->id }}">
+                                            <select class="form-select fs-11 update-field" name="person_in_charge">
                                                 <option value="">Assign User</option>
                                                 @foreach ($anggotaProker as $user)
                                                     <option value="{{ $user->user_id }}"
@@ -58,11 +57,11 @@
                                         </td>
                                         <td>
                                             <input type="date" class="form-control update-field"
-                                                value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu->format('Y-m-d') : '' }}"
-                                                name="tenggat_waktu_{{ $activity->id }}" />
+                                                value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu : '' }}"
+                                                name="tenggat_waktu" />
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="prioritas_{{ $activity->id }}">
+                                            <select class="form-select update-field" name="prioritas">
                                                 <option value="rendah"
                                                     {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>Low
                                                 </option>
@@ -78,7 +77,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="status_{{ $activity->id }}">
+                                            <select class="form-select update-field" name="status">
                                                 <option value="belum_mulai"
                                                     {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>Not
                                                     Started</option>
@@ -92,7 +91,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="dependency_{{ $activity->id }}">
+                                            <select class="form-select update-field" name="dependency_id">
                                                 <option value="">No Dependency</option>
                                                 @foreach ($activities as $activity)
                                                     <option value="{{ $activity->id }}"

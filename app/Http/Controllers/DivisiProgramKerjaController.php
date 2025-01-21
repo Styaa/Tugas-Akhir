@@ -6,6 +6,7 @@ use App\Models\ProgramKerja;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class DivisiProgramKerjaController extends Controller
 {
@@ -48,7 +49,11 @@ class DivisiProgramKerjaController extends Controller
             ->where('program_kerjas_id', $prokerId)
             ->get();
 
-        // dd($activities);
+        foreach ($activities as $activity) {
+            $activity->tenggat_waktu = $activity->tenggat_waktu ? Carbon::parse($activity->tenggat_waktu)->format('Y-m-d') : null;
+        }
+
+        // dd($activities->first()->tenggat_waktu);
 
 
         // dd($anggotaProker[0]->nama_program_kerja);
