@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::prefix('{id}/aktivitas')->name('aktivitas.')->group(function () {
                     Route::get('/', [AktivitasDivisiProgramKerjaController::class, 'index'])->name('index'); // Menampilkan aktivitas divisi
                     Route::post('/', [AktivitasDivisiProgramKerjaController::class, 'store'])->name('store'); // Menyimpan aktivitas divisi
+                    Route::patch('/{aktivitas_id}/update', [AktivitasDivisiProgramKerjaController::class, 'update'])->name('update');
                 });
             });
         });

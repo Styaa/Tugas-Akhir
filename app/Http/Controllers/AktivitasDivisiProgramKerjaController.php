@@ -27,4 +27,20 @@ class AktivitasDivisiProgramKerjaController extends Controller
 
         return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan.');
     }
+
+    public function update(Request $request, $kode_ormawa, $nama_program_kerja, $id, $aktivitas_id)
+    {
+        // dd($kode_ormawa, $nama_program_kerja, $id, $aktivitas_id, $request->all());
+        $keys = array_keys($request->all());
+        $value = array_values($request->all());
+
+        // Cari aktivitas berdasarkan ID
+        $activity = AktivitasDivisiProgramKerja::find($aktivitas_id);
+
+        // Update data aktivitas
+        $activity->update($request->all());
+
+        // Response JSON
+        return response()->json(['success' => true, 'message' => 'Aktivitas berhasil diperbarui.']);
+    }
 }

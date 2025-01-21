@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiPelaksana;
 use App\Models\DivisiProgramKerja;
 use App\Models\Jabatan;
@@ -247,13 +248,12 @@ class ProgramKerjaController extends Controller
             ->get();
 
         // Ambil aktivitas untuk semua divisi pelaksana yang terkait
-        $activities = DB::table('aktivitas_divisi_program_kerjas')
-            ->where('program_kerjas_id', $programKerja->id)
-            ->get();
+        $activities = AktivitasDivisiProgramKerja::where('program_kerjas_id', $programKerja->id)->get();
 
-        // dd($activities);
 
-        // dd($ketua);
+        // dd($activities->first()->personInCharge->name);
+
+        // dd($programKerja);
 
         // Periksa apakah tanggal selesai berbeda dengan tanggal mulai
         if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {

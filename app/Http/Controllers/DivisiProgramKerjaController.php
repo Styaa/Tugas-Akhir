@@ -23,6 +23,8 @@ class DivisiProgramKerjaController extends Controller
             ->select('divisi_pelaksanas.nama AS nama_divisi', 'divisi_program_kerjas.id AS id_divisi', 'divisi_program_kerjas.divisi_pelaksanas_id AS id_pelaksana')
             ->first();
 
+        // dd($namaDivisi);
+
 
         $anggotaProker = DB::table('struktur_prokers')
             ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
@@ -50,6 +52,6 @@ class DivisiProgramKerjaController extends Controller
 
 
         // dd($anggotaProker[0]->nama_program_kerja);
-        return view('program-kerja.divisi.show', compact('anggotaProker', 'namaDivisi', 'activities', 'prokerNama'));
+        return view('program-kerja.divisi.show', compact('anggotaProker', 'namaDivisi', 'activities', 'prokerNama', 'prokerId'));
     }
 }

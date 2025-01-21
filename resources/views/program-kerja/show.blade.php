@@ -51,94 +51,71 @@
                     {{-- Card Info End --}}
 
                     <div class="row clearfix g-3">
-                        <div class="col-xl-8 col-lg-12 col-md-12 flex-column">
-                            <div class="row g-3">
+                        <div class="col-xl-8 col-lg-12 col-md-12">
+                            <div class="column g-3">
                                 {{-- Card Divisi Start --}}
-                                <div class="d-flex flex-row flex-wrap justify-content-start">
-                                    @foreach ($divisi as $item)
-                                        <div class="card mb-4 w-30 me-4"> <!-- Mengatur lebar kartu -->
-                                            <div
-                                                class="card-header py-3 px-0 d-flex flex-column align-items-center text-center justify-content-between">
-                                                <h3 class="fw-bold flex-fill mb-2">
-                                                    {{ $item['divisi_pelaksana']['nama'] }}
-                                                </h3>
+                                @foreach ($divisi as $item)
+                                    <div class="mt-4 pb-3 border-bottom">
+                                        <!-- Garis Bawah untuk Setiap Divisi -->
+                                        <h5 class="fw-bold mt-4"> {{ $item['divisi_pelaksana']['nama'] }}
+                                        </h5>
+                                        @php
+                                            $activitiesForDivisi = $activities->where(
+                                                'divisi_pelaksana_id',
+                                                $item['id'],
+                                            );
+                                        @endphp
+                                        @if ($activitiesForDivisi->isEmpty())
+                                            <p class="text-muted">Tidak ada aktivitas</p>
+                                        @else
+                                            <!-- Tabel dengan Garis Tipis Antar Kolom -->
+                                            <div class="table-responsive">
+                                                <table class="table table-borderless align-middle">
+                                                    <thead class="border-bottom">
+                                                        <tr class="text-muted">
+                                                            <th class="border-end">Nama Aktivitas</th>
+                                                            <th class="border-end">Person In Charge</th>
+                                                            <th class="border-end">Tenggat Waktu</th>
+                                                            <th class="border-end">Prioritas</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activitiesForDivisi as $activity)
+                                                            <tr>
+                                                                <td class="border-end">{{ $activity->nama }}</td>
+                                                                <td class="border-end">
+                                                                    {{ $activity->personInCharge->name ?? 'Not Assigned' }}
+                                                                </td>
+                                                                <td class="border-end">{{ $activity->tenggat_waktu }}</td>
+                                                                <td class="border-end">{{ $activity->prioritas }}</td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge
+                                        {{ $activity->status === 'belum_mulai'
+                                            ? 'bg-warning'
+                                            : ($activity->status === 'sedang_berjalan'
+                                                ? 'bg-info'
+                                                : 'bg-success') }}">
+                                                                        {{ ucfirst(str_replace('_', ' ', $activity->status)) }}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            <div class="card-body d-flex justify-content-between align-items-center">
-                                                <div class="planned_task client_task">
-                                                    <div class="dd" data-plugin="nestable">
-                                                        <ol class="dd-list">
-                                                            @foreach ($activities as $activity)
-                                                                @if ($activity->divisi_pelaksana_id === $item['id'])
-                                                                    <li class="dd-item mb-3">
-                                                                        <div class="dd-handle">
-                                                                            <div
-                                                                                class="task-info d-flex align-items-center justify-content-between">
-                                                                                <h6
-                                                                                    class="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-14 mb-0">
-                                                                                    {{ $activity->nama }}</h6>
-                                                                                <div
-                                                                                    class="task-priority d-flex flex-column align-items-center justify-content-center">
-                                                                                    <div
-                                                                                        class="avatar-list avatar-list-stacked m-0">
-                                                                                        <img class="avatar rounded-circle small-avt sm"
-                                                                                            src="{{ url('/') . '/images/xs/avatar2.jpg' }}"
-                                                                                            alt="">
-                                                                                        <img class="avatar rounded-circle small-avt sm"
-                                                                                            src="{{ url('/') . '/images/xs/avatar1.jpg' }}"
-                                                                                            alt="">
-                                                                                    </div>
-                                                                                    @if ($activity->status === 'belum_mulai')
-                                                                                        <span
-                                                                                            class="badge bg-warning text-end mt-1">
-                                                                                            Not Started
-                                                                                        </span>
-                                                                                    @elseif($activity->status === 'sedang_berjalan')
-                                                                                        <span
-                                                                                            class="badge bg-warning text-end mt-1">
-                                                                                            In Progress
-                                                                                        </span>
-                                                                                    @else
-                                                                                        <span
-                                                                                            class="badge bg-warning text-end mt-1">
-                                                                                            Completed
-                                                                                        </span>
-                                                                                    @endif
-                                                                                </div>
-                                                                            </div>
-                                                                            {{-- <p class="py-2 mb-0">Lorem ipsum dolor sit amet,
-                                                                                consectetur
-                                                                                adipiscing
-                                                                                elit. In id
-                                                                                nec scelerisque massa.</p> --}}
-                                                                            {{-- <div
-                                                                                class="tikit-info row g-3 align-items-center">
-                                                                                <div class="col-sm">
-                                                                                </div>
-                                                                                <div class="col-sm text-end">
-                                                                                    <div
-                                                                                        class="small text-truncate light-danger-bg py-1 px-2 rounded-1 d-inline-block fw-bold small">
-                                                                                        Social Geek Made </div>
-                                                                                </div>
-                                                                            </div> --}}
-                                                                        </div>
-                                                                    </li>
-                                                                @else
-                                                                    <p>Belum ada aktivitas</p>
-                                                                @endif
-                                                            @endforeach
-                                                        </ol>
-                                                        <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $programKerja->nama]) }}"
-                                                            class="btn btn-dark btn-sm mt-1"><i
-                                                                class="icofont-plus-circle me-2 fs-6"></i>Lihat Detail</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
+                                        @endif
+                                        <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $programKerja->nama]) }}"
+                                            class="btn btn-dark btn-sm mt-1">Lihat
+                                            Detail</a>
+                                    </div>
+                                @endforeach
+
                                 {{-- Card Divisi End --}}
                             </div>
                         </div>
+
                         <div class="col-xl-4 col-lg-12 col-md-12">
                             <div class="row g-3 row-deck">
                                 <div class="col-md-12 col-lg-12 col-xl-12">
@@ -167,8 +144,9 @@
                                                     </div>
                                                 @endforeach
                                                 <button type="button" class="btn btn-dark w-sm-100 mt-3"
-                                                    data-bs-toggle="modal" data-bs-target="#addmember"><i
-                                                        class="icofont-plus-circle me-2 fs-6"></i>Tambah Anggota</button>
+                                                    data-bs-toggle="modal" data-bs-target="#addmember">
+                                                    <i class="icofont-plus-circle me-2 fs-6"></i>Tambah Anggota
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -176,6 +154,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div><!-- Row End -->
         </div>

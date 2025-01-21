@@ -25,4 +25,9 @@ class AktivitasDivisiProgramKerja extends Model
         'divisi_pelaksana_id',
         'program_kerjas_id',
     ];
+
+    public function personInCharge()
+    {
+        return $this->belongsTo(User::class, 'person_in_charge');
+    }
 }

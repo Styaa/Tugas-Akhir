@@ -3,11 +3,16 @@
 @section('title', __('Dashboard'))
 
 @section('content')
+    <div id="success-alert" class="alert alert-success alert-dismissible fade show" hidden role="alert">
+        <span id="success-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <div class="row g-3">
         {{-- Card Aktivitas --}}
         <div class="col-xl-9 col-lg-8 col-md-8">
             <div class="card mb-4">
-                <div class="card-header py-3 px-0 d-flex flex-column align-items-center text-center justify-content-between">
+                <div
+                    class="card-header py-3 px-0 d-flex flex-column align-items-center text-center justify-content-between">
                     <h3 class="fw-bold flex-fill mb-2">{{ $namaDivisi->nama_divisi }}</h3>
                 </div>
                 <div class="card-body d-flex flex-column">
@@ -27,67 +32,78 @@
                         </thead>
                         <tbody>
                             @foreach ($activities as $activity)
-                                <tr>
-                                    <td>
-                                        <input type="text" class="form-control fs-10" value="{{ $activity->nama }}"
-                                            name="activity_name_{{ $activity->id }}" />
-                                    </td>
-                                    <td>
-                                        <select class="form-select fs-11" name="person_in_charge_{{ $activity->id }}">
-                                            <option value="">Assign User</option>
-                                            @foreach ($anggotaProker as $user)
-                                                <option value="{{ $user->user_id }}"
-                                                    {{ $activity->person_in_charge == $user->user_id ? 'selected' : '' }}>
-                                                    {{ $user->nama_user }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="date" class="form-control"
-                                            value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu->format('Y-m-d') : '' }}"
-                                            name="tenggat_waktu_{{ $activity->id }}" />
-                                    </td>
-                                    <td>
-                                        <select class="form-select" name="prioritas_{{ $activity->id }}">
-                                            <option value="rendah"
-                                                {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>Low
-                                            </option>
-                                            <option value="sedang"
-                                                {{ $activity->prioritas == 'sedang' ? 'selected' : '' }}>Normal
-                                            </option>
-                                            <option value="tinggi"
-                                                {{ $activity->prioritas == 'tinggi' ? 'selected' : '' }}>High
-                                            </option>
-                                            <option value="kritikal"
-                                                {{ $activity->prioritas == 'kritikal' ? 'selected' : '' }}>Urgent
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select class="form-select" name="status_{{ $activity->id }}">
-                                            <option value="belum_mulai"
-                                                {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>Not
-                                                Started</option>
-                                            <option value="sedang_berjalan"
-                                                {{ $activity->status == 'sedang_berjalan' ? 'selected' : '' }}>In
-                                                Progress</option>
-                                            <option value="selesai" {{ $activity->status == 'selesai' ? 'selected' : '' }}>
-                                                Completed
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select class="form-select" name="dependency_{{ $activity->id }}">
-                                            <option value="">No Dependency</option>
-                                            @foreach ($activities as $activity)
-                                                <option value="{{ $activity->id }}"
-                                                    {{ $activity->id == $activity->dependency_id ? 'selected' : '' }}>
-                                                    {{ $activity->nama }}
+                                <form
+                                    action="{{ route('program-kerja.divisi.aktivitas.update', ['kode_ormawa' => $kode_ormawa, 'id' => $prokerId, 'aktivitas_id' => $activity->id, 'nama_program_kerja' => $prokerNama]) }}"
+                                    method="PATCH">
+                                    @csrf
+                                    @method('PATCH')
+                                    <tr data-id="{{ $activity->id }}">
+                                        @php
+                                            $activityId = $activity->id;
+                                        @endphp
+                                        <td>
+                                            <input type="text" class="form-control fs-10 update-field"
+                                                value="{{ $activity->nama }}" name="activity_name_{{ $activity->id }}" />
+                                        </td>
+                                        <td>
+                                            <select class="form-select fs-11 update-field"
+                                                name="person_in_charge_{{ $activity->id }}">
+                                                <option value="">Assign User</option>
+                                                @foreach ($anggotaProker as $user)
+                                                    <option value="{{ $user->user_id }}"
+                                                        {{ $activity->person_in_charge == $user->user_id ? 'selected' : '' }}>
+                                                        {{ $user->nama_user }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control update-field"
+                                                value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu->format('Y-m-d') : '' }}"
+                                                name="tenggat_waktu_{{ $activity->id }}" />
+                                        </td>
+                                        <td>
+                                            <select class="form-select update-field" name="prioritas_{{ $activity->id }}">
+                                                <option value="rendah"
+                                                    {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>Low
                                                 </option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                </tr>
+                                                <option value="sedang"
+                                                    {{ $activity->prioritas == 'sedang' ? 'selected' : '' }}>Normal
+                                                </option>
+                                                <option value="tinggi"
+                                                    {{ $activity->prioritas == 'tinggi' ? 'selected' : '' }}>High
+                                                </option>
+                                                <option value="kritikal"
+                                                    {{ $activity->prioritas == 'kritikal' ? 'selected' : '' }}>Urgent
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select update-field" name="status_{{ $activity->id }}">
+                                                <option value="belum_mulai"
+                                                    {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>Not
+                                                    Started</option>
+                                                <option value="sedang_berjalan"
+                                                    {{ $activity->status == 'sedang_berjalan' ? 'selected' : '' }}>In
+                                                    Progress</option>
+                                                <option value="selesai"
+                                                    {{ $activity->status == 'selesai' ? 'selected' : '' }}>
+                                                    Completed
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select update-field" name="dependency_{{ $activity->id }}">
+                                                <option value="">No Dependency</option>
+                                                @foreach ($activities as $activity)
+                                                    <option value="{{ $activity->id }}"
+                                                        {{ $activity->id == $activity->dependency_id ? 'selected' : '' }}>
+                                                        {{ $activity->nama }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </form>
                             @endforeach
                         </tbody>
                     </table>
@@ -133,4 +149,12 @@
     <!-- Jquery Page Js -->
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
+    <script src="{{ asset('assets/custom/aktivitas/update-field.js') }}"></script>
+
+    {{-- <script>
+        // const activityId = row.getAttribute('data-id');
+
+        var updateField =
+            `{{ route('program-kerja.divisi.aktivitas.update', ['kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $prokerNama, 'id' => $namaDivisi->id_divisi, 'aktivitas_id' => $activityId]) }}?periode=$periode`;
+    </script> --}}
 @endsection
