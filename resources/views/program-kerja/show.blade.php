@@ -52,69 +52,76 @@
 
                     <div class="row clearfix g-3">
                         <div class="col-xl-8 col-lg-12 col-md-12">
-                            <div class="column g-3">
+                            <div class="row g-3">
                                 {{-- Card Divisi Start --}}
                                 @foreach ($divisi as $item)
-                                    <div class="mt-4 pb-3 border-bottom">
-                                        <!-- Garis Bawah untuk Setiap Divisi -->
-                                        <h5 class="fw-bold mt-4"> {{ $item['divisi_pelaksana']['nama'] }}
-                                        </h5>
-                                        @php
-                                            $activitiesForDivisi = $activities->where(
-                                                'divisi_pelaksana_id',
-                                                $item['id'],
-                                            );
-                                        @endphp
-                                        @if ($activitiesForDivisi->isEmpty())
-                                            <p class="text-muted">Tidak ada aktivitas</p>
-                                        @else
-                                            <!-- Tabel dengan Garis Tipis Antar Kolom -->
-                                            <div class="table-responsive">
-                                                <table class="table table-borderless align-middle">
-                                                    <thead class="border-bottom">
-                                                        <tr class="text-muted">
-                                                            <th class="border-end">Nama Aktivitas</th>
-                                                            <th class="border-end">Person In Charge</th>
-                                                            <th class="border-end">Tenggat Waktu</th>
-                                                            <th class="border-end">Prioritas</th>
-                                                            <th>Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($activitiesForDivisi as $activity)
-                                                            <tr>
-                                                                <td class="border-end">{{ $activity->nama }}</td>
-                                                                <td class="border-end">
-                                                                    {{ $activity->personInCharge->name ?? 'Not Assigned' }}
-                                                                </td>
-                                                                <td class="border-end">{{ $activity->tenggat_waktu }}</td>
-                                                                <td class="border-end">{{ $activity->prioritas }}</td>
-                                                                <td>
-                                                                    <span
-                                                                        class="badge
-                                        {{ $activity->status === 'belum_mulai'
-                                            ? 'bg-warning'
-                                            : ($activity->status === 'sedang_berjalan'
-                                                ? 'bg-info'
-                                                : 'bg-success') }}">
-                                                                        {{ ucfirst(str_replace('_', ' ', $activity->status)) }}
-                                                                    </span>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
+                                    <div class="col-md-12 col-lg-12 col-xl-12">
+                                        <div class="card">
+                                            <div
+                                                class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                                                <h6 class="mb-0 fw-bold">{{ $item['divisi_pelaksana']['nama'] }}</h6>
+                                                <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $programKerja->nama]) }}"
+                                                    class="btn btn-dark btn-sm">Lihat Detail</a>
                                             </div>
-                                        @endif
-                                        <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $programKerja->nama]) }}"
-                                            class="btn btn-dark btn-sm mt-1">Lihat
-                                            Detail</a>
+                                            <div class="card-body">
+                                                @php
+                                                    $activitiesForDivisi = $activities->where(
+                                                        'divisi_pelaksana_id',
+                                                        $item['id'],
+                                                    );
+                                                @endphp
+
+                                                @if ($activitiesForDivisi->isEmpty())
+                                                    <p class="text-muted">Tidak ada aktivitas</p>
+                                                @else
+                                                    <!-- Tabel dengan Garis Tipis Antar Kolom -->
+                                                    <div class="table-responsive">
+                                                        <table class="table table-borderless align-middle">
+                                                            <thead class="border-bottom">
+                                                                <tr class="text-muted">
+                                                                    <th class="border-end">Nama Aktivitas</th>
+                                                                    <th class="border-end">Person In Charge</th>
+                                                                    <th class="border-end">Tenggat Waktu</th>
+                                                                    <th class="border-end">Prioritas</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($activitiesForDivisi as $activity)
+                                                                    <tr>
+                                                                        <td class="border-end">{{ $activity->nama }}</td>
+                                                                        <td class="border-end">
+                                                                            {{ $activity->personInCharge->name ?? 'Not Assigned' }}
+                                                                        </td>
+                                                                        <td class="border-end">
+                                                                            {{ $activity->tenggat_waktu }}</td>
+                                                                        <td class="border-end">{{ $activity->prioritas }}
+                                                                        </td>
+                                                                        <td>
+                                                                            <span
+                                                                                class="badge
+                                                                            {{ $activity->status === 'belum_mulai'
+                                                                                ? 'bg-warning'
+                                                                                : ($activity->status === 'sedang_berjalan'
+                                                                                    ? 'bg-info'
+                                                                                    : 'bg-success') }}">
+                                                                                {{ ucfirst(str_replace('_', ' ', $activity->status)) }}
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 @endforeach
-
                                 {{-- Card Divisi End --}}
                             </div>
                         </div>
+
 
                         <div class="col-xl-4 col-lg-12 col-md-12">
                             <div class="row g-3 row-deck">
@@ -151,6 +158,75 @@
                                         </div>
                                     </div>
                                 </div>
+                                {{-- Section Dokumen Wajib Program Kerja --}}
+                                <div class="col-md-12 col-lg-12 col-xl-12">
+                                    <div class="card">
+                                        <div
+                                            class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                                            <h6 class="mb-0 fw-bold ">Dokumen Wajib Program Kerja</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="flex-grow-1">
+                                                <!-- Rancangan Anggaran Biaya -->
+                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                    <div class="d-flex align-items-center flex-fill">
+                                                        <span
+                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                class="icofont-file-text fs-5"></i></span>
+                                                        <div class="d-flex flex-column ps-3">
+                                                            <a href="{{ route('program-kerja.rab.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                class="text-decoration-none">
+                                                                <h6 class="fw-bold mb-0 small-14">Rancangan Anggaran Biaya
+                                                                </h6>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="time-block text-truncate">
+                                                        Update status
+                                                    </div>
+                                                </div>
+
+                                                <!-- Proposal -->
+                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                    <div class="d-flex align-items-center flex-fill">
+                                                        <span
+                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                class="icofont-file-text fs-5"></i></span>
+                                                        <div class="d-flex flex-column ps-3">
+                                                            <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                class="text-decoration-none">
+                                                                <h6 class="fw-bold mb-0 small-14">Proposal</h6>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="time-block text-truncate">
+                                                        Update status
+                                                    </div>
+                                                </div>
+
+                                                <!-- Laporan Pertanggungjawaban -->
+                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                    <div class="d-flex align-items-center flex-fill">
+                                                        <span
+                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                class="icofont-file-text fs-5"></i></span>
+                                                        <div class="d-flex flex-column ps-3">
+                                                            <a href="{{ route('program-kerja.lpj.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                class="text-decoration-none">
+                                                                <h6 class="fw-bold mb-0 small-14">Laporan
+                                                                    Pertanggungjawaban</h6>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="time-block text-truncate">
+                                                        Update status
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -165,8 +241,4 @@
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/program-kerja/detail-program-kerja.js') }}"></script>
 
-    <script>
-        var assignLeaderUrl =
-            "{{ route('program-kerja.pilih-ketua', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'periode' => $periode, 'userId' => $nama->id]) }}?periode=$periode";
-    </script>
 @endsection

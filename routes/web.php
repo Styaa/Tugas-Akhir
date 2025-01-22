@@ -44,6 +44,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
 
+            Route::get('{id}/rab/create', [ProgramKerjaController::class, 'createRAB'])->name('rab.create');
+            Route::post('{id}/rab/export', [ProgramKerjaController::class, 'downloadRAB'])->name('rab.export');
+            Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
+            Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
+
+
             // Divisi Program Kerja Routes
             Route::prefix('{nama_program_kerja}/divisi')->name('divisi.')->group(function () {
                 Route::get('/', [DivisiProgramKerjaController::class, 'index'])->name('index'); // Menampilkan divisi program kerja

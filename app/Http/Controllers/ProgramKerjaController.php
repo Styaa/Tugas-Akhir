@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-use function Laravel\Prompts\alert;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ArrayExport;
 
 class ProgramKerjaController extends Controller
 {
@@ -351,5 +351,57 @@ class ProgramKerjaController extends Controller
             'kode_ormawa' => $kode_ormawa,
             'id' => $prokerId
         ])->with('success', 'Panitia berhasil dipilih.');
+    }
+
+    public function createRAB($kode_ormawa, $prokerId)
+    {
+        $programKerja = ProgramKerja::find($prokerId);
+        $divisis = DivisiProgramKerja::where('program_kerjas_id', $prokerId)->get();
+        // dd($divisi->first()->divisiPelaksana->nama);
+        return view('program-kerja.dokumen.rab.create', compact('programKerja', 'divisis'));
+    }
+
+    public function downloadRAB(Request $request, $kodeOrmawa, $id)
+    {
+        $rabData = json_decode($request->rab_data, true);
+
+        // dd($request);
+
+        // Header untuk file Excel
+        $header = ['No', 'Komponen Biaya', 'Biaya', 'Jumlah', 'Satuan', 'Total', 'Kategori'];
+
+        $data = [];
+        $counter = 1;
+
+        // Pemasukan
+        foreach ($rabData['pemasukan'] as $pemasukan) {
+            $data[] = [
+                $counter++,
+                $pemasukan['komponen'],
+                $pemasukan['biaya'],
+                $pemasukan['jumlah'],
+                $pemasukan['satuan'],
+                $pemasukan['total'],
+                'Pemasukan',
+            ];
+        }
+
+        // Pengeluaran
+        foreach ($rabData['pengeluaran'] as $pengeluaran) {
+            $data[] = [
+                $counter++,
+                $pengeluaran['komponen'],
+                $pengeluaran['biaya'],
+                $pengeluaran['jumlah'],
+                $pengeluaran['satuan'],
+                $pengeluaran['total'],
+                'Pengeluaran - ' . $pengeluaran['divisi'],
+            ];
+        }
+
+        return Excel::download(new ArrayExport($data), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
+
+        // Unduh file Excel
+        // return Excel::download(new ArrayExport(array_merge([$header], $data)), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
     }
 }

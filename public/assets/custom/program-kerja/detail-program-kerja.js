@@ -3,16 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     ketuaDropdown.forEach(item => {
         item.addEventListener('click', function () {
-            // Ambil data dari item yang diklik
-            const userId = this.dataset.id; // Ambil ID dari dataset item yang baru diklik
-            const periode = new URLSearchParams(window.location.search).get('periode'); // Ambil periode dari URL
+            const userId = this.dataset.id;
+            const periode = new URLSearchParams(window.location.search).get('periode');
             const currUrl = window.location.pathname;
             const pathParts = currUrl.split('/');
-            const kodeOrmawa = pathParts[1]; // Ambil kode ormawa dari URL
-            const prokerId = pathParts[3]; // Ambil ID program kerja dari URL
-
-            // var assignLeaderUrl =
-            //     `{{ route('program-kerja.pilih-ketua', ['kode_ormawa' => ${kodeOrmawa}, 'id' => ${prokerId}, 'periode' => ${periode}, 'userId' => ${userId}]) }}?periode=${periode}`;
+            const kodeOrmawa = pathParts[1];
+            const prokerId = pathParts[3];
 
             const assignLeaderUrl = `/${kodeOrmawa}/program-kerja/${prokerId}/${periode}/${userId}/pilih-ketua`;
 
@@ -32,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.success) {
                         alert('Ketua berhasil dipilih!');
                         location.reload();
-                        // Perbarui tampilan UI (opsional, seperti menandai user terpilih)
+
                         ketuaDropdown.forEach(btn => btn.classList.remove('active'));
                         this.classList.add('active');
                     } else {
@@ -52,14 +48,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.pilih-anggota').forEach(function (item) {
         item.addEventListener('click', function (e) {
             e.preventDefault();
-            // Set selected text
             const userButton = document.getElementById('dropdownUserButton');
             userButton.textContent = this.dataset.name;
 
-            // Update hidden input
             document.querySelector('input[name="anggota"]').value = this.dataset.id;
 
-            // Mark active
             document.querySelectorAll('.pilih-anggota').forEach(function (el) {
                 el.classList.remove('active');
             });
@@ -67,18 +60,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Handle division selection
     document.querySelectorAll('.pilih-divisi').forEach(function (item) {
         item.addEventListener('click', function (e) {
             e.preventDefault();
-            // Set selected text
             const divisiButton = document.getElementById('dropdownDivisiButton');
             divisiButton.textContent = this.dataset.name;
 
-            // Update hidden input
             document.querySelector('input[name="divisi"]').value = this.dataset.id;
 
-            // Mark active
             document.querySelectorAll('.pilih-divisi').forEach(function (el) {
                 el.classList.remove('active');
             });
@@ -86,18 +75,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Handle job position selection
     document.querySelectorAll('.pilih-jabatan').forEach(function (item) {
         item.addEventListener('click', function (e) {
             e.preventDefault();
-            // Set selected text
             const jabatanButton = document.getElementById('dropdownJabatanButton');
             jabatanButton.textContent = this.dataset.name;
 
-            // Update hidden input
             document.querySelector('input[name="jabatan"]').value = this.dataset.id;
 
-            // Mark active
             document.querySelectorAll('.pilih-jabatan').forEach(function (el) {
                 el.classList.remove('active');
             });
