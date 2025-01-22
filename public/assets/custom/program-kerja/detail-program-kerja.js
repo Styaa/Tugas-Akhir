@@ -3,37 +3,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
     ketuaDropdown.forEach(item => {
         item.addEventListener('click', function () {
-            const url = new URL(assignLeaderUrl);
-            const userId = url.searchParams.get('userId'); // Ambil parameter userId
-            const prokerId = url.searchParams.get('id');
-            const kode_ormawa = url.searchParams.get('kode_ormawa'); // Ambil parameter kode_ormawa
-            const periode = url.searchParams.get('periode'); // Ambil parameter periode
-            // let userId = this.dataset.id;
-            console.log(url);
+            // Ambil data dari item yang diklik
+            const userId = this.dataset.id; // Ambil ID dari dataset item yang baru diklik
+            const periode = new URLSearchParams(window.location.search).get('periode'); // Ambil periode dari URL
+            const currUrl = window.location.pathname;
+            const pathParts = currUrl.split('/');
+            const kodeOrmawa = pathParts[1]; // Ambil kode ormawa dari URL
+            const prokerId = pathParts[3]; // Ambil ID program kerja dari URL
+
+            // var assignLeaderUrl =
+            //     `{{ route('program-kerja.pilih-ketua', ['kode_ormawa' => ${kodeOrmawa}, 'id' => ${prokerId}, 'periode' => ${periode}, 'userId' => ${userId}]) }}?periode=${periode}`;
+
+            const assignLeaderUrl = `/${kodeOrmawa}/program-kerja/${prokerId}/${periode}/${userId}/pilih-ketua`;
+
+
+            console.log('User ID yang dipilih:', userId);
+            console.log(assignLeaderUrl);
+
             fetch(assignLeaderUrl, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        userId: userId,
-                        kode_ormawa: kode_ormawa,
-                        prokerId: prokerId,
-                        periode: periode, // Masukkan parameter lainnya jika perlu
-                    }),
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Ketua berhasil dipilih!');
+                        location.reload();
+                        // Perbarui tampilan UI (opsional, seperti menandai user terpilih)
+                        ketuaDropdown.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
                     } else {
                         alert('Gagal menyimpan ketua: ' + data.message);
                     }
+                })
+                .catch(error => {
+                    console.error('Terjadi kesalahan:', error);
                 });
         });
     });
 });
+
 
 document.addEventListener('DOMContentLoaded', function () {
     // Handle user selection

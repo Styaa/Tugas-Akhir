@@ -34,7 +34,7 @@ class ProgramKerjaController extends Controller
             ->first();
 
         // dd($programKerjas);
-        return view('dashboard.dashboard', compact('programKerjas', 'divisiPelaksanas', 'periode', 'kode_ormawa'));
+        return view('dashboard.project-dashboard', compact('programKerjas', 'divisiPelaksanas', 'periode', 'kode_ormawa'));
     }
 
     protected function validateRequest(Request $request)
@@ -173,6 +173,8 @@ class ProgramKerjaController extends Controller
         // dd($request);
         $this->validateRequest($request);
 
+        // dd($request->periode);
+
         // Cari data berdasarkan ID
         $programKerja = ProgramKerja::find($id);
 
@@ -269,23 +271,67 @@ class ProgramKerjaController extends Controller
 
     public function pilihKetua($kode_ormawa, $prokerId, $periode, $userId)
     {
-        // dd($prokerId);
+        // Cari ID divisi_program_kerja berdasarkan divisi_pelaksanas_id dan program_kerjas_id
         $id = DB::table('divisi_program_kerjas')
             ->where('divisi_pelaksanas_id', 4)
             ->where('program_kerjas_id', $prokerId)
             ->value('id');
 
-        StrukturProker::create([
+        // Jika ID tidak ditemukan
+        if (!$id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Divisi program kerja tidak ditemukan.',
+            ], 404);
+        }
+
+        // Periksa apakah ada user yang sudah menjabat sebagai ketua (jabatans_id = 1) pada divisi_program_kerjas_id yang sama
+        $existingKetua = StrukturProker::where('divisi_program_kerjas_id', $id)
+            ->where('jabatans_id', 1)
+            ->first();
+
+        // dd($existingKetua);
+
+        // Jika ada, hapus user sebelumnya
+        if ($existingKetua) {
+            $existingKetua->update(['users_id' => $userId]);
+
+            return response()->json([
+                'success' => 'Ketua berhasil diperbarui.',
+                'data' => $existingKetua,
+            ], 200);
+        }
+
+        // Periksa apakah user sudah berada pada divisi_program_kerjas_id yang sama
+        $exists = StrukturProker::where('users_id', $userId)
+            ->where('divisi_program_kerjas_id', $id)
+            ->exists();
+
+        if ($exists) {
+            // Jika sudah ada, kembalikan respons JSON dengan pesan error
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User sudah berada di divisi program kerja yang sama.',
+            ], 400);
+        }
+
+        // Jika tidak ada, tambahkan data baru
+        $strukturProker = StrukturProker::create([
             'users_id' => $userId,
             'divisi_program_kerjas_id' => $id,
             'jabatans_id' => 1,
         ]);
 
-        return redirect()->route('program-kerja.show', [
-            'kode_ormawa' => $kode_ormawa,
-            'id' => $prokerId
-        ])->with('success', 'Ketua berhasil dipilih.');
+        // Kembalikan respons JSON jika berhasil
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Ketua berhasil dipilih.',
+            'data' => $strukturProker,
+        ], 200);
     }
+
+
+
 
     public function pilihAnggota(Request $request, $kode_ormawa, $prokerId, $periode)
     {

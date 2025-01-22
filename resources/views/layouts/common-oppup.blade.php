@@ -745,7 +745,7 @@ $date = \Carbon\Carbon::now();
             <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="createprojectLabel">TAI Program Kerja</h5>
+                        <h5 class="modal-title fw-bold" id="createprojectLabel">Program Kerja</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -757,50 +757,52 @@ $date = \Carbon\Carbon::now();
                             @method('PUT')
                             <div class="mb-3">
                                 <label for="nama-program" class="form-label">Nama Program Kerja</label>
-                                <input type="text" class="form-control" id="e-nama-program" name="nama"
-                                    placeholder="Nama Program Kerja">
+                                <input type="text" class="form-control" id="e-nama-program-{{ $program->id }}"
+                                    name="nama" placeholder="Nama Program Kerja">
                             </div>
                             <div class="mb-3">
                                 <label for="tujuan-program" class="form-label">Tujuan Program Kerja</label>
-                                <div id="e-tujuan-program-list">
+                                <div id="e-tujuan-program-list-{{ $program->id }}">
                                     <input type="text" class="form-control mb-2" name="tujuan[]"
                                         placeholder="Tujuan Program Kerja">
                                 </div>
-                                <button type="button" id="e-add-tujuan" class="btn btn-primary">Tambah
+                                <button type="button" id="e-add-tujuan" data-id="{{ $program->id }}"
+                                    class="btn btn-primary">Tambah
                                     Tujuan</button>
                             </div>
                             <div class="mb-3">
                                 <label for="deskripsi-program" class="form-label">Deskripsi Program Kerja</label>
-                                <textarea class="form-control" name="deskripsi" id="e-deskripsi-program" rows="3"
+                                <textarea class="form-control" name="deskripsi" id="e-deskripsi-program-{{ $program->id }}" rows="3"
                                     placeholder="Masukkan deskripsi program kerja"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="manfaat-program" class="form-label">Manfaat Program Kerja</label>
-                                <div id="e-manfaat-program-list">
+                                <div id="e-manfaat-program-list-{{ $program->id }}">
                                     <input type="text" class="form-control mb-2" name="manfaat[]"
                                         placeholder="Manfaat Program Kerja">
                                 </div>
-                                <button type="button" id="e-add-manfaat" class="btn btn-primary">Tambah
+                                <button type="button" id="e-add-manfaat" data-id="{{ $program->id }}"
+                                    class="btn btn-primary">Tambah
                                     Manfaat</button>
                             </div>
                             <div class="mb-3 col-span-2">
                                 <label class="form-label">Tipe Program Kerja</label>
                                 <div class="form-check">
-                                    <input type="radio" id="e-internal" name="tipe" value="Internal"
-                                        class="form-check-input">
+                                    <input type="radio" id="e-internal-{{ $program->id }}" name="tipe"
+                                        value="Internal" class="form-check-input">
                                     <label for="internal" class="form-check-label">Internal</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="radio" id="e-eksternal" name="tipe" value="Eksternal"
-                                        class="form-check-input">
+                                    <input type="radio" id="e-eksternal-{{ $program->id }}" name="tipe"
+                                        value="Eksternal" class="form-check-input">
                                     <label for="eksternal" class="form-check-label">Eksternal</label>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="anggaran-dana" class="form-label">Anggaran Dana</label>
                                 <div class="relative">
-                                    <button id="e-dropdownButton" class="btn btn-primary" data-bs-toggle="dropdown"
-                                        aria-expanded="false">Pilih Anggaran</button>
+                                    <button id="e-dropdownButton-{{ $program->id }}" class="btn btn-primary"
+                                        data-bs-toggle="dropdown" aria-expanded="false">Pilih Anggaran</button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownButton">
                                         <li>
                                             <div class="form-check">
@@ -832,47 +834,50 @@ $date = \Carbon\Carbon::now();
                             <div class="mb-3">
                                 <label class="form-label">Konsep</label>
                                 <div class="form-check">
-                                    <input type="radio" id="e-online" name="konsep" value="Online"
-                                        class="form-check-input">
+                                    <input type="radio" id="e-online-{{ $program->id }}" name="konsep"
+                                        value="Online" class="form-check-input">
                                     <label for="online" class="form-check-label">Online</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="radio" id="e-offline" name="konsep" value="Offline"
-                                        class="form-check-input">
+                                    <input type="radio" id="e-offline-{{ $program->id }}" name="konsep"
+                                        value="Offline" class="form-check-input">
                                     <label for="offline" class="form-check-label">Offline</label>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="tempat" class="form-label">Tempat</label>
-                                <input type="text" class="form-control" id="e-tempat" name="tempat"
-                                    placeholder="Masukkan tempat">
+                                <input type="text" class="form-control" id="e-tempat-{{ $program->id }}"
+                                    name="tempat" placeholder="Masukkan tempat">
                             </div>
                             <div class="mb-3">
                                 <label for="sasaran-kegiatan" class="form-label">Sasaran Kegiatan</label>
-                                <input type="text" class="form-control" id="e-sasaran-kegiatan" name="sasaran"
+                                <input type="text" class="form-control"
+                                    id="e-sasaran-kegiatan-{{ $program->id }}" name="sasaran"
                                     placeholder="Masukkan sasaran kegiatan">
                             </div>
 
                             <div class="mb-3">
                                 <label for="indikator-keberhasilan" class="form-label">Indikator Keberhasilan</label>
-                                <input type="text" class="form-control" id="e-indikator-keberhasilan"
-                                    name="indikator" placeholder="Masukkan indikator keberhasilan">
+                                <input type="text" class="form-control"
+                                    id="e-indikator-keberhasilan-{{ $program->id }}" name="indikator"
+                                    placeholder="Masukkan indikator keberhasilan">
                             </div>
                             <div class="row g-3 mb-3 col-span-2">
                                 <div class="col">
                                     <label class="form-label">Tanggal Mulai</label>
-                                    <input type="date" class="form-control" name="mulai" id="e-tanggal-mulai">
+                                    <input type="date" class="form-control" name="mulai"
+                                        id="e-tanggal-mulai-{{ $program->id }}">
                                 </div>
                                 <div class="col">
                                     <label class="form-label">Tanggal Selesai</label>
                                     <input type="date" class="form-control" name="selesai"
-                                        id="e-tanggal-selesai">
+                                        id="e-tanggal-selesai-{{ $program->id }}">
                                 </div>
                             </div>
                             <div class="mb-3 col-span-2">
                                 <label for="divisi" class="form-label">Divisi</label>
                                 <div class="relative">
-                                    <button id="dropdownDivisiButton" class="btn btn-primary"
+                                    <button id="dropdownDivisiButton-{{ $program->id }}" class="btn btn-primary"
                                         data-bs-toggle="dropdown" aria-expanded="false">Pilih Divisi</button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownDivisiButton">
                                         @foreach ($divisiPelaksanas as $divisi)

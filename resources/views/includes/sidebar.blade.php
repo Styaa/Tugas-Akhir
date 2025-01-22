@@ -12,7 +12,7 @@
                             d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
                     </svg>
                 </span>
-                <span class="logo-text">my-Task</span>
+                <span class="logo-text">{{ $kode_ormawa }}</span>
             </a>
             <!-- Menu: main ul -->
 
@@ -27,8 +27,19 @@
                         id="dashboard-Components">
                         <li><a class="ms-link {{ Request::segment(2) == 'hr-dashboard' ? 'active' : '' }}"
                                 href="{{ route('dashboard') }}"> <span>Hr Dashboard</span></a></li>
-                        <li><a class="ms-link {{ Request::segment(2) == 'project-dashboard' ? 'active' : '' }}"
-                                href="#"> <span>Project Dashboard</span></a></li>
+                    </ul>
+                </li>
+                <li class="collapsed">
+                    <a class="m-link {{ Request::segment(2) == 'program-kerja' ? 'active' : '' }} "
+                        data-bs-toggle="collapse" data-bs-target="#program-Components" href="#"><i
+                            class="icofont-users-alt-5"></i> <span>Program Kerja</span> <span
+                            class="arrow icofont-dotted-down ms-auto text-end fs-5"></span></a>
+                    <!-- Menu: Sub menu ul -->
+                    <ul class="sub-menu  {{ Request::segment(2) == 'program-kerja' ? 'collapsed show' : 'collapse' }}"
+                        id="program-Components">
+                        <li><a class="ms-link {{ Request::segment(3) == 'project-dashboard' ? 'active' : '' }}"
+                                href="{{ route('program-kerja.index', ['kode_ormawa' => $kode_ormawa]) }}">
+                                <span>Project Dashboard</span></a></li>
                     </ul>
                 </li>
                 <li class="collapsed">

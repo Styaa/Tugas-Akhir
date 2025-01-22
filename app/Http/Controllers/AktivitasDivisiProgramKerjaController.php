@@ -34,13 +34,10 @@ class AktivitasDivisiProgramKerjaController extends Controller
         $keys = array_keys($request->all());
         $value = array_values($request->all());
 
-        // Cari aktivitas berdasarkan ID
         $activity = AktivitasDivisiProgramKerja::find($aktivitas_id);
 
-        // Update data aktivitas
         $activity->update($request->all());
 
-        // Response JSON
         return response()->json(['success' => true, 'message' => 'Aktivitas berhasil diperbarui.']);
     }
 }
