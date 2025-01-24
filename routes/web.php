@@ -47,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{id}/rab/create', [ProgramKerjaController::class, 'createRAB'])->name('rab.create');
             Route::post('{id}/rab/export', [ProgramKerjaController::class, 'downloadRAB'])->name('rab.export');
             Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
+            Route::get('{id}/proposal/store', [ProgramKerjaController::class, 'storeProposal'])->name('proposal.store');
+            Route::post('{id}/proposal/generate', [ProgramKerjaController::class, 'generateProposal'])->name('proposal.generate');
             Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
 
 

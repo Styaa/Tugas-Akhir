@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ArrayExport;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 
 class ProgramKerjaController extends Controller
 {
@@ -361,47 +361,295 @@ class ProgramKerjaController extends Controller
         return view('program-kerja.dokumen.rab.create', compact('programKerja', 'divisis'));
     }
 
-    public function downloadRAB(Request $request, $kodeOrmawa, $id)
+    public function createProposal($kode_ormawa, $id)
     {
-        $rabData = json_decode($request->rab_data, true);
+        $programKerja = ProgramKerja::findOrFail($id);
 
-        // dd($request);
+        // Hitung jumlah hari dari tanggal mulai hingga tanggal selesai
+        $tanggalMulai = Carbon::parse($programKerja->tanggal_mulai);
+        $tanggalSelesai = Carbon::parse($programKerja->tanggal_selesai);
 
-        // Header untuk file Excel
-        $header = ['No', 'Komponen Biaya', 'Biaya', 'Jumlah', 'Satuan', 'Total', 'Kategori'];
-
-        $data = [];
-        $counter = 1;
-
-        // Pemasukan
-        foreach ($rabData['pemasukan'] as $pemasukan) {
-            $data[] = [
-                $counter++,
-                $pemasukan['komponen'],
-                $pemasukan['biaya'],
-                $pemasukan['jumlah'],
-                $pemasukan['satuan'],
-                $pemasukan['total'],
-                'Pemasukan',
-            ];
+        $hariKegiatan = [];
+        while ($tanggalMulai <= $tanggalSelesai) {
+            $hariKegiatan[] = $tanggalMulai->format('Y-m-d'); // Format tanggal
+            $tanggalMulai->addDay(); // Increment hari
         }
 
-        // Pengeluaran
-        foreach ($rabData['pengeluaran'] as $pengeluaran) {
-            $data[] = [
-                $counter++,
-                $pengeluaran['komponen'],
-                $pengeluaran['biaya'],
-                $pengeluaran['jumlah'],
-                $pengeluaran['satuan'],
-                $pengeluaran['total'],
-                'Pengeluaran - ' . $pengeluaran['divisi'],
-            ];
-        }
+        $anggotaProker = DB::table('struktur_prokers')
+            ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+            ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+            ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
+            ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+            ->where('divisi_program_kerjas.program_kerjas_id', $id)
+            ->select('divisi_pelaksanas.nama AS nama_divisi', 'users.name AS nama_user', 'jabatans.nama AS nama_jabatan', 'users.id AS id')
+            ->orderBy('divisi_pelaksanas.nama')
+            ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
+            ->get();
 
-        return Excel::download(new ArrayExport($data), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
-
-        // Unduh file Excel
-        // return Excel::download(new ArrayExport(array_merge([$header], $data)), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
+        return view('program-kerja.dokumen.proposal.create', [
+            'programKerja' => $programKerja,
+            'kode_ormawa' => $kode_ormawa,
+            'anggotaProker' => $anggotaProker,
+            'hariKegiatan' => $hariKegiatan,
+        ]);
     }
+
+    public function generateProposal(Request $request, $kode_ormawa, $id)
+    {
+        // Ambil data dari request
+        $data = $request->all();
+
+        // Buat instance PHPWord
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+
+        // Konfigurasi dokumen (layout, margin, dll.)
+        $section = $phpWord->addSection([
+            'pageSizeW' => 11900, // Ukuran A4
+            'pageSizeH' => 16840,
+            'marginTop' => 1440, // 2 cm
+            'marginRight' => 1440,
+            'marginBottom' => 1440,
+            'marginLeft' => 1800, // 2.5 cm
+        ]);
+
+        // **COVER PAGE**
+        $section->addText(
+            strtoupper('Proposal Program Kerja'),
+            ['name' => 'Cambria', 'size' => 20, 'bold' => true],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+        );
+        $section->addTextBreak(2);
+        $section->addText(
+            strtoupper($request->program_kerja ?? 'Nama Program Kerja'),
+            ['name' => 'Cambria', 'size' => 16, 'bold' => true],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+        );
+        $section->addTextBreak(2);
+
+        // **1. LATAR BELAKANG**
+        $section->addText(
+            'I. LATAR BELAKANG',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            $data['latar_belakang'] ?? 'Belum ada data.',
+            ['name' => 'Cambria', 'size' => 12],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH, 'lineHeight' => 1.5]
+        );
+
+        // **2. SASARAN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'II. SASARAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            $data['sasaran'] ?? 'Belum ada data.',
+            ['name' => 'Cambria', 'size' => 12],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH]
+        );
+
+        // **3. TUJUAN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'III. TUJUAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        if (!empty($data['tujuan'])) {
+            foreach ($data['tujuan'] as $tujuan) {
+                $section->addListItem(
+                    $tujuan,
+                    0,
+                    ['name' => 'Cambria', 'size' => 12],
+                    ['listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_BULLET_FILLED]
+                );
+            }
+        } else {
+            $section->addText('Belum ada data.', ['name' => 'Cambria', 'size' => 12]);
+        }
+
+        // **4. BENTUK KEGIATAN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'IV. BENTUK KEGIATAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            $data['bentuk_kegiatan'] ?? 'Belum ada data.',
+            ['name' => 'Cambria', 'size' => 12]
+        );
+
+        // **5. HARI, TANGGAL, DAN TEMPAT**
+        $section->addTextBreak(1);
+        $section->addText(
+            'V. HARI, TANGGAL, DAN TEMPAT',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            'Hari, Tanggal: ' . ($data['hari_tanggal'] ?? 'Belum ada data.'),
+            ['name' => 'Cambria', 'size' => 12]
+        );
+        $section->addText(
+            'Tempat: ' . ($data['tempat'] ?? 'Belum ada data.'),
+            ['name' => 'Cambria', 'size' => 12]
+        );
+
+        // **6. RUNDOWN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'VI. RUNDOWN KEGIATAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        if (!empty($data['rundown'])) {
+            foreach ($data['rundown'] as $tanggal => $rundownItems) {
+                $section->addText(
+                    \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y'),
+                    ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+                );
+                $table = $section->addTable();
+                foreach ($rundownItems['waktu'] as $index => $waktu) {
+                    $table->addRow();
+                    $table->addCell(2000)->addText($waktu);
+                    $table->addCell(8000)->addText($rundownItems['kegiatan'][$index] ?? '');
+                }
+            }
+        } else {
+            $section->addText('Belum ada data.', ['name' => 'Cambria', 'size' => 12]);
+        }
+
+        // **7. SUSUNAN PANITIA PELAKSANA**
+        $section->addTextBreak(1);
+        $section->addText(
+            'VII. SUSUNAN PANITIA PELAKSANA',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        if (!empty($data['panitia'])) {
+            $table = $section->addTable();
+            $table->addRow();
+            $table->addCell(2000)->addText('Nama', ['bold' => true]);
+            $table->addCell(2000)->addText('NRP', ['bold' => true]);
+            $table->addCell(2000)->addText('Jabatan', ['bold' => true]);
+            foreach ($data['panitia'] as $panitia) {
+                $table->addRow();
+                $table->addCell(2000)->addText($panitia['nama']);
+                $table->addCell(2000)->addText($panitia['nrp']);
+                $table->addCell(2000)->addText($panitia['jabatan']);
+            }
+        }
+
+        // **8. INDIKATOR KEBERHASILAN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'VIII. INDIKATOR KEBERHASILAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            $data['indikator_keberhasilan'] ?? 'Belum ada data.',
+            ['name' => 'Cambria', 'size' => 12]
+        );
+
+        // **9. ANGGARAN DANA**
+        $section->addTextBreak(1);
+        $section->addText(
+            'IX. ANGGARAN DANA',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        if (!empty($data['anggaran']['komponen'])) {
+            $table = $section->addTable();
+            $table->addRow();
+            $table->addCell(2000)->addText('Komponen Biaya', ['bold' => true]);
+            $table->addCell(1000)->addText('Jumlah', ['bold' => true]);
+            $table->addCell(1000)->addText('Satuan', ['bold' => true]);
+            $table->addCell(2000)->addText('Harga', ['bold' => true]);
+            $table->addCell(2000)->addText('Total', ['bold' => true]);
+            foreach ($data['anggaran']['komponen'] as $index => $komponen) {
+                $jumlah = $data['anggaran']['jumlah'][$index];
+                $harga = $data['anggaran']['harga'][$index];
+                $total = $jumlah * $harga;
+                $table->addRow();
+                $table->addCell(2000)->addText($komponen);
+                $table->addCell(1000)->addText($jumlah);
+                $table->addCell(1000)->addText($data['anggaran']['satuan'][$index] ?? '-');
+                $table->addCell(2000)->addText(number_format($harga, 0, ',', '.'));
+                $table->addCell(2000)->addText(number_format($total, 0, ',', '.'));
+            }
+        }
+
+        // **10. PENUTUP**
+        $section->addTextBreak(1);
+        $section->addText(
+            'X. PENUTUP',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        $section->addText(
+            $data['penutup'] ?? 'Belum ada data.',
+            ['name' => 'Cambria', 'size' => 12]
+        );
+
+        // **LEMBAR PENGESAHAN**
+        $section->addTextBreak(1);
+        $section->addText(
+            'LEMBAR PENGESAHAN',
+            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
+        );
+        if (!empty($data['pengesahan'])) {
+            foreach ($data['pengesahan'] as $pengesahan) {
+                $section->addText($pengesahan, ['name' => 'Cambria', 'size' => 12]);
+            }
+        }
+
+        // **SIMPAN FILE**
+        $fileName = 'Proposal_' . $kode_ormawa . '.docx';
+        $tempFile = storage_path($fileName);
+
+        $writer = IOFactory::createWriter($phpWord, 'Word2007');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile)->deleteFileAfterSend(true);
+    }
+
+
+    // public function downloadRAB(Request $request, $kodeOrmawa, $id)
+    // {
+    //     $rabData = json_decode($request->rab_data, true);
+
+    //     // dd($request);
+
+    //     // Header untuk file Excel
+    //     $header = ['No', 'Komponen Biaya', 'Biaya', 'Jumlah', 'Satuan', 'Total', 'Kategori'];
+
+    //     $data = [];
+    //     $counter = 1;
+
+    //     // Pemasukan
+    //     foreach ($rabData['pemasukan'] as $pemasukan) {
+    //         $data[] = [
+    //             $counter++,
+    //             $pemasukan['komponen'],
+    //             $pemasukan['biaya'],
+    //             $pemasukan['jumlah'],
+    //             $pemasukan['satuan'],
+    //             $pemasukan['total'],
+    //             'Pemasukan',
+    //         ];
+    //     }
+
+    //     // Pengeluaran
+    //     foreach ($rabData['pengeluaran'] as $pengeluaran) {
+    //         $data[] = [
+    //             $counter++,
+    //             $pengeluaran['komponen'],
+    //             $pengeluaran['biaya'],
+    //             $pengeluaran['jumlah'],
+    //             $pengeluaran['satuan'],
+    //             $pengeluaran['total'],
+    //             'Pengeluaran - ' . $pengeluaran['divisi'],
+    //         ];
+    //     }
+
+    //     return Excel::download(new ArrayExport($data), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
+
+    //     // Unduh file Excel
+    //     // return Excel::download(new ArrayExport(array_merge([$header], $data)), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
+    // }
 }
