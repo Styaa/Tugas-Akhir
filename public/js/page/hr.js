@@ -1,7 +1,7 @@
 if (typeof jQuery === "undefined") {
     throw new Error("jQuery plugins need to be before this file");
 }
-$(function() {
+$(function () {
     "use strict";
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -9,7 +9,7 @@ $(function() {
     })
 
     // Employees Data
-    $(document).ready(function() {
+    $(document).ready(function () {
         var options = {
             align: 'center',
             chart: {
@@ -17,7 +17,7 @@ $(function() {
                 type: 'donut',
                 align: 'center',
             },
-            labels: ['Man', 'Women'],
+            labels: ['Selesai', 'Berjalan', 'Ditunda'],
             dataLabels: {
                 enabled: false,
             },
@@ -26,8 +26,8 @@ $(function() {
                 horizontalAlign: 'center',
                 show: true,
             },
-            colors: ['var(--chart-color4)', 'var(--chart-color3)'],
-            series: [44, 55],
+            colors: ['var(--chart-color4)', 'var(--chart-color3)', 'var(--chart-color2)'],
+            series: [1, 2],
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -40,18 +40,18 @@ $(function() {
                 }
             }]
         }
-        var chart = new ApexCharts( document.querySelector("#apex-MainCategories"),options);        
+        var chart = new ApexCharts(document.querySelector("#apex-StatisticProker"), options);
         chart.render();
-    }); 
+    });
 
     // Employees Analytics
-    $(document).ready(function() { 
+    $(document).ready(function () {
         var options = {
             series: [{
                 name: 'Available',
                 data: [4, 19, 7, 35, 14, 27, 9, 12],
             }],
-                chart: {
+            chart: {
                 height: 140,
                 type: 'line',
                 toolbar: {
@@ -64,12 +64,12 @@ $(function() {
                     lines: {
                         show: false
                     }
-                },   
-                yaxis: { 
+                },
+                yaxis: {
                     lines: {
                         show: false
                     }
-                }, 
+                },
             },
             stroke: {
                 width: 4,
@@ -81,7 +81,7 @@ $(function() {
                 categories: ['1/11/2021', '2/11/2021', '3/11/2021', '4/11/2021', '5/11/2021', '6/11/2021', '7/11/2021', '8/11/2021'],
                 tickAmount: 10,
                 labels: {
-                    formatter: function(value, timestamp, opts) {
+                    formatter: function (value, timestamp, opts) {
                         return opts.dateFormatter(new Date(timestamp), 'dd MMM')
                     }
                 }
@@ -90,7 +90,7 @@ $(function() {
                 type: 'gradient',
                 gradient: {
                     shade: 'dark',
-                    gradientToColors: [ "var(--chart-color3)" ],
+                    gradientToColors: ["var(--chart-color3)"],
                     shadeIntensity: 1,
                     type: 'horizontal',
                     opacityFrom: 1,
@@ -116,11 +116,11 @@ $(function() {
 
         var chart = new ApexCharts(document.querySelector("#apex-emplyoeeAnalytics"), options);
         chart.render();
-    });  
+    });
 
-     // Hr Resorce
-    $(document).ready(function() {
-        
+    // Hr Resorce
+    $(document).ready(function () {
+
         var options = {
             series: [{
                 name: 'Ui/Ux Designer',
@@ -146,7 +146,7 @@ $(function() {
                     enabled: true
                 }
             },
-            colors: ['var(--chart-color1)','var(--chart-color2)','var(--chart-color3)','var(--chart-color4)'],
+            colors: ['var(--chart-color1)', 'var(--chart-color2)', 'var(--chart-color3)', 'var(--chart-color4)'],
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -158,7 +158,7 @@ $(function() {
                 }
             }],
             xaxis: {
-                categories: ['Jan','Feb','March','Apr','May','Jun','July','Aug','Sept','Oct','Nov','Dec'],
+                categories: ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
             },
             legend: {
                 position: 'top', // top, bottom
@@ -176,4 +176,3 @@ $(function() {
         chart.render();
     });
 });
-
