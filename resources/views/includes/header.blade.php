@@ -49,11 +49,12 @@
                                                     src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
                                                 <div class="flex-fill ms-2">
                                                     <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Dylan Hunter</span>
+                                                            class="font-weight-bold">System</span>
                                                         <small>2MIN</small>
                                                     </p>
-                                                    <span class="">Added 2021-02-19 my-Task ui/ux Design <span
-                                                            class="badge bg-success">Review</span></span>
+                                                    <span class="">Proposal Studi Ekskursi mendekati tenggat
+                                                        waktu!
+                                                    </span>
                                                 </div>
                                             </a>
                                         </li>
@@ -62,11 +63,12 @@
                                                 <div class="avatar rounded-circle no-thumbnail">DF</div>
                                                 <div class="flex-fill ms-2">
                                                     <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Diane Fisher</span>
+                                                            class="font-weight-bold">System</span>
                                                         <small>13MIN</small>
                                                     </p>
-                                                    <span class="">Task added Get Started with Fast Cad
-                                                        project</span>
+                                                    <span class="">Rapat koordinasi divisi Public Relation
+                                                        Department dijadwalkan pada
+                                                        30 Januari 2025.</span>
                                                 </div>
                                             </a>
                                         </li>
@@ -76,48 +78,11 @@
                                                     src="{{ url('/') . '/images/xs/avatar3.jpg' }}" alt="">
                                                 <div class="flex-fill ms-2">
                                                     <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Andrea Gill</span>
+                                                            class="font-weight-bold">System</span>
                                                         <small>1HR</small>
                                                     </p>
-                                                    <span class="">Quality Assurance Task Completed</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{{ url('/') . '/images/xs/avatar5.jpg' }}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Diane Fisher</span>
-                                                        <small>13MIN</small>
-                                                    </p>
-                                                    <span class="">Add New Project for App Developemnt</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{{ url('/') . '/images/xs/avatar6.jpg' }}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Andrea Gill</span>
-                                                        <small>1HR</small>
-                                                    </p>
-                                                    <span class="">Add Timesheet For Rhinestone project</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{{ url('/') . '/images/xs/avatar7.jpg' }}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Zoe Wright</span> <small
-                                                            class="">1DAY</small></p>
-                                                    <span class="">Add Calander Event</span>
+                                                    <span class="">LPJ untuk Informatics Gathering belum
+                                                        diajukan.</span>
                                                 </div>
                                             </a>
                                         </li>
@@ -143,8 +108,8 @@
                         <div class="card border-0 w280">
                             <div class="card-body pb-0">
                                 <div class="d-flex py-1">
-                                    <img class="avatar rounded-circle"
-                                        src="{{ url('/') . '/images/profile_av.png' }}" alt="profile">
+                                    <img class="avatar rounded-circle" src="{{ url('/') . '/images/profile_av.png' }}"
+                                        alt="profile">
                                     <div class="flex-fill ms-3">
                                         <p class="mb-0"><span class="font-weight-bold">Dylan Hunter</span></p>
                                         <small class="">Dylan.hunter@gmail.com</small>
