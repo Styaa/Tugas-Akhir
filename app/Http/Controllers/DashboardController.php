@@ -80,4 +80,14 @@ class DashboardController extends Controller
             'pengumuman'
         ));
     }
+
+    public function alurDanaKemahasiswaan()
+    {
+        return view('alur-dana.kemahasiswaan');
+    }
+
+    public function alurDanaJurusan()
+    {
+        return view('alur-dana.jurusan');
+    }
 }

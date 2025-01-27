@@ -47,7 +47,7 @@ class AuthController extends Controller
             $periode = date('Y');
 
             // Redirect ke halaman program kerja dengan kode_ormawa dan periode
-            return redirect()->route('program-kerja.index', ['kode_ormawa' => $kodeOrmawa]) . "?periode=$periode";
+            return redirect()->route('dashboard', ['kode_ormawa' => $kodeOrmawa]) . "?periode=$periode";
         }
 
 

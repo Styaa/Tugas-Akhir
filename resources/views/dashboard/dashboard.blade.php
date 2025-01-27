@@ -15,7 +15,8 @@
                             <div class="flex-fill ms-4">
                                 <div class="">Lihat Alur Pengurusan Dana Jurusan</div>
                             </div>
-                            <a href="" title="view-members" class="btn btn-link text-decoration-none  rounded-1"><i
+                            <a href="{{ route('alur-dana.jurusan') }}" title="Lihat alur dana jurusan"
+                                class="btn btn-link text-decoration-none  rounded-1"><i
                                     class="icofont-hand-drawn-right fs-2 "></i></a>
                         </div>
                     </div>
@@ -30,7 +31,8 @@
                             <div class="flex-fill ms-4">
                                 <div class="">Lihat Alur Pengurusan Dana Kemahasiwaan</div>
                             </div>
-                            <a href="" title="space-used" class="btn btn-link text-decoration-none  rounded-1"><i
+                            <a href="{{ route('alur-dana.kemahasiswaan') }}" title="Lihat alur dana kemahasiswaan"
+                                class="btn btn-link text-decoration-none  rounded-1"><i
                                     class="icofont-hand-drawn-right fs-2 "></i></a>
                         </div>
                     </div>
@@ -229,78 +231,6 @@
                                             <i class="icofont-clock-time"></i> 8.00 - 9.00
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-6 col-xl-12  flex-column">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center flex-fill">
-                                    <span
-                                        class="avatar lg light-success-bg rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                            class="icofont-users-alt-2 fs-5"></i></span>
-                                    <div class="d-flex flex-column ps-3  flex-fill">
-                                        <h6 class="fw-bold mb-0 fs-4">BPH</h6>
-                                        <span class="text-muted">badan Pengurus Harian</span>
-                                    </div>
-                                    <span class="fs-3 text-muted">4</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center flex-fill">
-                                    <span
-                                        class="avatar lg light-success-bg rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                            class="icofont-users-alt-2 fs-5"></i></span>
-                                    <div class="d-flex flex-column ps-3  flex-fill">
-                                        <h6 class="fw-bold mb-0 fs-4">IRD</h6>
-                                        <span class="text-muted">Internal Relation Department</span>
-                                    </div>
-                                    <span class="fs-3 text-muted">6</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center flex-fill">
-                                    <span
-                                        class="avatar lg light-success-bg rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                            class="icofont-users-alt-2 fs-5"></i></span>
-                                    <div class="d-flex flex-column ps-3  flex-fill">
-                                        <h6 class="fw-bold mb-0 fs-4">PRD</h6>
-                                        <span class="text-muted">Public Relation Department</span>
-                                    </div>
-                                    <span class="fs-3 text-muted">5</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center flex-fill">
-                                    <span
-                                        class="avatar lg light-success-bg rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                            class="icofont-users-alt-2 fs-5"></i></span>
-                                    <div class="d-flex flex-column ps-3  flex-fill">
-                                        <h6 class="fw-bold mb-0 fs-4">CDD</h6>
-                                        <span class="text-muted">Creative Design Department</span>
-                                    </div>
-                                    <span class="fs-3 text-muted">4</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center flex-fill">
-                                    <span
-                                        class="avatar lg light-success-bg rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                            class="icofont-holding-hands fs-5"></i></span>
-                                    <div class="d-flex flex-column ps-3 flex-fill">
-                                        <h6 class="fw-bold mb-0 fs-4">HRDD</h6>
-                                        <span class="text-muted">Human Resource Development Department</span>
-                                    </div>
-                                    <span class="fs-3 text-muted">4</span>
                                 </div>
                             </div>
                         </div>

@@ -30,10 +30,13 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard Route
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/alur-dana/kemahasiswaan', [DashboardController::class, 'alurDanaKemahasiswaan'])->name('alur-dana.kemahasiswaan');
+    Route::get('/alur-dana/jurusan', [DashboardController::class, 'alurDanaJurusan'])->name('alur-dana.jurusan');
 
     // Routes based on Kode Ormawa
     Route::prefix('{kode_ormawa}')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::prefix('program-kerja')->name('program-kerja.')->group(function () {
             Route::get('/', [ProgramKerjaController::class, 'index'])->name('index'); // Menampilkan semua program kerja
