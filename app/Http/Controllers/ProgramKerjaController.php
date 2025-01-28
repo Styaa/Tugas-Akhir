@@ -608,6 +608,14 @@ class ProgramKerjaController extends Controller
         return response()->download($tempFile)->deleteFileAfterSend(true);
     }
 
+    public function progressProposal($kode_ormawa, $id)
+    {
+        $programKerja = ProgramKerja::findOrFail($id);
+        $user = Auth::user();
+
+        return view('program-kerja.dokumen.proposal.progress', compact('programKerja', 'user'));
+    }
+
 
     // public function downloadRAB(Request $request, $kodeOrmawa, $id)
     // {

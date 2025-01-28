@@ -664,6 +664,27 @@ $date = \Carbon\Carbon::now();
                                         <label for="dana-fakultas" class="form-check-label">Dana Fakultas</label>
                                     </div>
                                 </li>
+                                <li>
+                                    <div class="form-check">
+                                        <input id ="dana" type="checkbox" name="anggaran[]"
+                                            class="form-check-input" value="Dana Fakultas">
+                                        <label for="dana-fakultas" class="form-check-label">Dana Kemahasiswaan</label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form-check">
+                                        <input id ="dana" type="checkbox" name="anggaran[]"
+                                            class="form-check-input" value="Dana Fakultas">
+                                        <label for="dana-fakultas" class="form-check-label">Dana Sponsor</label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form-check">
+                                        <input id ="dana" type="checkbox" name="anggaran[]"
+                                            class="form-check-input" value="Dana Fakultas">
+                                        <label for="dana-fakultas" class="form-check-label">Dana Pendaftaran</label>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -1125,7 +1146,8 @@ $date = \Carbon\Carbon::now();
                         <div class="row g-3 mb-3">
                             <div class="col">
                                 <label for="depone11" class="form-label">Assign Name</label>
-                                <input type="text" class="form-control" id="depone11" value="Victor Rampling">
+                                <input type="text" class="form-control" id="depone11"
+                                    value="Victor Rampling">
                             </div>
                             <div class="col">
                                 <label for="deptwo56" class="form-label">Creted Date</label>

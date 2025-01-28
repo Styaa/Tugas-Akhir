@@ -193,7 +193,7 @@
                                                             class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
                                                                 class="icofont-file-text fs-5"></i></span>
                                                         <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                            <a href="{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
                                                                 class="text-decoration-none">
                                                                 <h6 class="fw-bold mb-0 small-14">Proposal</h6>
                                                             </a>
