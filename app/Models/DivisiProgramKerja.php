@@ -22,4 +22,9 @@ class DivisiProgramKerja extends Model
     {
         return $this->belongsTo(ProgramKerja::class, 'program_kerjas_id');
     }
+
+    public function strukturProker()
+    {
+        return $this->hasMany(StrukturProker::class, 'divisi_program_kerjas_id');
+    }
 }

@@ -74,16 +74,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Studi Ekskursi</td>
-                                            <td>16-20 Desember 2024</td>
-                                            <td>Bali</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Informatics Gathering</td>
-                                            <td>10 Februari 2025</td>
-                                            <td>Kampus UBAYA</td>
-                                        </tr>
+                                        @foreach ($programKerjaTerdekats as $programKerjaTerdekat)
+                                            <tr>
+                                                <td>{{ $programKerjaTerdekat['nama'] }}</td>
+                                                <td>{{ $programKerjaTerdekat['tanggal_mulai'] }} -
+                                                    {{ $programKerjaTerdekat['tanggal_selesai'] }}</td>
+                                                <td>{{ $programKerjaTerdekat['tempat'] }}</td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -96,7 +94,22 @@
                             </div>
                             <div class="card-body">
                                 <div class="row g-2 row-deck">
-                                    <div class="col-md-6 col-sm-6">
+                                    @foreach ($programKerjaUsers as $programKerjaUser)
+                                        <div class="col-md-6 col-sm-6">
+                                            <div class="card">
+                                                <div class="card-body ">
+                                                    <i class="icofont-checked fs-3"></i>
+                                                    <h6 class="mt-3 mb-0 fw-bold small-14">
+                                                        {{ $programKerjaUser['nama_program_kerja'] }}</h6>
+                                                    <span
+                                                        class="text-muted">{{ $programKerjaUser['tanggal_mulai_program_kerja'] }}
+                                                        -
+                                                        {{ $programKerjaUser['tanggal_selesai_program_kerja'] }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    {{-- <div class="col-md-6 col-sm-6">
                                         <div class="card">
                                             <div class="card-body ">
                                                 <i class="icofont-checked fs-3"></i>
@@ -113,7 +126,7 @@
                                                 <span class="text-muted">12 Maret 2023 - 13 Maret 2023</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>
@@ -140,97 +153,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="flex-grow-1">
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar2.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Beli galon</h6>
-                                                <span class="text-muted">Informatics Gathering</span>
+                                    @foreach ($aktivitasUsers as $aktivitasUser)
+                                        <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                            <div class="d-flex align-items-center flex-fill">
+                                                <img class="avatar lg rounded-circle img-thumbnail"
+                                                    src="{{ url('/') . '/images/lg/avatar2.jpg' }}" alt="profile">
+                                                <div class="d-flex flex-column ps-3">
+                                                    <h6 class="fw-bold mb-0 small-14">{{ $aktivitasUser->nama }}</h6>
+                                                    <span
+                                                        class="text-muted">{{ $aktivitasUser->programKerja->nama }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="time-block text-truncate">
+                                                <i class="icofont-clock-time"></i>
+                                                {{ $aktivitasUser->tenggat_waktu ? \Carbon\Carbon::parse($aktivitasUser->tenggat_waktu)->locale('id')->translatedFormat('l, d F Y') : 'Deadline belum diatur' }}
                                             </div>
                                         </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> Rabu, 19 Maret 2023
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar9.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Peter Piperg</h6>
-                                                <span class="text-muted">Web Design</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 9.00 - 1:30
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar12.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Robert Young</h6>
-                                                <span class="text-muted">PHP Developer</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 1.30 - 2:30
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar8.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Victoria Vbell</h6>
-                                                <span class="text-muted">IOS Developer</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 2.00 - 3:30
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar7.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Mary Butler</h6>
-                                                <span class="text-muted">Writer</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 4.00 - 4:30
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar3.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Youn Bel</h6>
-                                                <span class="text-muted">Unity 3d</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 7.00 - 8.00
-                                        </div>
-                                    </div>
-                                    <div class="py-2 d-flex align-items-center  flex-wrap">
-                                        <div class="d-flex align-items-center flex-fill">
-                                            <img class="avatar lg rounded-circle img-thumbnail"
-                                                src="{{ url('/') . '/images/lg/avatar2.jpg' }}" alt="profile">
-                                            <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">Gibson Butler</h6>
-                                                <span class="text-muted">Networking</span>
-                                            </div>
-                                        </div>
-                                        <div class="time-block text-truncate">
-                                            <i class="icofont-clock-time"></i> 8.00 - 9.00
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>

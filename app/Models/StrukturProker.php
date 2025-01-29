@@ -17,4 +17,9 @@ class StrukturProker extends Model
         'divisi_program_kerjas_id',
         'jabatans_id',
     ];
+
+    public function divisiProgramKerja()
+    {
+        return $this->belongsTo(DivisiProgramKerja::class, 'divisi_program_kerjas_id');
+    }
 }

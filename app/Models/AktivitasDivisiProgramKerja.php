@@ -30,4 +30,16 @@ class AktivitasDivisiProgramKerja extends Model
     {
         return $this->belongsTo(User::class, 'person_in_charge');
     }
+
+    // Relasi ke DivisiProgramKerja
+    public function divisiProgramKerja()
+    {
+        return $this->belongsTo(DivisiProgramKerja::class, 'divisi_pelaksana_id');
+    }
+
+    // Relasi ke ProgramKerja melalui DivisiProgramKerja
+    public function programKerja()
+    {
+        return $this->hasOneThrough(ProgramKerja::class, DivisiProgramKerja::class, 'id', 'id', 'divisi_pelaksana_id', 'program_kerjas_id');
+    }
 }
