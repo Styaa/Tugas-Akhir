@@ -34,4 +34,16 @@ class ProgramKerja extends Model
     {
         return $this->hasMany(DivisiProgramKerja::class, 'program_kerjas_id');
     }
+
+    public function strukturProkers()
+    {
+        return $this->hasManyThrough(
+            StrukturProker::class, // Model yang ingin dihubungkan
+            DivisiProgramKerja::class, // Model perantara
+            'program_kerjas_id', // Foreign key di tabel perantara (divisi_program_kerjas)
+            'divisi_program_kerjas_id', // Foreign key di tabel tujuan (struktur_prokers)
+            'id', // Primary key di tabel ProgramKerja
+            'id' // Primary key di tabel DivisiProgramKerja
+        );
+    }
 }

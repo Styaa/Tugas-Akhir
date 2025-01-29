@@ -23,7 +23,6 @@ class ProgramKerjaController extends Controller
     public function index()
     {
         //
-        $programKerjas = ProgramKerja::all();
         $divisiPelaksanas = DivisiPelaksana::all();
         $periode = date('Y');
         $user = Auth::user();
@@ -32,6 +31,42 @@ class ProgramKerjaController extends Controller
             ->get()
             ->pluck('divisiOrmawas.ormawa.kode')
             ->first();
+
+        $programKerjas = ProgramKerja::where('ormawas_kode', $kode_ormawa)
+            ->with(['divisiProgramKerjas.strukturProker', 'strukturProkers.jabatan'])
+            ->get()
+            ->map(function ($program) {
+                // dd($program);
+                // Ambil status program kerja berdasarkan tanggal
+                $today = \Carbon\Carbon::today();
+                $program->status = $today->lt($program->tanggal_mulai) ? 'Belum Dimulai' : ($today->between($program->tanggal_mulai, $program->tanggal_selesai) ? 'Sedang Berlangsung' : 'Selesai');
+
+                // Hitung total hari antara tanggal mulai dan selesai
+                $totalDays = \Carbon\Carbon::parse($program->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($program->tanggal_selesai));
+
+                // Hitung hari yang sudah berjalan sejak `created_at`
+                $daysPassed = \Carbon\Carbon::parse($program->created_at)->diffInDays($today);
+
+                // Hitung sisa hari menuju tanggal selesai
+                $daysLeft = \Carbon\Carbon::parse($program->tanggal_selesai)->diffInDays($today, false);
+                $program->days_left = $daysLeft > 0 ? "$daysLeft Hari Lagi" : 'Selesai';
+
+                // Hitung progress dalam persentase
+                $progress = $totalDays > 0 ? min(100, max(0, ($daysPassed / $totalDays) * 100)) : 0;
+                $program->progress = round($progress, 2);
+
+                // Konversi anggaran dana ke dalam bentuk array
+                $program->anggaran_dana = json_decode($program->anggaran_dana, true) ?? [];
+
+                // Ambil penanggung jawab (Ketua Acara) dari struktur proker
+                $ketuaAcara = $program->strukturProkers
+                    ->where('jabatans_id', '1')
+                    ->first();
+                // dd($ketuaAcara->user->name);
+                $program->ketua_acara = $ketuaAcara ? $ketuaAcara->user->name : 'Belum Ditentukan';
+
+                return $program;
+            });
 
         // dd($programKerjas);
         return view('dashboard.project-dashboard', compact('programKerjas', 'divisiPelaksanas', 'periode', 'kode_ormawa'));

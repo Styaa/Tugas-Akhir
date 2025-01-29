@@ -18,8 +18,18 @@ class StrukturProker extends Model
         'jabatans_id',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'users_id');
+    }
+
     public function divisiProgramKerja()
     {
         return $this->belongsTo(DivisiProgramKerja::class, 'divisi_program_kerjas_id');
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, 'jabatan_id');
     }
 }

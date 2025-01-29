@@ -93,14 +93,13 @@
                                                     <div class="col-6">
                                                         <div class="d-flex align-items-center">
                                                             <i class="icofont-sand-clock"></i>
-                                                            <span class="ms-2">{{ $program->durasi }} Month</span>
+                                                            <span class="ms-2">{{ $program->tipe }}</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
                                                         <div class="d-flex align-items-center">
                                                             <i class="icofont-group-students"></i>
-                                                            <span class="ms-2">{{ $program->anggota_count }}
-                                                                Members</span>
+                                                            <span class="ms-2">{{ $program->ketua_acara }}</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
@@ -122,7 +121,8 @@
                                                     <div class="progress-bar bg-secondary" role="progressbar"
                                                         style="width: {{ $program->progress }}%"
                                                         aria-valuenow="{{ $program->progress }}" aria-valuemin="0"
-                                                        aria-valuemax="100"></div>
+                                                        aria-valuemax="100">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
