@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProgramKerjaController;
+use App\Http\Controllers\RancanganAnggaranDanaController;
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiProgramKerja;
 use App\Models\StrukturProker;
@@ -47,8 +48,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
 
-            Route::get('{id}/rab/create', [ProgramKerjaController::class, 'createRAB'])->name('rab.create');
-            Route::post('{id}/rab/export', [ProgramKerjaController::class, 'downloadRAB'])->name('rab.export');
+            Route::resource('rancanganAnggaranDana', RancanganAnggaranDanaController::class);
             Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
             Route::get('{id}/proposal/progress', [ProgramKerjaController::class, 'progressProposal'])->name('proposal.progress');
             Route::get('{id}/proposal/store', [ProgramKerjaController::class, 'storeProposal'])->name('proposal.store');

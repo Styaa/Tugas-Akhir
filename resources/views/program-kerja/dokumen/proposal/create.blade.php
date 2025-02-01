@@ -1,19 +1,43 @@
 @extends('layouts.app')
 
+@section('js_head')
+    <link rel="stylesheet"  href="{{asset('css/style.css')}}"></link>
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.css" crossorigin>
+		<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5-premium-features/44.1.0/ckeditor5-premium-features.css" crossorigin>
+@endsection
+
 @section('content')
     <div class="container">
+        <div class="main-container">
+            <div class="editor-container editor-container_document-editor editor-container_include-outline editor-container_include-pagination"
+                id="editor-container">
+                <div class="editor-container__menu-bar" id="editor-menu-bar"></div>
+                <div class="editor-container__toolbar" id="editor-toolbar"></div>
+                <div class="editor-container__editor-wrapper">
+                    <div class="editor-container__sidebar">
+                        <div id="editor-outline"></div>
+                    </div>
+                    <div class="editor-container__editor">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <h3 class="text-center fw-bold">Form Proposal Kegiatan</h3>
         <p class="text-center">Program Kerja: <strong>{{ $programKerja->nama }}</strong> - Periode: {{ $periode }}</p>
 
-        <form
+        {{-- <form
             action="{{ route('program-kerja.proposal.generate', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
             method="POST">
             @csrf
 
+
             <!-- Latar Belakang -->
             <div class="mt-4">
                 <h5 class="fw-bold">Latar Belakang</h5>
-                <textarea class="form-control" name="latar_belakang" rows="4" placeholder="Masukkan latar belakang">{{ old('latar_belakang') }}</textarea>
+                <textarea class="form-control ckeditor" id="latar_belakang" name="latar_belakang" rows="4">
+                    {{ old('latar_belakang') }}
+                </textarea>
             </div>
 
             <!-- Sasaran -->
@@ -212,11 +236,17 @@
                 <a href="{{ route('program-kerja.index', ['kode_ormawa' => $kode_ormawa]) }}"
                     class="btn btn-dark">Kembali</a>
             </div>
-        </form>
+        </form> --}}
     </div>
 
     <!-- Jquery Page Js -->
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/dokumen/proposal.js') }}"></script>
+
+    {{-- <script src="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.umd.js" crossorigin></script> --}}
+    <script src="{{asset('assets/plugins/ckeditor/ckeditor.js')}}" crossorigin></script>
+		<script src="https://cdn.ckeditor.com/ckeditor5-premium-features/44.1.0/ckeditor5-premium-features.umd.js" crossorigin></script>
+		<script src="https://cdn.ckbox.io/ckbox/2.6.1/ckbox.js" crossorigin></script>
+    <script src="{{asset('js/ckeditor.js')}}"></script>
 @endsection

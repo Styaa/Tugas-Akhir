@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ asset('assets/plugins/nestable/jquery-nestable.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/plugins/fullcalendar/main.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/plugins/prism/prism.css') }}" />
+
     @yield('js_head')
     <link rel="stylesheet" href="{{ asset('assets/my-task.style.min.css') }}">
 </head>
