@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AktivitasDivisiProgramKerja;
+use App\Models\DivisiOrmawa;
 use App\Models\DivisiPelaksana;
+use App\Models\Ormawa;
 use App\Models\ProgramKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +15,7 @@ use Carbon\Carbon;
 class DashboardController extends Controller
 {
     //
-    public function index()
+    public function index($kodeOrmawa)
     {
         // // Jumlah anggota aktif dalam Ormawa
         // $jumlahAnggota = DB::table('users')
@@ -105,9 +107,12 @@ class DashboardController extends Controller
             ->where('person_in_charge', $userId)
             ->get();
 
-        // dd($aktivitasUsers);
+        $ormawas = Ormawa::where('kode', $kodeOrmawa)->get();
+        $misis = json_decode($ormawas[0]['misi']);
 
-        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers'));
+        // dd($ormawas);
+
+        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers', 'ormawas', 'misis'));
     }
 
     public function alurDanaKemahasiswaan()

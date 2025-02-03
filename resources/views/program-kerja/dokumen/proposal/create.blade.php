@@ -9,23 +9,28 @@
 @section('content')
     <div class="container">
         <div class="main-container">
-            <div class="editor-container editor-container_document-editor editor-container_include-outline editor-container_include-pagination"
-                id="editor-container">
-                <div class="editor-container__menu-bar" id="editor-menu-bar"></div>
-                <div class="editor-container__toolbar" id="editor-toolbar"></div>
-                <div class="editor-container__editor-wrapper">
-                    <div class="editor-container__sidebar">
-                        <div id="editor-outline"></div>
-                    </div>
-                    <div class="editor-container__editor">
-                        <div id="editor"></div>
-                    </div>
-                </div>
-            </div>
+            <h3 class="text-center fw-bold">Form Proposal Kegiatan</h3>
+            <p class="text-center">Program Kerja: <strong>{{ $programKerja->nama }}</strong> - Periode: {{ $periode }}</p>
+            <div class="presence" id="editor-presence"></div>
+			<div
+				class="editor-container editor-container_document-editor editor-container_include-outline editor-container_include-annotations editor-container_include-pagination"
+				id="editor-container"
+			>
+				<div class="editor-container__menu-bar" id="editor-menu-bar"></div>
+				<div class="editor-container__toolbar" id="editor-toolbar"></div>
+				<div class="editor-container__editor-wrapper">
+					<div class="editor-container__sidebar"><div id="editor-outline"></div></div>
+					<div class="editor-container__editor"><div id="editor"></div></div>
+					<div class="editor-container__sidebar"><div id="editor-annotations"></div></div>
+				</div>
+			</div>
+			<div class="revision-history" id="editor-revision-history">
+				<div class="revision-history__wrapper">
+					<div class="revision-history__editor" id="editor-revision-history-editor"></div>
+					<div class="revision-history__sidebar" id="editor-revision-history-sidebar"></div>
+				</div>
+			</div>
         </div>
-        <h3 class="text-center fw-bold">Form Proposal Kegiatan</h3>
-        <p class="text-center">Program Kerja: <strong>{{ $programKerja->nama }}</strong> - Periode: {{ $periode }}</p>
-
         {{-- <form
             action="{{ route('program-kerja.proposal.generate', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
             method="POST">
@@ -245,7 +250,7 @@
     <script src="{{ asset('assets/custom/dokumen/proposal.js') }}"></script>
 
     {{-- <script src="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.umd.js" crossorigin></script> --}}
-    <script src="{{asset('assets/plugins/ckeditor/ckeditor.js')}}" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.umd.js" crossorigin></script>
 		<script src="https://cdn.ckeditor.com/ckeditor5-premium-features/44.1.0/ckeditor5-premium-features.umd.js" crossorigin></script>
 		<script src="https://cdn.ckbox.io/ckbox/2.6.1/ckbox.js" crossorigin></script>
     <script src="{{asset('js/ckeditor.js')}}"></script>

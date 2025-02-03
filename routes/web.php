@@ -9,6 +9,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\RancanganAnggaranDanaController;
 use App\Models\AktivitasDivisiProgramKerja;
+use App\Models\DivisiOrmawa;
 use App\Models\DivisiProgramKerja;
 use App\Models\StrukturProker;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
     // Routes based on Kode Ormawa
     Route::prefix('{kode_ormawa}')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::resource('divisi', DivisiOrmawa::class);
 
         Route::prefix('program-kerja')->name('program-kerja.')->group(function () {
             Route::get('/', [ProgramKerjaController::class, 'index'])->name('index'); // Menampilkan semua program kerja

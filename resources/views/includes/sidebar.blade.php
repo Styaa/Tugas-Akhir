@@ -93,36 +93,14 @@
                     </a>
                     <ul class="sub-menu {{ Request::segment(1) == 'divisi-ormawa' ? 'show' : 'collapse' }}"
                         id="divisi-ormawa">
-                        <li>
-                            <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
-                                href="{{ route('alur-dana.kemahasiswaan') }}">
-                                <span>BPH</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(2) == 'jurusan' ? 'active' : '' }}"
-                                href="{{ route('alur-dana.jurusan') }}">
-                                <span>IRD</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
-                                href="{{ route('alur-dana.kemahasiswaan') }}">
-                                <span>PRD</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(2) == 'jurusan' ? 'active' : '' }}"
-                                href="{{ route('alur-dana.jurusan') }}">
-                                <span>HRDD</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
-                                href="{{ route('alur-dana.kemahasiswaan') }}">
-                                <span>CDD</span>
-                            </a>
-                        </li>
+                        @foreach ($divisis as $divisi)
+                            <li>
+                                <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
+                                    href="{{ route('alur-dana.kemahasiswaan') }}">
+                                    <span>{{ $divisi->nama }}</span>
+                                </a>
+                            </li>
+                        @endforeach
                     </ul>
                 </li>
             </ul>

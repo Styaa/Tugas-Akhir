@@ -56,7 +56,47 @@
             </div>
         </div>
 
-        <div class="row clearfix g-3">
+        <div class="col-md-6 col-lg-6 col-xl-12">
+            <div class="card bg-primary">
+                <div class="card-body row ">
+                    <div class="col text-white">
+                        <h1 class="mt-3 mb-0 fw-bold ">{{ $ormawas[0]['nama'] }}</h1>
+                        <span class="">{{ $ormawas[0]['kode'] }}</span>
+                    </div>
+                    {{-- <div class="col">
+                        <img class="img-fluid" src="{{ url('/') . '/images/interview.svg' }}" alt="interview">
+                    </div> --}}
+                    <div class="row mt-4">
+                        <div class="col-12 col-md-7 col-lg-6 order-md-1 px-4 text-white">
+                            <h3 class="fw-bold ">Visi</h3>
+                            <p class="line-height-custom fs-6">{{ $ormawas[0]['visi'] }}</p>
+                            <a class="btn bg-secondary text-light btn-lg lift" href="http://pixelwibes.com/" target="_blank">Free Inquire</a>
+                        </div>
+                        <div class="col-12 col-md-5 col-lg-6 order-md-2 ">
+                            <div class="card">
+                                <div class="card-header py-3">
+                                    <h6 class="mb-0 fw-bold ">Divisi Ormawa</h6>
+                                </div>
+                                <div class="card-body mem-list">
+                                    @foreach ($divisis as $divisi)
+                                        <div class="timeline-item ti-danger border-bottom ms-2">
+                                            <div class="d-flex">
+                                                <div class="flex-fill ms-3">
+                                                    <div class="mb-1"><strong><a href="#">{{ $divisi->keterangan }}</a></strong></div>
+                                                    <span class="d-flex text-muted">{{ $divisi->nama }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach <!-- timeline item end  -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row clearfix g-3 mt-4">
             <div class="col-xl-8 col-lg-12 col-md-12 flex-column">
                 <div class="row g-3">
                     <div class="col-md-12">

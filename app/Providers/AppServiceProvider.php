@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\DivisiOrmawa;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,8 +41,10 @@ class AppServiceProvider extends ServiceProvider
                     ->pluck('periodes_periode') // Ambil kolom periode
                     ->first(); // Ambil nilai pertama (jika ada)
 
+                $divisis = DivisiOrmawa::where('ormawas_kode', $kode_ormawa)->get();
+
                 // Share variabel ke semua view
-                $view->with(compact('kode_ormawa', 'periode'));
+                $view->with(compact('kode_ormawa', 'periode', 'divisis'));
             } else {
                 return route('login');
             }
