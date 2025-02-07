@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\DivisiOrmawa;
 use App\Models\User;
+use App\Notifications\DeadlineReminder;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification as Notification;
+use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 
 class AuthController extends Controller
 {
@@ -33,6 +38,19 @@ class AuthController extends Controller
                 'login_gagal' => 'Akun Anda masih dalam proses penerimaan.',
             ]);
         }
+
+        // $aktivitas = DB::table('aktivitas_divisi_program_kerjas')
+        // ->select('*', DB::raw('DATEDIFF(DATE(tenggat_waktu), CURDATE()) AS sisa_hari'))
+        // ->whereRaw("DATE(tenggat_waktu) IN (
+        //     CURDATE() + INTERVAL 1 DAY,
+        //     CURDATE() + INTERVAL 2 DAY,
+        //     CURDATE() + INTERVAL 3 DAY,
+        //     CURDATE() + INTERVAL 4 DAY,
+        //     CURDATE() + INTERVAL 5 DAY
+        // )")
+        // ->get();
+
+        // dd($aktivitas[0]->nama);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();

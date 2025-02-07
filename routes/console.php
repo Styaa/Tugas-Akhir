@@ -7,6 +7,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -14,7 +15,14 @@ Artisan::command('inspire', function () {
 
 Schedule::call(function () {
     $aktivitas = DB::table('aktivitas_divisi_program_kerjas')
-        ->whereRaw("DATE(tenggat_waktu) = DATE(NOW() + INTERVAL 5 DAY)")
+        ->select('*', DB::raw('DATEDIFF(DATE(tenggat_waktu), CURDATE()) AS sisa_hari'))
+        ->whereRaw("DATE(tenggat_waktu) IN (
+            CURDATE() + INTERVAL 1 DAY,
+            CURDATE() + INTERVAL 2 DAY,
+            CURDATE() + INTERVAL 3 DAY,
+            CURDATE() + INTERVAL 4 DAY,
+            CURDATE() + INTERVAL 5 DAY
+        )")
         ->get();
 
     foreach ($aktivitas as $item) {
@@ -23,10 +31,7 @@ Schedule::call(function () {
 
         // Kirim notifikasi ke person in charge jika ada
         $user = User::find($item->person_in_charge);
-        dd($user);
-        if ($user) {
-            $user->notify(new DeadlineReminder($item));
-        }
+        Notification::send($user, new DeadlineReminder($item));
     }
 })->everyFiveSeconds();
 

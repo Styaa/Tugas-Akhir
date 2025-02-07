@@ -37,11 +37,13 @@ class DeadlineReminder extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+
         return (new MailMessage)
-            ->subject('Peringatan Tenggat Waktu')
-            ->line("Aktivitas '{$this->aktivitas->nama}' akan mencapai tenggat dalam 5 hari.")
-            ->action('Lihat Detail', url('/aktivitas/' . $this->aktivitas->id))
-            ->line('Pastikan untuk menyelesaikan tepat waktu!');
+            ->subject("Pengingat: Tenggat Waktu Aktivitas {$this->aktivitas->nama}")
+            ->greeting("Halo {$notifiable->name},")
+            ->line("Kami ingin mengingatkan bahwa aktivitas **{$this->aktivitas->nama}** memiliki tenggat waktu yang akan datang dalam *{$this->aktivitas->sisa_hari}* hari.")
+            ->line("Silakan tinjau detail aktivitas ini dan pastikan semuanya sudah sesuai rencana.")
+            ->action('Lihat Detail Aktivitas', url('/aktivitas/' . $this->aktivitas->id));
     }
 
     /**
