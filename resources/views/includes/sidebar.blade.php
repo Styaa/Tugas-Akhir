@@ -93,7 +93,7 @@
                     </a>
                     <ul class="sub-menu {{ Request::segment(1) == 'divisi-ormawa' ? 'show' : 'collapse' }}"
                         id="divisi-ormawa">
-                        @foreach ($divisis as $divisi)
+                        @foreach ($divisiOrmawas as $divisi)
                             <li>
                                 <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
                                     href="{{ route('alur-dana.kemahasiswaan') }}">

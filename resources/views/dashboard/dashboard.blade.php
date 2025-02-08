@@ -78,7 +78,7 @@
                                     <h6 class="mb-0 fw-bold ">Divisi Ormawa</h6>
                                 </div>
                                 <div class="card-body mem-list">
-                                    @foreach ($divisis as $divisi)
+                                    @foreach ($divisiOrmawas as $divisi)
                                         <div class="timeline-item ti-danger border-bottom ms-2">
                                             <div class="d-flex">
                                                 <div class="flex-fill ms-3">

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DivisiProgramKerja;
 use App\Models\ProgramKerja;
 use App\Models\RancanganAnggaranBiaya;
-use App\Models\RancanganAnggaranDana;
 use Illuminate\Http\Request;
 
 class RancanganAnggaranDanaController extends Controller
@@ -26,7 +25,10 @@ class RancanganAnggaranDanaController extends Controller
         //
         $programKerja = ProgramKerja::find($request->prokerId);
         $periode = $programKerja->periode;
-        $divisis = DivisiProgramKerja::where('program_kerjas_id', $request->prokerId)->get();
+        // $divisis = DivisiProgramKerja::where('program_kerjas_id', $request->prokerId)->get();
+        $divisis = DivisiProgramKerja::with('divisiPelaksana')
+        ->where('program_kerjas_id', $request->prokerId)
+        ->get();
 
         // Ambil pemasukan dan pengeluaran dari database
         $pemasukans = RancanganAnggaranBiaya::where('program_kerjas_id', $request->prokerId)
@@ -36,6 +38,8 @@ class RancanganAnggaranDanaController extends Controller
         $pengeluarans = RancanganAnggaranBiaya::where('program_kerjas_id', $request->prokerId)
             ->where('kategori', 'pengeluaran')
             ->get();
+
+        // dd($divisis);
 
         // dd($pengeluaran);
 
@@ -48,40 +52,76 @@ class RancanganAnggaranDanaController extends Controller
      */
     public function store($kode_ormawa, Request $request)
     {
+        $prokerId = $request->prokerId;
+
+        // Ambil data lama dari database
+        $existingData = RancanganAnggaranBiaya::where('program_kerjas_id', $prokerId)->get();
+
         // Simpan pemasukan
+        $newPemasukanIds = [];
         foreach ($request->pemasukan['komponen'] as $index => $komponen) {
-            RancanganAnggaranBiaya::create([
-                'kategori' => 'pemasukan',
-                'komponen_biaya' => $komponen,
-                'biaya' => $request->pemasukan['biaya'][$index],
-                'jumlah' => $request->pemasukan['jumlah'][$index],
-                'satuan' => $request->pemasukan['satuan'][$index],
-                'total' => $request->pemasukan['total'][$index],
-                'program_kerjas_id' => $request->prokerId,
-                'divisi_program_kerjas_id' => null,
-            ]);
+            // Cek jika komponen kosong, lewati
+            if (empty($komponen) || empty($request->pemasukan['biaya'][$index]) || empty($request->pemasukan['jumlah'][$index])) {
+                continue;
+            }
+
+            $pemasukan = RancanganAnggaranBiaya::updateOrCreate(
+                [
+                    'program_kerjas_id' => $prokerId,
+                    'komponen_biaya' => $komponen,
+                    'kategori' => 'pemasukan'
+                ],
+                [
+                    'biaya' => $request->pemasukan['biaya'][$index],
+                    'jumlah' => $request->pemasukan['jumlah'][$index],
+                    'satuan' => $request->pemasukan['satuan'][$index] ?? '-',
+                    'total' => $request->pemasukan['total'][$index],
+                    'divisi_program_kerjas_id' => null,
+                ]
+            );
+            $newPemasukanIds[] = $pemasukan->id;
         }
 
         // Simpan pengeluaran per divisi
+        $newPengeluaranIds = [];
         if ($request->has('pengeluaran')) {
             foreach ($request->pengeluaran as $divisiId => $pengeluaranData) {
                 foreach ($pengeluaranData['komponen'] as $index => $komponen) {
-                    RancanganAnggaranBiaya::create([
-                        'kategori' => 'pengeluaran',
-                        'komponen_biaya' => $komponen,
-                        'biaya' => $pengeluaranData['biaya'][$index],
-                        'jumlah' => $pengeluaranData['jumlah'][$index],
-                        'satuan' => $pengeluaranData['satuan'][$index],
-                        'total' => $pengeluaranData['total'][$index],
-                        'program_kerjas_id' => $request->prokerId,
-                        'divisi_program_kerjas_id' => $divisiId,
-                    ]);
+                    // Cek jika komponen kosong, lewati
+                    if (empty($komponen) || empty($pengeluaranData['biaya'][$index]) || empty($pengeluaranData['jumlah'][$index])) {
+                        continue;
+                    }
+
+                    $pengeluaran = RancanganAnggaranBiaya::updateOrCreate(
+                        [
+                            'program_kerjas_id' => $prokerId,
+                            'komponen_biaya' => $komponen,
+                            'kategori' => 'pengeluaran',
+                            'divisi_program_kerjas_id' => $divisiId,
+                        ],
+                        [
+                            'biaya' => $pengeluaranData['biaya'][$index],
+                            'jumlah' => $pengeluaranData['jumlah'][$index],
+                            'satuan' => $pengeluaranData['satuan'][$index] ?? '-',
+                            'total' => $pengeluaranData['total'][$index],
+                        ]
+                    );
+                    $newPengeluaranIds[] = $pengeluaran->id;
                 }
             }
         }
 
-        return back()->with('success', 'Data berhasil disimpan!');
+        // Hapus data yang sudah tidak ada di form
+        $existingData->each(function ($item) use ($newPemasukanIds, $newPengeluaranIds) {
+            if (!in_array($item->id, array_merge($newPemasukanIds, $newPengeluaranIds))) {
+                $item->delete();
+            }
+        });
+
+        return back()->with('success', 'Data berhasil diperbarui!');
     }
+
+
 
     /**
      * Display the specified resource.

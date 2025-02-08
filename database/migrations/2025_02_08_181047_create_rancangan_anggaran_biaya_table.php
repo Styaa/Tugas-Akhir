@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('satuan');
             $table->integer('total');
+            $table->enum('status', ['rencana', 'realisasi'])->default('rencana');
             $table->foreignId('program_kerjas_id')->constrained('program_kerjas')->onDelete('cascade');
             $table->foreignId('divisi_program_kerjas_id')->nullable()->constrained('divisi_program_kerjas')->onDelete('set null');
             $table->timestamps();

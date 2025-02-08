@@ -41,10 +41,10 @@ class AppServiceProvider extends ServiceProvider
                     ->pluck('periodes_periode') // Ambil kolom periode
                     ->first(); // Ambil nilai pertama (jika ada)
 
-                $divisis = DivisiOrmawa::where('ormawas_kode', $kode_ormawa)->get();
+                $divisiOrmawas = DivisiOrmawa::where('ormawas_kode', $kode_ormawa)->get();
 
                 // Share variabel ke semua view
-                $view->with(compact('kode_ormawa', 'periode', 'divisis'));
+                $view->with(compact('kode_ormawa', 'periode', 'divisiOrmawas'));
             } else {
                 return route('login');
             }

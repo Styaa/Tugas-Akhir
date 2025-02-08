@@ -7,6 +7,7 @@ use App\Models\DivisiPelaksana;
 use App\Models\DivisiProgramKerja;
 use App\Models\Jabatan;
 use App\Models\ProgramKerja;
+use App\Models\RancanganAnggaranBiaya;
 use App\Models\StrukturProker;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -287,6 +288,19 @@ class ProgramKerjaController extends Controller
         // Ambil aktivitas untuk semua divisi pelaksana yang terkait
         $activities = AktivitasDivisiProgramKerja::where('program_kerjas_id', $programKerja->id)->get();
 
+        // Hitung total pemasukan
+        $totalPemasukan = RancanganAnggaranBiaya::where('program_kerjas_id', $id)
+        ->where('kategori', 'pemasukan')
+        ->sum('total');
+
+        // Hitung total pengeluaran
+        $totalPengeluaran = RancanganAnggaranBiaya::where('program_kerjas_id', $id)
+            ->where('kategori', 'pengeluaran')
+            ->sum('total');
+
+        // Hitung selisih anggaran (pemasukan - pengeluaran)
+        $selisih = $totalPemasukan - $totalPengeluaran;
+
 
         // dd($activities->first()->personInCharge->name);
 
@@ -297,11 +311,11 @@ class ProgramKerjaController extends Controller
             $tanggal_selesai = Carbon::parse($programKerja->tanggal_selesai)->format('d F Y');
 
             // Kembalikan view dengan semua data
-            return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids'));
+            return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
         }
 
         // Kembalikan view tanpa tanggal selesai
-        return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids'));
+        return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
     }
 
     public function pilihKetua($kode_ormawa, $prokerId, $periode, $userId)

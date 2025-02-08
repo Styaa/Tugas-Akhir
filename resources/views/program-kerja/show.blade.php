@@ -50,7 +50,34 @@
                     </div>
                     {{-- Card Info End --}}
 
-                    <div class="row clearfix g-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-center">Anggaran Program Kerja</h5>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <!-- Total Pemasukan -->
+                                <div class="text-center mx-3">
+                                    <h6 class="fw-bold text-muted">Total Pemasukan</h6>
+                                    <p class="fs-5 text-success fw-bold">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</p>
+                                </div>
+
+                                <!-- Total Pengeluaran -->
+                                <div class="text-center mx-3">
+                                    <h6 class="fw-bold text-muted">Total Pengeluaran</h6>
+                                    <p class="fs-5 text-danger fw-bold">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+                                </div>
+
+                                <!-- Selisih Anggaran -->
+                                <div class="text-center mx-3">
+                                    <h6 class="fw-bold text-muted">Selisih Anggaran</h6>
+                                    <p class="fs-5 fw-bold {{ $selisih >= 0 ? 'text-success' : 'text-danger' }}">
+                                        Rp {{ number_format($selisih, 0, ',', '.') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row clearfix g-3 mt-4">
                         <div class="col-xl-8 col-lg-12 col-md-12">
                             <div class="row g-3">
                                 {{-- Card Divisi Start --}}
