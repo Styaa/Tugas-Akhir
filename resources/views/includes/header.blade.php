@@ -95,7 +95,7 @@
                 </div>
                 <div class="dropdown user-profile ml-2 ml-sm-3 d-flex align-items-center zindex-popover">
                     <div class="u-info me-2">
-                        <p class="mb-0 text-end line-height-sm "><span class="font-weight-bold">Dylan Hunter</span>
+                        <p class="mb-0 text-end line-height-sm "><span class="font-weight-bold">{{ Auth::user()->name }}</span>
                         </p>
                         <small>Admin Profile</small>
                     </div>
@@ -111,8 +111,8 @@
                                     <img class="avatar rounded-circle" src="{{ url('/') . '/images/profile_av.png' }}"
                                         alt="profile">
                                     <div class="flex-fill ms-3">
-                                        <p class="mb-0"><span class="font-weight-bold">Dylan Hunter</span></p>
-                                        <small class="">Dylan.hunter@gmail.com</small>
+                                        <p class="mb-0"><span class="font-weight-bold">{{ Auth::user()->name }}</span></p>
+                                        <small class="">{{ Auth::user()->email }}</small>
                                     </div>
                                 </div>
 

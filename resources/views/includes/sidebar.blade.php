@@ -29,11 +29,10 @@
                 <li class="collapsed">
                     <a class="m-link {{ Request::segment(2) == 'program-kerja' ? 'active' : '' }}"
                         data-bs-toggle="collapse" data-bs-target="#program-Components" href="#">
-                        <i class="icofont-users-alt-5"></i> <span>Program Kerja</span>
+                        <i class="icofont-tasks-alt"></i> <span>Program Kerja</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
-                    <ul class="sub-menu {{ Request::segment(2) == 'program-kerja' ? 'show' : 'collapse' }}"
-                        id="program-Components">
+                    <ul class="sub-menu {{ Request::segment(2) == 'program-kerja' ? 'show' : 'collapse' }}" id="program-Components">
                         <li>
                             <a class="ms-link {{ Request::segment(2) == 'program-kerja' && Request::segment(3) == null ? 'active' : '' }}"
                                 href="{{ route('program-kerja.index', ['kode_ormawa' => Request::segment(1)]) }}">
@@ -50,8 +49,13 @@
                         <i class="icofont-users-alt-5"></i> <span>Our Members</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
-                    <ul class="sub-menu {{ Request::segment(2) == 'our-member' ? 'show' : 'collapse' }}"
-                        id="member-Components">
+                    <ul class="sub-menu {{ Request::segment(2) == 'our-member' ? 'show' : 'collapse' }}" id="member-Components">
+                        <li>
+                            <a class="ms-link {{ Request::segment(3) == 'members' ? 'active' : '' }}"
+                                href="{{ route('our-member.members', ['kode_ormawa' => Request::segment(1)]) }}">
+                                <span>All Members</span>
+                            </a>
+                        </li>
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
                                 href="{{ route('our-member.candidate', ['kode_ormawa' => Request::segment(1)]) }}">
@@ -65,7 +69,7 @@
                 <li class="collapsed">
                     <a class="m-link {{ Request::segment(1) == 'alur-dana' ? 'active' : '' }}"
                         data-bs-toggle="collapse" data-bs-target="#alur-dana" href="#">
-                        <i class="icofont-money"></i> <span>Alur Dana</span>
+                        <i class="icofont-money-bag"></i> <span>Alur Dana</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
                     <ul class="sub-menu {{ Request::segment(1) == 'alur-dana' ? 'show' : 'collapse' }}" id="alur-dana">
@@ -84,23 +88,38 @@
                     </ul>
                 </li>
 
-                <!-- Divisi Ormawa -->
+                <!-- Rapat -->
                 <li class="collapsed">
-                    <a class="m-link {{ Request::segment(1) == 'divisi-ormawa' ? 'active' : '' }}"
-                        data-bs-toggle="collapse" data-bs-target="#divisi-ormawa" href="#">
-                        <i class="icofont-money"></i> <span>Divisi Ormawa</span>
+                    <a class="m-link {{ Request::segment(2) == 'rapat' ? 'active' : '' }}"
+                        data-bs-toggle="collapse" data-bs-target="#menu-rapat" href="#">
+                        <i class="icofont-calendar"></i> <span>Rapat</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
-                    <ul class="sub-menu {{ Request::segment(1) == 'divisi-ormawa' ? 'show' : 'collapse' }}"
-                        id="divisi-ormawa">
-                        @foreach ($divisiOrmawas as $divisi)
-                            <li>
-                                <a class="ms-link {{ Request::segment(2) == 'kemahasiswaan' ? 'active' : '' }}"
-                                    href="{{ route('alur-dana.kemahasiswaan') }}">
-                                    <span>{{ $divisi->nama }}</span>
-                                </a>
-                            </li>
-                        @endforeach
+                    <ul class="sub-menu {{ Request::segment(2) == 'rapat' ? 'show' : 'collapse' }}" id="menu-rapat">
+                        <li>
+                            <a class="ms-link {{ Request::segment(3) == 'semua' ? 'active' : '' }}"
+                                href="{{route('rapat.index', ['kode_ormawa' => Request::segment(1)]) }}">
+                                <span>Semua Rapat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
+                                href="{{ route('rapat.perizinan', ['kode_ormawa' => Request::segment(1)]) }}">
+                                <span>Perizinan</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}"
+                                href="">
+                                <span>Notulen Rapat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="ms-link {{ Request::segment(3) == 'kalender' ? 'active' : '' }}"
+                                href="">
+                                <span>Kalender</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>

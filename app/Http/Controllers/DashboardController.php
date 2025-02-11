@@ -108,11 +108,12 @@ class DashboardController extends Controller
             ->get();
 
         $ormawas = Ormawa::where('kode', $kodeOrmawa)->get();
-        $misis = json_decode($ormawas[0]['misi']);
 
-        // dd($ormawas);
+        $divisiOrmawas = DivisiOrmawa::where('ormawas_kode', $kodeOrmawa)->get();
 
-        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers', 'ormawas', 'misis'));
+        // dd($divisiOrmawas);
+
+        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers', 'ormawas', 'divisiOrmawas'));
     }
 
     public function alurDanaKemahasiswaan()

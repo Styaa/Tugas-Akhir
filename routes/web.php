@@ -8,6 +8,7 @@ use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\RancanganAnggaranDanaController;
+use App\Http\Controllers\RapatController;
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiOrmawa;
 use App\Models\DivisiProgramKerja;
@@ -36,9 +37,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/alur-dana/kemahasiswaan', [DashboardController::class, 'alurDanaKemahasiswaan'])->name('alur-dana.kemahasiswaan');
     Route::get('/alur-dana/jurusan', [DashboardController::class, 'alurDanaJurusan'])->name('alur-dana.jurusan');
 
+    Route::get('/get-divisions/{programKerjaId}', function ($programKerjaId) {
+        $divisions = DivisiProgramKerja::where('program_kerjas_id', $programKerjaId)
+            ->with('divisiPelaksana') // Pastikan relasi dimuat
+            ->get();
+        return response()->json($divisions);
+    });
+
     // Routes based on Kode Ormawa
     Route::prefix('{kode_ormawa}')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('rapat')->name('rapat.')->group(function () {
+            Route::get('/semua', [RapatController::class, 'index'])->name('index');
+            Route::get('/create', [RapatController::class, 'create'])->name('create');
+            Route::post('/store', [RapatController::class, 'store'])->name('store');
+            Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
+        });
 
         Route::resource('divisi', DivisiOrmawa::class);
 
@@ -80,6 +95,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Member Routes
         Route::prefix('our-member')->name('our-member.')->group(function () {
+            Route::get('members', [MemberController::class, 'allMembers'])->name('members');
+            Route::get('member-profile', [MemberController::class, 'show'])->name('member-profile');
             Route::get('candidate-member', [MemberController::class, 'candidateMembers'])->name('candidate');
             Route::post('candidate-accept', [MemberController::class, 'acceptCandidate'])->name('candidate-accept');
         });

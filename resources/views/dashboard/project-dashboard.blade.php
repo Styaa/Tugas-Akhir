@@ -2484,8 +2484,6 @@
                                 </div>
                             </div>
                         </div> --}}
-
-                        <div id="area-chart"></div>
                     </div>
                 </div>
             </div>

@@ -87,7 +87,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach <!-- timeline item end  -->
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
