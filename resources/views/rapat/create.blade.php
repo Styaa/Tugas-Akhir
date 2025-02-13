@@ -6,7 +6,7 @@
 <div class="container py-5">
     <div class="card shadow-lg rounded-lg p-4">
         <div id="stepWizard">
-            <form action="{{ route('rapat.store', ['kode_ormawa' => Request::segment(1)]) }}" id="rapatForm" method="post">
+            <form action="{{ route('rapat.store', ['kode_ormawa' => $kode_ormawa]) }}" id="rapatForm" method="post">
                 @csrf
                 <!-- Progress Bar -->
                 <div class="progress mb-4" style="height: 8px;">
@@ -215,7 +215,7 @@
 <script>
 let currentStep = 1;
 let selectedType = null;
-let kodeOrmawa = "{{ Request::segment(1) }}";
+let kodeOrmawa = "{{ $kode_ormawa }}";
 
 // Pilih tipe rapat
 function selectMeetingType(type, event) {
@@ -460,7 +460,7 @@ $('#rapatForm').on('submit', function(e) {
         data: $(this).serialize(),
         success: function(response) {
             alert(response.message);
-            window.location.href = `/${kodeOrmawa}/rapat/semua`; // Redirect ke halaman daftar rapat
+            window.location.href = `/${kodeOrmawa}/rapat`; // Redirect ke halaman daftar rapat
         },
         error: function(xhr) {
             alert("Error: " + xhr.responseJSON.message);

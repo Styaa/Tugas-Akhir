@@ -55,7 +55,7 @@
                                             {{-- <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices.Vestibulum ante ipsum primis in faucibus orci luctus et ultrices</p> --}}
                                         </div>
                                         {{-- <a href="" class="btn btn-dark btn-sm mt-1"><i class="icofont-plus-circle me-2 fs-6"></i>Add Task</a> --}}
-                                        <a href="{{ route('our-member.member-profile', ['kode_ormawa' => Request::segment(1), 'id_member' => $anggota->id]) }}" class="btn btn-dark btn-sm mt-1"><i class="icofont-invisible me-2 fs-6"></i>Profile</a>
+                                        <a href="{{ route('our-member.member-profile', ['kode_ormawa' => $kode_ormawa, 'id_member' => $anggota->id]) }}" class="btn btn-dark btn-sm mt-1"><i class="icofont-invisible me-2 fs-6"></i>Profile</a>
                                     </div>
                                 </div>
                             </div>

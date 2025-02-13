@@ -159,7 +159,7 @@
                 </form> --}}
 
                 {{-- <button type="button" class="btn btn-secondary">Download</button> --}}
-                <a href="{{ route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                <a href="{{ route('program-kerja.show', ['kode_ormawa' => Request::segment(1), 'id' => $programKerja->id]) }}"
                     class="btn btn-dark">Kembali</a>
             </div>
         </form>

@@ -27,14 +27,12 @@ class AppServiceProvider extends ServiceProvider
 
             if (Auth::check()) {
                 // Jika user terautentikasi, ambil kode ormawa dari relasi
-                if (Auth::check()) {
-                    $user = Auth::user();
-                    $kode_ormawa = $user->strukturOrmawas()
+                $user = Auth::user();
+                $kode_ormawa = $user->strukturOrmawas()
                         ->with('divisiOrmawas.ormawa')
                         ->get()
-                        ->pluck('divisiOrmawas.0.ormawa.kode')
-                        ->first(); // Fallback ke default jika tidak ditemukan
-                }
+                        ->pluck('divisiOrmawas.ormawa.kode')
+                        ->first();
 
                 $periode = $user->strukturOrmawas()
                     ->orderBy('periodes_periode', 'desc') // Ambil periode terbaru

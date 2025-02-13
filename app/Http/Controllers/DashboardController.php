@@ -113,7 +113,7 @@ class DashboardController extends Controller
 
         // dd($divisiOrmawas);
 
-        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers', 'ormawas', 'divisiOrmawas'));
+        return view('dashboard.dashboard', compact('programKerjaUsers', 'programKerjaTerdekats', 'aktivitasUsers', 'ormawas', 'divisiOrmawas', 'kodeOrmawa'));
     }
 
     public function alurDanaKemahasiswaan()

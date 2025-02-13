@@ -512,17 +512,7 @@ const editorConfig = {
 		]
 	},
 	initialData:
-		`<div>
-        <p style="font-family:'Cambria'; font-weight:bold; text-align:center; font-size:20pt;">PROPOSAL</p>
-        <p style="font-family:Cambria, serif; font-size:16pt; text-align:center;">GATHERING INFORMATICS</p>
-        <p style="font-family:Cambria, serif; font-size:16pt; text-align:center;">KELOMPOK STUDI</p>
-        <p style="font-family:Cambria, serif; font-size:16pt; text-align:center;">MAHASISWA INFORMATIKA</p>
-        <p style="font-family:Cambria, serif; font-size:14pt; text-align:center;">2023</p>
-        <br><br><br>
-        <p style="font-family:Cambria, serif; font-size:16pt; text-align:center;">FAKULTAS TEKNIK</p>
-        <p style="font-family:Cambria, serif; font-size:16pt; text-align:center;">UNIVERSITAS SURABAYA</p>
-    </div>
-    `,
+		``,
 	licenseKey: LICENSE_KEY,
 	link: {
 		addTargetToExternalLinks: true,
@@ -593,7 +583,7 @@ const editorConfig = {
 		viewerContainer: document.querySelector('#editor-revision-history'),
 		viewerEditorElement: document.querySelector('#editor-revision-history-editor'),
 		viewerSidebarContainer: document.querySelector('#editor-revision-history-sidebar'),
-		resumeUnsavedRevision: true
+		resumeUnsavedRevision: false
 	},
 	sidebar: {
 		container: document.querySelector('#editor-annotations')

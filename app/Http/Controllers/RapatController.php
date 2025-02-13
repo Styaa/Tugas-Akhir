@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DivisiOrmawa;
 use App\Models\DivisiProgramKerja;
+use App\Models\IzinRapat;
 use App\Models\Ormawa;
 use App\Models\ProgramKerja;
 use App\Models\Rapat;
@@ -12,45 +13,35 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class RapatController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $meetings = [
-            [
-                'title' => 'Problem Solving Office Hours',
-                'day' => 'Wednesday',
-                'time' => '3:00 PM',
-                'host' => 'James Wang',
-                'image' => 'https://source.unsplash.com/150x100/?office,meeting'
-            ],
-            [
-                'title' => 'Research Group Meeting',
-                'day' => 'Thursday',
-                'time' => '10:00 AM',
-                'host' => 'David Patterson',
-                'image' => 'https://source.unsplash.com/150x100/?business,teamwork'
-            ],
-            [
-                'title' => 'Lecture on Quantum Computing',
-                'day' => 'Friday',
-                'time' => '1:00 PM',
-                'host' => 'Margaret Martonosi',
-                'image' => 'https://source.unsplash.com/150x100/?science,lecture'
-            ],
-            [
-                'title' => 'Monthly Organization Planning',
-                'day' => 'Saturday',
-                'time' => '4:00 PM',
-                'host' => 'Ormawa Leader',
-                'image' => 'https://source.unsplash.com/150x100/?planning,organization'
-            ]
-        ];
+        $kodeOrmawa = $request->kode_ormawa;
+        $userId = Auth::id(); // Ambil user yang sedang login
+
+        // Ambil semua rapat berdasarkan kode Ormawa
+        $meetings = Rapat::where('ormawa_id', $kodeOrmawa);
+
+        // Jika user memilih "Your Meetings", cari rapat yang diikuti oleh user
+        if ($request->has('filter') && $request->filter == 'your_meetings') {
+            $rapatIds = RapatPartisipasi::where('user_id', $userId)->pluck('rapat_id'); // Ambil ID rapat yang diikuti
+            $meetings = $meetings->whereIn('id', $rapatIds);
+        }
+
+        $meetings = $meetings->get();
+
+        // Jika request AJAX, kembalikan hanya HTML rapat
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('includes.partials.meeting-list', compact('meetings'))->render()
+            ]);
+        }
 
         return view('rapat.index', compact('meetings'));
     }
@@ -138,9 +129,13 @@ class RapatController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($kode_ormawa, Request $request)
     {
         //
+        $rapat = Rapat::with(['peserta.user'])->where('ormawa_id', $kode_ormawa)->findOrFail($request->id_rapat);
+
+        // Kirim data ke tampilan
+        return view('rapat.show', compact('rapat'));
     }
 
     /**
@@ -167,7 +162,23 @@ class RapatController extends Controller
         //
     }
 
-    public function perizinan(){
-        return view('rapat.perizinan');
+    public function perizinan($kode_ormawa){
+        $izinRapat = IzinRapat::whereHas('rapat', function ($query) use ($kode_ormawa) {
+            $query->where('ormawa_id', $kode_ormawa);
+        })->with(['user', 'rapat'])->get();
+
+        // dd($izinRapat);
+
+        return view('rapat.perizinan', compact('izinRapat'));
+    }
+
+    public function izin($kode_oramwa, Request $request){
+        IzinRapat::create([
+            'user_id' => auth()->id(),
+            'rapat_id' => $request->id_rapat,
+            'alasan' => $request->alasan_izin,
+        ]);
+
+        return redirect()->back()->with('success', 'Izin berhasil diajukan.');
     }
 }

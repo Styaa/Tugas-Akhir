@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Rapat extends Model
 {
@@ -28,15 +29,20 @@ class Rapat extends Model
     public function getTipePenyelenggaraAttribute()
     {
         if ($this->divisi_ormawas_id) {
-            return 'Divisi Ormawa';
+            return $this->divisiOrmawa ? $this->divisiOrmawa->nama : 'Divisi Ormawa';
         } elseif ($this->program_kerjas_id) {
-            return 'Program Kerja';
+            return $this->programKerja ? $this->programKerja->nama : 'Program Kerja';
         } elseif ($this->divisi_program_kerjas_id) {
-            return 'Divisi Program Kerja';
+            return $this->divisiProgramKerja ? $this->divisiProgramKerja->nama : 'Divisi Program Kerja';
         } else {
-            return $this->ormawa_id;
+            return $this->ormawa ? $this->ormawa->nama : 'Ormawa';
         }
     }
+
+    public function getHariAttribute()
+{
+    return Carbon::parse($this->tanggal)->translatedFormat('l');
+}
 
     // Relasi ke Ormawa
     public function ormawa()
@@ -66,5 +72,15 @@ class Rapat extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function izin()
+    {
+        return $this->hasMany(IzinRapat::class, 'rapat_id');
+    }
+
+    public function peserta()
+    {
+        return $this->hasMany(RapatPartisipasi::class, 'rapat_id');
     }
 }

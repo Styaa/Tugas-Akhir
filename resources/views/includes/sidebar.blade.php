@@ -1,7 +1,7 @@
 @if (Request::segment(2) != 'ui-components')
     <div class="sidebar px-4 py-4 py-md-5 me-0">
         <div class="d-flex flex-column h-100">
-            <a href="{{ route('dashboard', ['kode_ormawa' => Request::segment(1)]) }}" class="mb-0 brand-icon">
+            <a href="{{ route('dashboard', ['kode_ormawa' => $kode_ormawa]) }}" class="mb-0 brand-icon">
                 <span class="logo-icon">
                     <svg width="35" height="35" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
                         <path fill-rule="evenodd"
@@ -20,7 +20,7 @@
                 <!-- Dashboard -->
                 <li class="collapsed">
                     <a class="m-link {{ Request::segment(2) == 'dashboard' ? 'active' : '' }}"
-                        href="{{ route('dashboard', ['kode_ormawa' => Request::segment(1)]) }}">
+                        href="{{ route('dashboard', ['kode_ormawa' => $kode_ormawa]) }}">
                         <i class="icofont-home fs-5"></i> <span>Dashboard</span>
                     </a>
                 </li>
@@ -35,7 +35,7 @@
                     <ul class="sub-menu {{ Request::segment(2) == 'program-kerja' ? 'show' : 'collapse' }}" id="program-Components">
                         <li>
                             <a class="ms-link {{ Request::segment(2) == 'program-kerja' && Request::segment(3) == null ? 'active' : '' }}"
-                                href="{{ route('program-kerja.index', ['kode_ormawa' => Request::segment(1)]) }}">
+                                href="{{ route('program-kerja.index', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Daftar Program Kerja</span>
                             </a>
                         </li>
@@ -52,13 +52,13 @@
                     <ul class="sub-menu {{ Request::segment(2) == 'our-member' ? 'show' : 'collapse' }}" id="member-Components">
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'members' ? 'active' : '' }}"
-                                href="{{ route('our-member.members', ['kode_ormawa' => Request::segment(1)]) }}">
+                                href="{{ route('our-member.members', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>All Members</span>
                             </a>
                         </li>
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
-                                href="{{ route('our-member.candidate', ['kode_ormawa' => Request::segment(1)]) }}">
+                                href="{{ route('our-member.candidate', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Candidate Members</span>
                             </a>
                         </li>
@@ -97,14 +97,14 @@
                     </a>
                     <ul class="sub-menu {{ Request::segment(2) == 'rapat' ? 'show' : 'collapse' }}" id="menu-rapat">
                         <li>
-                            <a class="ms-link {{ Request::segment(3) == 'semua' ? 'active' : '' }}"
-                                href="{{route('rapat.index', ['kode_ormawa' => Request::segment(1)]) }}">
+                            <a class="ms-link {{ Request::segment(3) == '' ? 'active' : '' }}"
+                                href="{{route('rapat.index', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Semua Rapat</span>
                             </a>
                         </li>
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
-                                href="{{ route('rapat.perizinan', ['kode_ormawa' => Request::segment(1)]) }}">
+                                href="{{ route('rapat.perizinan', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Perizinan</span>
                             </a>
                         </li>

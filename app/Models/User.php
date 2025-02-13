@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->hasMany(StrukturOrmawa::class, 'users_id');
     }
 
+    public function izinRapat()
+{
+    return $this->hasMany(IzinRapat::class, 'user_id');
+}
+
     /**
      * The attributes that should be hidden for serialization.
      *

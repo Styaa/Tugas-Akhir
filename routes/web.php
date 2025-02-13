@@ -49,8 +49,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::prefix('rapat')->name('rapat.')->group(function () {
-            Route::get('/semua', [RapatController::class, 'index'])->name('index');
+            Route::get('/', [RapatController::class, 'index'])->name('index');
             Route::get('/create', [RapatController::class, 'create'])->name('create');
+            Route::post('/izin', [RapatController::class, 'izin'])->name('izin');
+            Route::get('/show', [RapatController::class, 'show'])->name('show');
             Route::post('/store', [RapatController::class, 'store'])->name('store');
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
         });

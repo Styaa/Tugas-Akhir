@@ -1041,6 +1041,37 @@ $date = \Carbon\Carbon::now();
     </div>
 </div>
 
+<!-- Modal Izin Rapat-->
+@if (isset($rapat))
+<div class="modal fade" id="izinrapat" tabindex="-1" aria-labelledby="izinRapatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="izinRapatModalLabel">Form Izin Rapat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Form Izin -->
+            <form action="{{ route('rapat.izin', ['kode_ormawa' => $rapat->ormawa_id, 'id_rapat' => $rapat->id]) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="alasan_izin" class="form-label">Alasan Izin</label>
+                        <textarea class="form-control" id="alasan_izin" name="alasan_izin" rows="3" placeholder="Tuliskan alasan izin Anda..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Kirim izin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+
 <!-- Modal  Remove Task-->
 <div class="modal fade" id="dremovetask" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">

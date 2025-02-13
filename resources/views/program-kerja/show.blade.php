@@ -87,7 +87,7 @@
                                             <div
                                                 class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
                                                 <h6 class="mb-0 fw-bold">{{ $item['divisi_pelaksana']['nama'] }}</h6>
-                                                <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $programKerja->nama]) }}"
+                                                <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => Request::segment(1), 'nama_program_kerja' => $programKerja->nama]) }}"
                                                     class="btn btn-dark btn-sm">Lihat Detail</a>
                                             </div>
                                             <div class="card-body">
@@ -201,7 +201,7 @@
                                                             class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
                                                                 class="icofont-file-text fs-5"></i></span>
                                                         <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id]) }}"
+                                                            <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' =>$kode_ormawa, 'prokerId' => $programKerja->id]) }}"
                                                                 class="text-decoration-none">
                                                                 <h6 class="fw-bold mb-0 small-14">Rancangan Anggaran Biaya
                                                                 </h6>
