@@ -4,7 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\ProgramKerja;
+use App\Models\User;
+use App\Notifications\AssignPICReminder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schedule;
 
 class AktivitasDivisiProgramKerjaController extends Controller
 {
@@ -15,7 +21,8 @@ class AktivitasDivisiProgramKerjaController extends Controller
             ->where('nama', $nama_program_kerja)
             ->value('id');
 
-        AktivitasDivisiProgramKerja::create([
+        // Simpan aktivitas dan ambil ID-nya
+        $aktivitas = AktivitasDivisiProgramKerja::create([
             'nama' => $request->input('name'),
             'prioritas' => $request->input('priority', 'sedang'),
             'person_in_charge' => $request->input('assignee'),
@@ -24,6 +31,13 @@ class AktivitasDivisiProgramKerjaController extends Controller
             'divisi_pelaksana_id' => $id,
             'program_kerjas_id' => $idProgramKerja,
         ]);
+
+        // Kirim notifikasi secara asinkron setelah response dikirim
+        $user = User::find($aktivitas->person_in_charge);
+
+        if ($user) {
+            Notification::send($user, new AssignPICReminder($aktivitas));
+        }
 
         return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan.');
     }

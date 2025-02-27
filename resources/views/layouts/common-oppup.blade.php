@@ -1071,6 +1071,86 @@ $date = \Carbon\Carbon::now();
 </div>
 @endif
 
+<!-- Modal Daftar Izin -->
+@if (isset($daftarIzin))
+    <div class="modal fade" id="daftarIzinModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Daftar Peserta yang Izin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if($daftarIzin->isEmpty())
+                        <p class="text-center">Belum ada peserta yang mengajukan izin.</p>
+                    @else
+                        <div class="card-body">
+                            <table id="myProjectTable" class="table table-hover align-middle mb-0" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id Izin</th>
+                                        <th>Nama Anggota</th>
+                                        <th>Rapat</th>
+                                        <th>Kegiatan</th>
+                                        <th>Alasan</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($daftarIzin as $izin)
+                                        <tr>
+                                            <td>
+                                                <a href="" class="fw-bold text-secondary">#{{ $izin->id }}</a>
+                                            </td>
+                                            <td>
+                                                <img class="avatar rounded-circle"
+                                                    src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
+                                                <span class="fw-bold ms-1">{{ $izin->user->name }}</span>
+                                            </td>
+                                            <td>
+                                                <a href="{{route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id])}}" class="underline">{{ $izin->rapat->nama }}</a>
+                                            </td>
+                                            <td>
+                                                {{ $izin->rapat->tipe_penyelenggara }}
+                                            </td>
+                                            <td>
+                                                {{ $izin->alasan }}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                                    {{-- <button type="button" class="btn btn-outline-secondary accept-button"
+                                                        data-user-id="{{ $user->id }}"
+                                                        data-user-name="{{ $user->name }}"><i
+                                                            class="icofont-check-circled text-success"></i></button>
+                                                    <button type="button" class="btn btn-outline-secondary reject-button"
+                                                        data-user-id="{{ $user->id }}" data-bs-toggle="modal"
+                                                        data-user-name="{{ $user->name }}"><i
+                                                            class="icofont-close-circled text-danger"></i></button> --}}
+                                                    <button type="button" class="btn btn-outline-secondary accept-button"
+                                                        data-user-id="1"
+                                                        data-user-name="Satya"><i
+                                                            class="icofont-check-circled text-success"></i></button>
+                                                    <button type="button" class="btn btn-outline-secondary reject-button"
+                                                        data-user-id="1" data-bs-toggle="modal"
+                                                        data-user-name="Satya"><i
+                                                            class="icofont-close-circled text-danger"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 
 <!-- Modal  Remove Task-->
 <div class="modal fade" id="dremovetask" tabindex="-1" aria-hidden="true">

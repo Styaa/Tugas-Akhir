@@ -1,26 +1,26 @@
 // sparklines
 $(document).ready(function() {
-   
+
     var randomizeArray = function (arg) {
         var array = arg.slice();
         var currentIndex = array.length,
         temporaryValue, randomIndex;
-  
-        while (0 !== currentIndex) {  
+
+        while (0 !== currentIndex) {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
-    
+
             temporaryValue = array[currentIndex];
             array[currentIndex] = array[randomIndex];
             array[randomIndex] = temporaryValue;
-        }  
+        }
         return array;
     }
 
     // data for the sparklines that appear below header area
     var sparklineData = [47, 45, 54, 38, 56, 24, 65, 31, 37, 39, 62, 51, 35, 41, 35, 27, 93, 53, 61, 27, 54, 43, 19, 46];
 
-    // topb big chart    
+    // topb big chart
     var spark1 = {
         chart: {
             type: 'area',
@@ -56,7 +56,7 @@ $(document).ready(function() {
 
     var spark1 = new ApexCharts(document.querySelector("#apexspark1"), spark1);
     spark1.render();
-    
+
     var spark2 = {
         chart: {
             type: 'area',
@@ -92,7 +92,7 @@ $(document).ready(function() {
 
     var spark2 = new ApexCharts(document.querySelector("#apexspark2"), spark2);
     spark2.render();
-    
+
     var spark3 = {
         chart: {
             type: 'area',
@@ -134,10 +134,10 @@ $(document).ready(function() {
     var spark3 = new ApexCharts(document.querySelector("#apexspark3"), spark3);
     spark3.render();
 
-    // bottom small chart    
+    // bottom small chart
     var options1 = {
         chart: {
-            type: 'line',            
+            type: 'line',
             width: 100,
             height: 35,
             sparkline: {
@@ -151,7 +151,7 @@ $(document).ready(function() {
         series: [{
           data: [25, 66, 41, 89, 63, 25, 44, 12, 36, 9, 54]
         }],
-        
+
         tooltip: {
             fixed: {
                 enabled: false
@@ -172,7 +172,7 @@ $(document).ready(function() {
         }
     }
     new ApexCharts(document.querySelector("#apexspark-chart1"), options1).render();
-        
+
     var options2 = {
         chart: {
             type: 'line',
@@ -208,7 +208,7 @@ $(document).ready(function() {
             }
         }
     }
-    
+
     new ApexCharts(document.querySelector("#apexspark-chart2"), options2).render();
 
     var options3 = {
@@ -258,7 +258,7 @@ $(document).ready(function() {
         }
     }
     new ApexCharts(document.querySelector("#apexspark-chart3"), options3).render();
-  
+
     var options4 = {
         chart: {
             type: 'bar',
@@ -304,7 +304,7 @@ $(document).ready(function() {
                 show: false
             }
         }
-    }    
+    }
     new ApexCharts(document.querySelector("#apexspark-chart4"), options4).render();
 });
 
@@ -366,7 +366,7 @@ $(document).ready(function() {
             show: true,
         },
         xaxis: {
-            type: 'datetime',            
+            type: 'datetime',
         },
         grid: {
             yaxis: {
@@ -844,23 +844,22 @@ $(document).ready(function() {
             toolbar: {
                 show: false,
             }
-        },        
+        },
         plotOptions: {
             bar: {
-                horizontal: true,                
+                horizontal: true,
             }
         },
-        colors: ['#ff4560', '#f7c56b'],
 
         series: [{
-            name: 'Bob',            
+            name: 'Bob',
             data: [{
               x: 'Design',
               y: [new Date('2019-03-02').getTime(), new Date('2019-03-03').getTime()]
             }, {
               x: 'Code',
               y: [new Date('2019-03-02').getTime(), new Date('2019-03-04').getTime()]
-             
+
             }, {
               x: 'Test',
               y: [new Date('2019-03-04').getTime(), new Date('2019-03-07').getTime()]
@@ -872,10 +871,10 @@ $(document).ready(function() {
             name: 'Joe',
             data: [{
               x: 'Design',
-              y: [new Date('2019-03-01').getTime(), new Date('2019-03-02').getTime()] 
+              y: [new Date('2019-03-01').getTime(), new Date('2019-03-02').getTime()]
             }, {
               x: 'Code',
-              y: [new Date('2019-03-03').getTime(), new Date('2019-03-07').getTime()] 
+              y: [new Date('2019-03-03').getTime(), new Date('2019-03-07').getTime()]
             }, {
               x: 'Test',
               y: [new Date('2019-03-06').getTime(), new Date('2019-03-09').getTime()]
@@ -910,7 +909,7 @@ $(document).ready(function() {
         document.querySelector("#apex-timeline"),
         options
     );
-    
+
     chart.render();
 });
 
@@ -958,7 +957,7 @@ $(document).ready(function() {
         document.querySelector("#apex-basic-bar"),
         options
     );
-    
+
     chart.render();
 });
 
@@ -1168,7 +1167,7 @@ $(document).ready(function() {
                 },
             ]
         }],
-              
+
         xaxis: {
             type: 'datetime'
         },
@@ -1178,7 +1177,7 @@ $(document).ready(function() {
             }
         }
     }
-  
+
     var chart = new ApexCharts(
         document.querySelector("#apex-CandleStick"),
         options
@@ -1199,7 +1198,7 @@ $(document).ready(function() {
             bar: {
                 horizontal: false,
                 columnWidth: '55%',
-                endingShape: 'rounded'	
+                endingShape: 'rounded'
             },
         },
         dataLabels: {
@@ -1380,7 +1379,7 @@ $(document).ready(function() {
                 left: 0
             },
         },
-        
+
         series: [{
             name: "Indigo",
             data: [
@@ -1406,7 +1405,7 @@ $(document).ready(function() {
     var chart = new ApexCharts(
         document.querySelector("#apex-basic-scatter"),
         options
-    );    
+    );
     chart.render();
 });
 
@@ -1432,7 +1431,7 @@ $(document).ready(function() {
         }],
         stroke: {
             width: [0, 4]
-        },        
+        },
         // labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         labels: ['01 Jan 2001', '02 Jan 2001', '03 Jan 2001', '04 Jan 2001', '05 Jan 2001', '06 Jan 2001', '07 Jan 2001', '08 Jan 2001', '09 Jan 2001', '10 Jan 2001', '11 Jan 2001', '12 Jan 2001'],
         xaxis: {
@@ -1528,12 +1527,12 @@ $(document).ready(function() {
         function randomSeries() {
             var arr = []
             for(var i = 0; i < 6; i++) {
-                arr.push(Math.floor(Math.random() * 100)) 
+                arr.push(Math.floor(Math.random() * 100))
             }
 
             return arr
         }
-        
+
 
         chart.updateSeries([{
             name: 'Series 1',
@@ -1582,7 +1581,7 @@ $(document).ready(function() {
             y: {
                 formatter: function(val) {
                     return val
-                }   
+                }
             }
         },
         yaxis: {
@@ -1641,7 +1640,7 @@ $(document).ready(function() {
         document.querySelector("#apex-simple-donut"),
         options
     );
-    
+
     chart.render();
 });
 
@@ -1700,12 +1699,12 @@ $(document).ready(function() {
             }
         },
         series: [44, 55, 67, 83],
-        labels: ['Apples', 'Oranges', 'Bananas', 'Berries'],        
+        labels: ['Apples', 'Oranges', 'Bananas', 'Berries'],
     }
     var chart = new ApexCharts(
         document.querySelector("#apex-circle-chart-multiple"),
         options
-    );    
+    );
     chart.render();
 });
 
@@ -1798,7 +1797,7 @@ $(document).ready(function() {
         options
     );
 
-    chart.render();    
+    chart.render();
 });
 
 // stroked gauge
@@ -1846,19 +1845,19 @@ $(document).ready(function() {
         },
         series: [67],
         labels: ['Median Ratio'],
-        
+
     }
 
    var chart = new ApexCharts(
         document.querySelector("#apex-stroked-gauge"),
         options
     );
-    
+
     chart.render();
 
     // window.setInterval(function () {
     //     chart.updateSeries([Math.floor(Math.random() * (100 - 1 + 1)) + 1])
-    // }, 2000) 
+    // }, 2000)
 });
 
 // Simple Bubble

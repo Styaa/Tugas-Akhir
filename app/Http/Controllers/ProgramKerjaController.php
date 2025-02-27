@@ -290,8 +290,8 @@ class ProgramKerjaController extends Controller
 
         // Hitung total pemasukan
         $totalPemasukan = RancanganAnggaranBiaya::where('program_kerjas_id', $id)
-        ->where('kategori', 'pemasukan')
-        ->sum('total');
+            ->where('kategori', 'pemasukan')
+            ->sum('total');
 
         // Hitung total pengeluaran
         $totalPengeluaran = RancanganAnggaranBiaya::where('program_kerjas_id', $id)

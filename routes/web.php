@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisiProgramKerjaController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\RancanganAnggaranDanaController;
@@ -37,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/alur-dana/kemahasiswaan', [DashboardController::class, 'alurDanaKemahasiswaan'])->name('alur-dana.kemahasiswaan');
     Route::get('/alur-dana/jurusan', [DashboardController::class, 'alurDanaJurusan'])->name('alur-dana.jurusan');
 
+    Route::get('/events', [EventController::class, 'getEvents'])->name('events.get');
+
     Route::get('/get-divisions/{programKerjaId}', function ($programKerjaId) {
         $divisions = DivisiProgramKerja::where('program_kerjas_id', $programKerjaId)
             ->with('divisiPelaksana') // Pastikan relasi dimuat
@@ -49,12 +52,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::prefix('rapat')->name('rapat.')->group(function () {
-            Route::get('/', [RapatController::class, 'index'])->name('index');
+            Route::get('/all', [RapatController::class, 'index'])->name('index');
             Route::get('/create', [RapatController::class, 'create'])->name('create');
             Route::post('/izin', [RapatController::class, 'izin'])->name('izin');
             Route::get('/show', [RapatController::class, 'show'])->name('show');
             Route::post('/store', [RapatController::class, 'store'])->name('store');
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
+            Route::get('/kalender', [RapatController::class, 'kalender'])->name('kalender');
         });
 
         Route::resource('divisi', DivisiOrmawa::class);

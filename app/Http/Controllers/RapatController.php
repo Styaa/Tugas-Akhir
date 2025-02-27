@@ -10,10 +10,12 @@ use App\Models\ProgramKerja;
 use App\Models\Rapat;
 use App\Models\RapatPartisipasi;
 use App\Models\User;
+use App\Notifications\RapatDibuatNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Notification;
 
 class RapatController extends Controller
 {
@@ -118,8 +120,18 @@ class RapatController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Rapat berhasil dibuat dan partisipasi dicatat.'], 201);
+            $users = User::whereIn('id', function ($query) use ($rapat) {
+                $query->select('user_id')
+                    ->from('rapat_partisipasis')
+                    ->where('rapat_id', $rapat->id);
+            })->get();
 
+            // Kirim notifikasi ke semua peserta rapat
+            foreach ($users as $user) {
+                Notification::send($user, new RapatDibuatNotification($rapat));
+            }
+
+            return response()->json(['message' => 'Rapat berhasil dibuat dan partisipasi dicatat.'], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Terjadi kesalahan saat menyimpan rapat.', 'error' => $e->getMessage()], 500);
@@ -133,9 +145,10 @@ class RapatController extends Controller
     {
         //
         $rapat = Rapat::with(['peserta.user'])->where('ormawa_id', $kode_ormawa)->findOrFail($request->id_rapat);
+        $daftarIzin = IzinRapat::where('rapat_id', $request->id_rapat);
 
         // Kirim data ke tampilan
-        return view('rapat.show', compact('rapat'));
+        return view('rapat.show', compact('rapat', 'daftarIzin'));
     }
 
     /**
@@ -162,7 +175,8 @@ class RapatController extends Controller
         //
     }
 
-    public function perizinan($kode_ormawa){
+    public function perizinan($kode_ormawa)
+    {
         $izinRapat = IzinRapat::whereHas('rapat', function ($query) use ($kode_ormawa) {
             $query->where('ormawa_id', $kode_ormawa);
         })->with(['user', 'rapat'])->get();
@@ -172,7 +186,8 @@ class RapatController extends Controller
         return view('rapat.perizinan', compact('izinRapat'));
     }
 
-    public function izin($kode_oramwa, Request $request){
+    public function izin($kode_oramwa, Request $request)
+    {
         IzinRapat::create([
             'user_id' => auth()->id(),
             'rapat_id' => $request->id_rapat,
@@ -180,5 +195,10 @@ class RapatController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Izin berhasil diajukan.');
+    }
+
+    public function kalender($kode_oramwa)
+    {
+        return view('rapat.kalender');
     }
 }

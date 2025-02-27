@@ -7,19 +7,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DeadlineReminder extends Notification
+class RapatDibuatNotification extends Notification
 {
     use Queueable;
 
-    private $aktivitas;
+    public $rapat;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($aktivitas)
+    public function __construct($rapat)
     {
-        //
-        $this->aktivitas = $aktivitas;
+        $this->rapat = $rapat;
     }
 
     /**
@@ -38,11 +37,13 @@ class DeadlineReminder extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Pengingat: Tenggat Waktu Aktivitas {$this->aktivitas->nama}")
+            ->subject("Rapat Baru: {$this->rapat->nama}")
             ->greeting("Halo {$notifiable->name},")
-            ->line("Kami ingin mengingatkan bahwa aktivitas **{$this->aktivitas->nama}** memiliki tenggat waktu yang akan datang dalam *{$this->aktivitas->sisa_hari}* hari.")
-            ->line("Silakan tinjau detail aktivitas ini dan pastikan semuanya sudah sesuai rencana.")
-            ->action('Lihat Detail Aktivitas', url('/aktivitas/' . $this->aktivitas->id));
+            ->line("Anda dijadwalkan untuk menghadiri rapat **{$this->rapat->nama}**.")
+            ->line("Tanggal Rapat: " . \Carbon\Carbon::parse($this->rapat->tanggal)->format('d M Y'))
+            ->line("Deskripsi: {$this->rapat->deskripsi}")
+            ->action('Lihat Detail Rapat', url('/rapat/' . $this->rapat->id))
+            ->line("Terima kasih atas perhatian Anda.");
     }
 
     /**
@@ -53,8 +54,11 @@ class DeadlineReminder extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => "Aktivitas '{$this->aktivitas->nama}' akan mencapai tenggat dalam 5 hari.",
-            'url' => url('/aktivitas/' . $this->aktivitas->id),
+            'title' => "Rapat Baru Dibuat",
+            'message' => "Anda dijadwalkan untuk menghadiri rapat '{$this->rapat->nama}'.",
+            'tanggal' => \Carbon\Carbon::parse($this->rapat->tanggal)->format('d M Y'),
+            'deskripsi' => $this->rapat->deskripsi,
+            'url' => url('/rapat/' . $this->rapat->id),
         ];
     }
 }

@@ -97,7 +97,7 @@
                     </a>
                     <ul class="sub-menu {{ Request::segment(2) == 'rapat' ? 'show' : 'collapse' }}" id="menu-rapat">
                         <li>
-                            <a class="ms-link {{ Request::segment(3) == '' ? 'active' : '' }}"
+                            <a class="ms-link {{ Request::segment(3) == 'all' ? 'active' : '' }}"
                                 href="{{route('rapat.index', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Semua Rapat</span>
                             </a>
@@ -116,7 +116,7 @@
                         </li>
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'kalender' ? 'active' : '' }}"
-                                href="">
+                                href="{{route('rapat.kalender', ['kode_ormawa' => $kode_ormawa])}}">
                                 <span>Kalender</span>
                             </a>
                         </li>

@@ -2,8 +2,7 @@
 
 @section('js_head')
     <link rel="stylesheet"  href="{{asset('css/style.css')}}"></link>
-    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.css" crossorigin>
-		<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5-premium-features/44.1.0/ckeditor5-premium-features.css" crossorigin>
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.2.1/ckeditor5.css" crossorigin>
 @endsection
 
 @section('content')
@@ -250,8 +249,7 @@
     <script src="{{ asset('assets/custom/dokumen/proposal.js') }}"></script>
 
     {{-- <script src="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.umd.js" crossorigin></script> --}}
-    <script src="{{asset('assets/plugins/ckeditor/ckeditor.js')}}" crossorigin></script>
-		<script src="https://cdn.ckeditor.com/ckeditor5-premium-features/44.1.0/ckeditor5-premium-features.umd.js" crossorigin></script>
-		<script src="https://cdn.ckbox.io/ckbox/2.6.1/ckbox.js" crossorigin></script>
+    {{-- <script src="{{asset('assets/plugins/ckeditor/ckeditor.js')}}" crossorigin></script> --}}
+	<script src="https://cdn.ckeditor.com/ckeditor5/44.2.1/ckeditor5.umd.js" crossorigin></script>
     <script src="{{asset('js/ckeditor.js')}}"></script>
 @endsection

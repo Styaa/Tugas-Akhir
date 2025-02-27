@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Rapat;
 use App\Models\User;
 use Illuminate\Support\Facades\Schedule;
 use App\Notifications\DeadlineReminder;
+use App\Notifications\PengingatRapatNotification;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -35,3 +37,24 @@ Schedule::call(function () {
     }
 })->everyFiveSeconds();
 
+Schedule::call(function () {
+    $rapatList = Rapat::whereDate('tanggal', '>', now())
+        ->whereDate('tanggal', '<=', now()->addDays(3))
+        ->get();
+
+    foreach ($rapatList as $rapat) {
+        $sisaHari = now()->diffInDays($rapat->tanggal);
+
+        // Dapatkan user yang akan menerima notifikasi
+        $users = DB::table('rapat_partisipasis')
+            ->join('users', 'rapat_partisipasis.user_id', '=', 'users.id')
+            ->where('rapat_partisipasis.rapat_id', $rapat->id)
+            ->select('users.*')
+            ->get();
+
+        // Kirim notifikasi ke semua peserta rapat
+        foreach ($users as $user) {
+            Notification::send($user, new PengingatRapatNotification($rapat, $sisaHari));
+        }
+    }
+})->dailyAt('08:00');

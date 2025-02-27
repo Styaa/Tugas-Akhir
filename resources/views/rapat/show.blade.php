@@ -60,6 +60,7 @@
     <div class="text-center mb-4 mt-4">
         @php
             $izin = $rapat->izin()->where('user_id', auth()->id())->first();
+            $daftarIzin = $rapat->izin()->with('user')->get();
         @endphp
 
         @if(!$izin)
@@ -71,6 +72,12 @@
             <span class="badge bg-warning text-dark">Izin Diajukan - {{ $izin->status }}</span>
             <p class="text-muted mt-2"><strong>Alasan:</strong> {{ $izin->alasan }}</p>
         @endif
+
+        <div class="mt-3">
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#daftarIzinModal">
+                Lihat Izin Rapat
+            </button>
+        </div>
     </div>
 </div>
 

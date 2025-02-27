@@ -39,7 +39,7 @@
                 $(this).addClass('active btn-dark');
 
                 $.ajax({
-                    url: `/${kodeOrmawa}/rapat`, // Panggil route dengan kode ormawa
+                    url: `/${kodeOrmawa}/rapat/all`, // Panggil route dengan kode ormawa
                     type: 'GET',
                     data: { filter: filter }, // Kirim filter ke backend
                     success: function (response) {
