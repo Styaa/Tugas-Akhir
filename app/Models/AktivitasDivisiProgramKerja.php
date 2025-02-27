@@ -24,6 +24,7 @@ class AktivitasDivisiProgramKerja extends Model
         'dependency_id',
         'divisi_pelaksana_id',
         'program_kerjas_id',
+        'nilai'
     ];
 
     public function personInCharge()

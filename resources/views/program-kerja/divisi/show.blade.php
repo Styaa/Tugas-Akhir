@@ -9,7 +9,7 @@
     </div>
     <div class="row g-3">
         {{-- Card Aktivitas --}}
-        <div class="col-xl-9 col-lg-8 col-md-8">
+        <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
             <div class="card mb-4">
                 <div
                     class="card-header py-3 px-0 d-flex flex-column align-items-center text-center justify-content-between">
@@ -19,7 +19,7 @@
                     @if ($activities->isEmpty())
                         <p class="text-center">No activities yet. Start by adding a new activity below.</p>
                     @endif
-                    <table class="table align-middle">
+                    <table id="myProjectTable" class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -28,6 +28,7 @@
                                 <th>Priority</th>
                                 <th>Status</th>
                                 <th>Dependency</th>
+                                <th>Nilai</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -42,11 +43,13 @@
                                             $activityId = $activity->id;
                                         @endphp
                                         <td>
-                                            <input type="text" class="form-control fs-10 update-field"
+                                            <input type="text"
+                                                class="form-control bg-transparent border-0 fs-10 update-field"
                                                 value="{{ $activity->nama }}" name="nama" />
                                         </td>
                                         <td>
-                                            <select class="form-select fs-11 update-field" name="person_in_charge">
+                                            <select class="form-select bg-transparent border-0 fs-11 update-field"
+                                                name="person_in_charge">
                                                 <option value="">Assign User</option>
                                                 @foreach ($anggotaProker as $user)
                                                     <option value="{{ $user->user_id }}"
@@ -56,12 +59,13 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="date" class="form-control update-field"
+                                            <input type="date" class="form-control bg-transparent border-0 update-field"
                                                 value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu : '' }}"
                                                 name="tenggat_waktu" />
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="prioritas">
+                                            <select class="form-select bg-transparent border-0 update-field"
+                                                name="prioritas">
                                                 <option value="rendah"
                                                     {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>Low
                                                 </option>
@@ -77,28 +81,44 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="status">
+                                            <select class="form-select bg-transparent border-0 update-field" name="status"
+                                                data-status="{{ $activity->status }}">
                                                 <option value="belum_mulai"
-                                                    {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>Not
-                                                    Started</option>
+                                                    {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>Not Started
+                                                </option>
                                                 <option value="sedang_berjalan"
                                                     {{ $activity->status == 'sedang_berjalan' ? 'selected' : '' }}>In
                                                     Progress</option>
                                                 <option value="selesai"
-                                                    {{ $activity->status == 'selesai' ? 'selected' : '' }}>
-                                                    Completed
+                                                    {{ $activity->status == 'selesai' ? 'selected' : '' }}>Completed
                                                 </option>
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-select update-field" name="dependency_id">
+                                            <select class="form-select bg-transparent border-0 update-field"
+                                                name="dependency_id">
                                                 <option value="">No Dependency</option>
-                                                @foreach ($activities as $activity)
-                                                    <option value="{{ $activity->id }}"
-                                                        {{ $activity->id == $activity->dependency_id ? 'selected' : '' }}>
-                                                        {{ $activity->nama }}
+                                                @foreach ($activities as $depActivity)
+                                                    <option value="{{ $depActivity->id }}"
+                                                        {{ $depActivity->id == $activity->dependency_id ? 'selected' : '' }}>
+                                                        {{ $depActivity->nama }}
                                                     </option>
                                                 @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select update-field" name="nilai" id="nilai">
+                                                <option value="">Pilih Nilai</option>
+                                                <option value="1" {{ $activity->nilai == '1' ? 'selected' : '' }}>1
+                                                </option>
+                                                <option value="2" {{ $activity->nilai == '2' ? 'selected' : '' }}>2
+                                                </option>
+                                                <option value="3" {{ $activity->nilai == '3' ? 'selected' : '' }}>3
+                                                </option>
+                                                <option value="4" {{ $activity->nilai == '4' ? 'selected' : '' }}>4
+                                                </option>
+                                                <option value="5" {{ $activity->nilai == '5' ? 'selected' : '' }}>5
+                                                </option>
                                             </select>
                                         </td>
                                     </tr>
@@ -115,7 +135,7 @@
         </div>
 
         {{-- Card Anggota Divisi --}}
-        <div class="col-xl-3 col-lg-12 col-md-12 ms-auto">
+        <div class="col-xl-3 col-lg-4 col-md-12">
             <div class="card">
                 <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
                     <h6 class="mb-0 fw-bold ">Anggota Divisi</h6>
@@ -147,8 +167,54 @@
 
     <!-- Jquery Page Js -->
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
+    <script src="{{ asset('assets/bundles/dataTables.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/aktivitas/update-field.js') }}"></script>
+
+    <script>
+        // project data table
+        $(document).ready(function() {
+            // Inisialisasi DataTables dengan Responsive
+            var table = $('#myProjectTable')
+                .addClass('nowrap')
+                .DataTable({
+                    responsive: true,
+                    columnDefs: [{
+                        targets: [-1, -3],
+                        className: 'dt-body-right'
+                    }]
+                });
+
+            // Observer untuk memantau perubahan pada tabel
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    // Cek apakah ada elemen child yang ditambahkan
+                    if (mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === 1 && node.classList.contains('child')) {
+                                // Dapatkan <tr> parent yang tepat
+                                const parentRow = $(node).prev('tr.parent');
+                                const parentDataId = parentRow.attr('data-id');
+
+                                if (parentDataId) {
+                                    // Tambahkan data-id dari parent ke <tr class="child">
+                                    $(node).attr('data-id', parentDataId);
+                                    console.log(
+                                        `data-id ${parentDataId} ditambahkan ke .child`);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Pantau perubahan pada tabel
+            observer.observe(document.querySelector('#myProjectTable tbody'), {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
 
     {{-- <script>
         // const activityId = row.getAttribute('data-id');

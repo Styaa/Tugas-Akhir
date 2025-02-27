@@ -48,9 +48,11 @@ class DivisiProgramKerjaController extends Controller
             ->where('divisi_pelaksana_id', $id)
             ->where('program_kerjas_id', $prokerId)
             ->get();
-
+        // dd($activities);
         foreach ($activities as $activity) {
             $activity->tenggat_waktu = $activity->tenggat_waktu ? Carbon::parse($activity->tenggat_waktu)->format('Y-m-d') : null;
+
+            // dd($activity->nilai);
         }
 
         // dd($activities->first()->tenggat_waktu);

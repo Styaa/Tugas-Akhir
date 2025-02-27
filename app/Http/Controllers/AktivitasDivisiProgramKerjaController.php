@@ -30,6 +30,7 @@ class AktivitasDivisiProgramKerjaController extends Controller
             'dependency_id' => $request->input('dependency'),
             'divisi_pelaksana_id' => $id,
             'program_kerjas_id' => $idProgramKerja,
+            'nilai' => $request->input('nilai')
         ]);
 
         // Kirim notifikasi secara asinkron setelah response dikirim
@@ -48,10 +49,36 @@ class AktivitasDivisiProgramKerjaController extends Controller
         $keys = array_keys($request->all());
         $value = array_values($request->all());
 
-        $activity = AktivitasDivisiProgramKerja::find($aktivitas_id);
+        // Cari aktivitas berdasarkan ID
+        $activity = AktivitasDivisiProgramKerja::findOrFail($aktivitas_id);
 
-        $activity->update($request->all());
+        // Update status
+        if ($request->has('status')) {
+            $newStatus = $request->input('status');
+            $activity->status = $newStatus;
 
-        return response()->json(['success' => true, 'message' => 'Aktivitas berhasil diperbarui.']);
+            // Cek apakah status berubah menjadi 'In Progress'
+            if ($newStatus === 'sedang_berjalan' && !$activity->tanggal_mulai) {
+                $activity->tanggal_mulai = now()->format('Y-m-d');
+            }
+
+            // Cek apakah status berubah menjadi 'Completed'
+            if ($newStatus === 'selesai' && !$activity->tanggal_selesai) {
+                $activity->tanggal_selesai = now()->format('Y-m-d');
+            }
+        }
+
+        // Update field lainnya (jika ada)
+        $activity->update($request->except(['status', 'tanggal_mulai', 'tanggal_selesai']));
+
+        // Simpan perubahan ke database
+        $activity->save();
+
+        // Return response JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Activity status updated successfully.',
+            'data' => $activity
+        ]);
     }
 }
