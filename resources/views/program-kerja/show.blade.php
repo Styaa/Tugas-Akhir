@@ -2,6 +2,10 @@
 
 @section('title', __('Dashboard'))
 
+@section('js_head')
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+@endsection
+
 @section('content')
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -57,13 +61,15 @@
                                 <!-- Total Pemasukan -->
                                 <div class="text-center mx-3">
                                     <h6 class="fw-bold text-muted">Total Pemasukan</h6>
-                                    <p class="fs-5 text-success fw-bold">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</p>
+                                    <p class="fs-5 text-success fw-bold">Rp
+                                        {{ number_format($totalPemasukan, 0, ',', '.') }}</p>
                                 </div>
 
                                 <!-- Total Pengeluaran -->
                                 <div class="text-center mx-3">
                                     <h6 class="fw-bold text-muted">Total Pengeluaran</h6>
-                                    <p class="fs-5 text-danger fw-bold">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+                                    <p class="fs-5 text-danger fw-bold">Rp
+                                        {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
                                 </div>
 
                                 <!-- Selisih Anggaran -->
@@ -201,7 +207,7 @@
                                                             class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
                                                                 class="icofont-file-text fs-5"></i></span>
                                                         <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' =>$kode_ormawa, 'prokerId' => $programKerja->id]) }}"
+                                                            <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id]) }}"
                                                                 class="text-decoration-none">
                                                                 <h6 class="fw-bold mb-0 small-14">Rancangan Anggaran Biaya
                                                                 </h6>
@@ -258,6 +264,14 @@
                         </div>
                     </div>
 
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-center">Dokumen Program Kerja</h5>
+                            <input type="file" class="filepond" name="files[]" multiple data-max-file-size="3MB"
+                                data-max-files="5" />
+                        </div>
+                    </div>
+
                 </div>
             </div><!-- Row End -->
         </div>
@@ -267,5 +281,11 @@
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/program-kerja/detail-program-kerja.js') }}"></script>
+
+    <script>
+        FilePond.registerPlugin( /* plugin jika diperlukan */ );
+        const inputElement = document.querySelector('.filepond');
+        const pond = FilePond.create(inputElement);
+    </script>
 
 @endsection

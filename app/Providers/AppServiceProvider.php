@@ -29,10 +29,10 @@ class AppServiceProvider extends ServiceProvider
                 // Jika user terautentikasi, ambil kode ormawa dari relasi
                 $user = Auth::user();
                 $kode_ormawa = $user->strukturOrmawas()
-                        ->with('divisiOrmawas.ormawa')
-                        ->get()
-                        ->pluck('divisiOrmawas.ormawa.kode')
-                        ->first();
+                    ->with('divisiOrmawas.ormawa')
+                    ->get()
+                    ->pluck('divisiOrmawas.ormawa.kode')
+                    ->first();
 
                 $periode = $user->strukturOrmawas()
                     ->orderBy('periodes_periode', 'desc') // Ambil periode terbaru

@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MemberController extends Controller
 {
@@ -18,8 +19,13 @@ class MemberController extends Controller
     {
         $candidate = User::whereHas('registrations', function ($query) {
             $query->where('ormawas_kode', 'KSMIF')
-                ->where('status', 'waiting'); // Tambahkan kondisi status "waiting"
-        })->get();
+                ->where('status', 'waiting'); // Hanya ambil yang statusnya "waiting"
+        })
+            ->with(['registrations.divisi1', 'registrations.divisi2']) // Ambil data registrasi_ormawas juga
+            ->get();
+
+
+        // dd($candidate);
 
         return view('our-member.candidate-members', compact('candidate'));
     }
@@ -29,6 +35,7 @@ class MemberController extends Controller
         // Validasi input
         $request->validate([
             'user_id' => 'required|exists:users,id',
+            'divisi_selected' => 'required'
         ]);
 
         $userId = $request->input('user_id');
@@ -38,14 +45,6 @@ class MemberController extends Controller
             $users->status = 'aktif';
             $users->save();
         }
-
-        // Ambil ormawa_kode dari user yang sedang login
-        // $user = Auth::user();
-        // $ormawasKode = $user->strukturOrmawas()
-        //     ->with('divisiOrmawas.ormawa')
-        //     ->get()
-        //     ->pluck('divisiOrmawas.ormawa.kode')
-        //     ->first();
 
         // Update status registrasi_ormawas menjadi accepted untuk ormawa_kode yang sesuai
         RegistrasiOrmawas::where('users_id', $request->user_id)
@@ -57,11 +56,15 @@ class MemberController extends Controller
             ->where('ormawas_kode', '!=', $kode_ormawa)
             ->update(['status' => 'rejected']);
 
+        $periode = DB::table('periodes')
+            ->orderBy('periode', 'DESC')
+            ->first();
+
         StrukturOrmawa::create([
-            'divisi_ormawas_id' => 2, //Masih perlu penyesuaian berdasarkan input user
+            'divisi_ormawas_id' => $request->divisi_selected, //Masih perlu penyesuaian berdasarkan input user
             'users_id' => $request->user_id, // ID user yang diterima
-            'periodes_periode' => 2023, //now()->year //Untuk Mendapatkan periode saat ini
-            'jabatan_id' => 7,
+            'periodes_periode' => $periode->periode, //now()->year //Untuk Mendapatkan periode saat ini
+            'jabatan_id' => 13,
         ]);
 
         // Kembalikan respons
@@ -71,41 +74,43 @@ class MemberController extends Controller
         ]);
     }
 
-    public function acceptRequest($registrasiId)
-    {
-        // Dapatkan data registrasi
-        $registrasi = User::find($registrasiId);
+    // public function acceptRequest($registrasiId)
+    // {
+    //     // Dapatkan data registrasi
+    //     $registrasi = User::find($registrasiId);
 
-        if (!$registrasi) {
-            return response()->json(['message' => 'Request not found'], 404);
-        }
+    //     if (!$registrasi) {
+    //         return response()->json(['message' => 'Request not found'], 404);
+    //     }
 
-        // Update status registrasi menjadi accepted
-        $registrasi->update(['status' => 'aktif']);
+    //     // Update status registrasi menjadi accepted
+    //     $registrasi->update(['status' => 'aktif']);
 
-        // Tolak semua permintaan lain dari user tersebut
-        RegistrasiOrmawas::where('users_id', $registrasi->users_id)
-            ->where('id', '!=', $registrasi->id)
-            ->update(['status' => 'rejected']);
-    }
+    //     // Tolak semua permintaan lain dari user tersebut
+    //     RegistrasiOrmawas::where('users_id', $registrasi->users_id)
+    //         ->where('id', '!=', $registrasi->id)
+    //         ->update(['status' => 'rejected']);
+    // }
 
     public function allMembers($kode_ormawa)
     {
         $anggotas = User::whereHas('strukturOrmawas.divisiOrmawas.ormawa', function ($query) use ($kode_ormawa) {
             $query->where('kode', $kode_ormawa);
         })
-        ->with(['strukturOrmawas.divisiOrmawas.ormawa', 'strukturOrmawas.jabatan'])
-        ->get();
+            ->with(['strukturOrmawas.divisiOrmawas.ormawa', 'strukturOrmawas.jabatan'])
+            ->get();
 
-        // dd($anggotas[0]->strukturOrmawas[0]s);
+        // dd($anggotas[0]->strukturOrmawas[0]);
 
         return view('our-member.members', compact('anggotas'));
     }
 
-    public function show($kode_ormawa, Request $request){
+    public function show($kode_ormawa, Request $request)
+    {
+        // dd(Auth::user()->jabatan);
         $id_member = $request->id_member;
 
-        $anggota = User::find($id_member);
+        $anggotaOrmawa = User::find($id_member);
 
         // dd($request);
 
@@ -124,6 +129,13 @@ class MemberController extends Controller
             ];
         });
 
-        return view('our-member.member-profile', compact('anggota', 'aktivitasUsers', 'programKerjaUsers'));
+        $divisiUser = StrukturOrmawa::with(['divisiOrmawas', 'jabatan'])
+            ->where('users_id', $id_member)
+            ->where('periodes_periode', $request->periode)
+            ->first();
+
+        // dd($divisiUser->divisiOrmawas->nama);
+
+        return view('our-member.member-profile', compact('anggotaOrmawa', 'aktivitasUsers', 'programKerjaUsers', 'divisiUser'));
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DivisiOrmawa;
 use Illuminate\Http\Request;
+use Pest\Mutate\Mutators\Arithmetic\DivisionToMultiplication;
 
 class DivisiOrmawaController extends Controller
 {
@@ -60,5 +62,16 @@ class DivisiOrmawaController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getDivisi($ormawa)
+    {
+        // Ambil data divisi berdasarkan ormawa dari database
+        $divisi = DivisiOrmawa::where('ormawas_kode', $ormawa)
+            ->where('nama', '!=', 'Badan Pengurus Harian')->get();
+
+        // dd($divisi);
+
+        return response()->json($divisi);
     }
 }

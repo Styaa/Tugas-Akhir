@@ -33,6 +33,8 @@
                                         <th>Member Name</th>
                                         <th>NRP</th>
                                         <th>Email</th>
+                                        <th>Divisi Pilihan 1</th>
+                                        <th>Divisi Pilihan 2</th>
                                         <th>Jurusan</th>
                                         <th>Id Line</th>
                                         <th>Actions</th>
@@ -55,21 +57,32 @@
                                             <td>
                                                 {{ $user->email }}
                                             </td>
+                                            <td>{{ $user->registrations[0]->divisi1 ? $user->registrations[0]->divisi1->nama : 'Tidak ada' }}
+                                            </td>
+                                            <td>{{ $user->registrations[0]->divisi2 ? $user->registrations[0]->divisi2->nama : 'Tidak ada' }}
+                                            </td>
                                             <td>
                                                 {{ $user->jurusan }}
                                             </td>
                                             <td>
                                                 {{ $user->id_line }}
                                             </td>
+
                                             <td>
                                                 <div class="btn-group" role="group" aria-label="Basic outlined example">
                                                     <button type="button" class="btn btn-outline-secondary accept-button"
                                                         data-user-id="{{ $user->id }}"
-                                                        data-user-name="{{ $user->name }}"><i
+                                                        data-user-name="{{ $user->name }}"
+                                                        data-divisi1-id="{{ $user->registrations[0]->divisi1->id }}"
+                                                        data-divisi2-id="{{ $user->registrations[0]->divisi2 ? $user->registrations[0]->divisi2->id : '' }}"
+                                                        data-divisi1-name="{{ $user->registrations[0]->divisi1->nama }}"
+                                                        data-divisi2-name="{{ $user->registrations[0]->divisi2 ? $user->registrations[0]->divisi2->nama : '' }}"><i
                                                             class="icofont-check-circled text-success"></i></button>
                                                     <button type="button" class="btn btn-outline-secondary reject-button"
                                                         data-user-id="{{ $user->id }}" data-bs-toggle="modal"
-                                                        data-user-name="{{ $user->name }}"><i
+                                                        data-user-name="{{ $user->name }}"
+                                                        data-divisi1="{{ $user->registrations[0]->divisi1->id }}"
+                                                        data-divisi2="{{ $user->registrations[0]->divisi2 ? $user->registrations[0]->divisi2->id : '' }}"><i
                                                             class="icofont-close-circled text-danger"></i></button>
                                                 </div>
                                             </td>

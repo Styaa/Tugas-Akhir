@@ -143,13 +143,13 @@ class ProgramKerjaController extends Controller
     {
         $this->validateRequest($request);
 
-        $this->storeProker($request);
+        // $this->storeProker($request);
         $this->storeDivisi($request);
 
         // Login user setelah registrasi
         // auth()->login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Program kerja berhasil ditambahkan.'); // Ganti dengan route yang sesuai
+        return response()->json(['success', 'Program kerja berhasil ditambahkan.']); // Ganti dengan route yang sesuai
     }
 
     public function edit(Request $request)

@@ -1043,32 +1043,35 @@ $date = \Carbon\Carbon::now();
 
 <!-- Modal Izin Rapat-->
 @if (isset($rapat))
-<div class="modal fade" id="izinrapat" tabindex="-1" aria-labelledby="izinRapatModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="izinRapatModalLabel">Form Izin Rapat</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+    <div class="modal fade" id="izinrapat" tabindex="-1" aria-labelledby="izinRapatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="izinRapatModalLabel">Form Izin Rapat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-            <!-- Form Izin -->
-            <form action="{{ route('rapat.izin', ['kode_ormawa' => $rapat->ormawa_id, 'id_rapat' => $rapat->id]) }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="alasan_izin" class="form-label">Alasan Izin</label>
-                        <textarea class="form-control" id="alasan_izin" name="alasan_izin" rows="3" placeholder="Tuliskan alasan izin Anda..." required></textarea>
+                <!-- Form Izin -->
+                <form
+                    action="{{ route('rapat.izin', ['kode_ormawa' => $rapat->ormawa_id, 'id_rapat' => $rapat->id]) }}"
+                    method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="alasan_izin" class="form-label">Alasan Izin</label>
+                            <textarea class="form-control" id="alasan_izin" name="alasan_izin" rows="3"
+                                placeholder="Tuliskan alasan izin Anda..." required></textarea>
+                        </div>
                     </div>
-                </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Kirim izin</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Kirim izin</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 @endif
 
 <!-- Modal Daftar Izin -->
@@ -1081,11 +1084,12 @@ $date = \Carbon\Carbon::now();
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if($daftarIzin->isEmpty())
+                    @if ($daftarIzin->isEmpty())
                         <p class="text-center">Belum ada peserta yang mengajukan izin.</p>
                     @else
                         <div class="card-body">
-                            <table id="myProjectTable" class="table table-hover align-middle mb-0" style="width:100%">
+                            <table id="myProjectTable" class="table table-hover align-middle mb-0"
+                                style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>Id Izin</th>
@@ -1100,7 +1104,8 @@ $date = \Carbon\Carbon::now();
                                     @foreach ($daftarIzin as $izin)
                                         <tr>
                                             <td>
-                                                <a href="" class="fw-bold text-secondary">#{{ $izin->id }}</a>
+                                                <a href=""
+                                                    class="fw-bold text-secondary">#{{ $izin->id }}</a>
                                             </td>
                                             <td>
                                                 <img class="avatar rounded-circle"
@@ -1108,7 +1113,8 @@ $date = \Carbon\Carbon::now();
                                                 <span class="fw-bold ms-1">{{ $izin->user->name }}</span>
                                             </td>
                                             <td>
-                                                <a href="{{route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id])}}" class="underline">{{ $izin->rapat->nama }}</a>
+                                                <a href="{{ route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id]) }}"
+                                                    class="underline">{{ $izin->rapat->nama }}</a>
                                             </td>
                                             <td>
                                                 {{ $izin->rapat->tipe_penyelenggara }}
@@ -1117,7 +1123,8 @@ $date = \Carbon\Carbon::now();
                                                 {{ $izin->alasan }}
                                             </td>
                                             <td>
-                                                <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                                <div class="btn-group" role="group"
+                                                    aria-label="Basic outlined example">
                                                     {{-- <button type="button" class="btn btn-outline-secondary accept-button"
                                                         data-user-id="{{ $user->id }}"
                                                         data-user-name="{{ $user->name }}"><i
@@ -1126,11 +1133,12 @@ $date = \Carbon\Carbon::now();
                                                         data-user-id="{{ $user->id }}" data-bs-toggle="modal"
                                                         data-user-name="{{ $user->name }}"><i
                                                             class="icofont-close-circled text-danger"></i></button> --}}
-                                                    <button type="button" class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="1"
-                                                        data-user-name="Satya"><i
+                                                    <button type="button"
+                                                        class="btn btn-outline-secondary accept-button"
+                                                        data-user-id="1" data-user-name="Satya"><i
                                                             class="icofont-check-circled text-success"></i></button>
-                                                    <button type="button" class="btn btn-outline-secondary reject-button"
+                                                    <button type="button"
+                                                        class="btn btn-outline-secondary reject-button"
                                                         data-user-id="1" data-bs-toggle="modal"
                                                         data-user-name="Satya"><i
                                                             class="icofont-close-circled text-danger"></i></button>
@@ -2400,6 +2408,16 @@ $date = \Carbon\Carbon::now();
             <div class="modal-body">
                 <p class="fs-5 text-center">Are you sure you want to accept <strong id="approveUserName"></strong>?
                 </p>
+
+                <!-- Dropdown Pilihan Divisi (Hanya Muncul Jika Ada 2 Divisi) -->
+                <div id="divisiSelection" class="text-center d-none">
+                    <label class="form-label fw-bold">Select Division:</label>
+                    <select id="approveUserDivisi" class="form-select">
+                    </select>
+                </div>
+
+                <!-- Konfirmasi Divisi Jika Hanya 1 -->
+                <p id="singleDivisiConfirmation" class="fs-5 text-center fw-bold d-none"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -2667,53 +2685,60 @@ $date = \Carbon\Carbon::now();
 
 
 <!-- Edit Employee Personal Info-->
-<div class="modal fade" id="edit1" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title  fw-bold" id="edit1Label"> Personal Informations</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="deadline-form">
-                    <form>
-                        <div class="row g-3 mb-3">
-                            <div class="col">
-                                <label class="form-label">Nationality</label>
-                                <input type="text" class="form-control" value="Indian">
-                            </div>
-                            <div class="col">
-                                <label class="form-label">Religion</label>
-                                <input type="text" class="form-control" value="Hindu">
-                            </div>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col">
-                                <label class="form-label">Marital Status</label>
-                                <input type="text" class="form-control" value="Married">
-                            </div>
-                            <div class="col">
-                                <label for="exampleFormControlInput2770" class="form-label">Passport No</label>
-                                <input type="text" class="form-control" id="exampleFormControlInput2770"
-                                    value="5468953210">
-                            </div>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-6">
-                                <label class="form-label">Emergency Contact</label>
-                                <input type="text" class="form-control" value="7468953210">
-                            </div>
-                        </div>
-                    </form>
+@if (isset($anggotaOrmawa))
+    <div class="modal fade" id="edit1" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title  fw-bold" id="edit1Label"> Personal Informations</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-                <button type="button" class="btn btn-primary">Create</button>
+                <div class="modal-body">
+                    <div class="deadline-form">
+                        <form>
+                            <div class="row g-3 mb-3">
+                                <div class="col">
+                                    <label class="form-label">Tanggal Lahir</label>
+                                    <input type="text" class="form-control" value="---">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label">ID Line</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ $anggotaOrmawa->id_line }}">
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col">
+                                    <label class="form-label">Instagram</label>
+                                    <input type="text" class="form-control" value="---">
+                                </div>
+                                <div class="col">
+                                    <label for="exampleFormControlInput2770" class="form-label">WhatsApp</label>
+                                    <input type="text" class="form-control" id="exampleFormControlInput2770"
+                                        value="{{ $anggotaOrmawa->no_hp }}">
+                                </div>
+                            </div>
+                            @if (Auth::user()->jabatanOrmawa->id !== 13 && isset($divisiUser))
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">Jabatan</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ $divisiUser->jabatan->nama }}">
+                                    </div>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+                    <button type="button" class="btn btn-primary">Create</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+@endif
 
 <!-- Edit Bank Personal Info-->
 <div class="modal fade" id="edit2" tabindex="-1" aria-hidden="true">

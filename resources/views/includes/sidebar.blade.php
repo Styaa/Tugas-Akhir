@@ -12,7 +12,7 @@
                             d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
                     </svg>
                 </span>
-                <span class="logo-text">{{ Request::segment(1) }}</span>
+                <span class="logo-text">{{ $kode_ormawa }}</span>
             </a>
 
             <!-- Menu -->
@@ -32,7 +32,8 @@
                         <i class="icofont-tasks-alt"></i> <span>Program Kerja</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
-                    <ul class="sub-menu {{ Request::segment(2) == 'program-kerja' ? 'show' : 'collapse' }}" id="program-Components">
+                    <ul class="sub-menu {{ Request::segment(2) == 'program-kerja' ? 'show' : 'collapse' }}"
+                        id="program-Components">
                         <li>
                             <a class="ms-link {{ Request::segment(2) == 'program-kerja' && Request::segment(3) == null ? 'active' : '' }}"
                                 href="{{ route('program-kerja.index', ['kode_ormawa' => $kode_ormawa]) }}">
@@ -49,19 +50,22 @@
                         <i class="icofont-users-alt-5"></i> <span>Our Members</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
-                    <ul class="sub-menu {{ Request::segment(2) == 'our-member' ? 'show' : 'collapse' }}" id="member-Components">
+                    <ul class="sub-menu {{ Request::segment(2) == 'our-member' ? 'show' : 'collapse' }}"
+                        id="member-Components">
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'members' ? 'active' : '' }}"
                                 href="{{ route('our-member.members', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>All Members</span>
                             </a>
                         </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
-                                href="{{ route('our-member.candidate', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>Candidate Members</span>
-                            </a>
-                        </li>
+                        @if (Auth::user()->jabatanOrmawa->id !== 13)
+                            <li>
+                                <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
+                                    href="{{ route('our-member.candidate', ['kode_ormawa' => $kode_ormawa]) }}">
+                                    <span>Candidate Members</span>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
 
@@ -90,33 +94,34 @@
 
                 <!-- Rapat -->
                 <li class="collapsed">
-                    <a class="m-link {{ Request::segment(2) == 'rapat' ? 'active' : '' }}"
-                        data-bs-toggle="collapse" data-bs-target="#menu-rapat" href="#">
+                    <a class="m-link {{ Request::segment(2) == 'rapat' ? 'active' : '' }}" data-bs-toggle="collapse"
+                        data-bs-target="#menu-rapat" href="#">
                         <i class="icofont-calendar"></i> <span>Rapat</span>
                         <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span>
                     </a>
                     <ul class="sub-menu {{ Request::segment(2) == 'rapat' ? 'show' : 'collapse' }}" id="menu-rapat">
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'all' ? 'active' : '' }}"
-                                href="{{route('rapat.index', ['kode_ormawa' => $kode_ormawa]) }}">
+                                href="{{ route('rapat.index', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Semua Rapat</span>
                             </a>
                         </li>
+                        @if (Auth::user()->jabatanOrmawa->id !== 13)
+                            <li>
+                                <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
+                                    href="{{ route('rapat.perizinan', ['kode_ormawa' => $kode_ormawa]) }}">
+                                    <span>Perizinan</span>
+                                </a>
+                            </li>
+                        @endif
                         <li>
-                            <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
-                                href="{{ route('rapat.perizinan', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>Perizinan</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}"
-                                href="">
+                            <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}" href="">
                                 <span>Notulen Rapat</span>
                             </a>
                         </li>
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'kalender' ? 'active' : '' }}"
-                                href="{{route('rapat.kalender', ['kode_ormawa' => $kode_ormawa])}}">
+                                href="{{ route('rapat.kalender', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Kalender</span>
                             </a>
                         </li>

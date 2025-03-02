@@ -4,6 +4,7 @@ use App\Http\Controllers\AktivitasDivisiProgramKerjaController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DivisiOrmawaController;
 use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MemberController;
@@ -24,6 +25,8 @@ Route::prefix('auth')->group(function () {
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('post-login');
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/get-divisi/{ormawa}', [DivisiOrmawaController::class, 'getDivisi'])->name('get-divisi');
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register'])->name('post-regist');

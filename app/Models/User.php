@@ -32,15 +32,28 @@ class User extends Authenticatable
         return $this->hasMany(RegistrasiOrmawas::class, 'users_id');
     }
 
+    public function jabatanOrmawa()
+    {
+        // return $this->hasMany(StrukturOrmawa::class, 'users_id');
+        return $this->hasOneThrough(
+            Jabatan::class,
+            StrukturOrmawa::class,
+            'users_id',
+            'id',
+            'id',
+            'jabatan_id'
+        );
+    }
+
     public function strukturOrmawas()
     {
         return $this->hasMany(StrukturOrmawa::class, 'users_id');
     }
 
     public function izinRapat()
-{
-    return $this->hasMany(IzinRapat::class, 'user_id');
-}
+    {
+        return $this->hasMany(IzinRapat::class, 'user_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

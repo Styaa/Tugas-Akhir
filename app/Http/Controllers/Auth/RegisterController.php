@@ -24,6 +24,7 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
+            'password_confirmation' => 'required|same:password',
             'nrp' => 'required|string|max:20',
             'jurusan' => 'required|string|max:100',
             'id_line' => 'required|string|max:50',
@@ -34,6 +35,10 @@ class RegisterController extends Controller
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        if ($request->password !== $request->password_confirmation) {
+            return back()->withErrors(['password' => 'Password dan Konfirmasi Password harus sama.'])->withInput();
         }
     }
 
@@ -55,6 +60,8 @@ class RegisterController extends Controller
             RegistrasiOrmawas::create([
                 'users_id' => $user->id,
                 'ormawas_kode' => $request->pilihan_ormawa_1,
+                'pilihan_divisi_1' => $request['divisi_divisi-container1_1'],
+                'pilihan_divisi_2' => $request['divisi_divisi-container1_2'],
                 'status' => 'waiting',
             ]);
         }
@@ -63,6 +70,8 @@ class RegisterController extends Controller
             RegistrasiOrmawas::create([
                 'users_id' => $user->id,
                 'ormawas_kode' => $request->pilihan_ormawa_2,
+                'pilihan_divisi_1' => $request['divisi_divisi-container2_1'],
+                'pilihan_divisi_2' => $request['divisi_divisi-container2_2'],
                 'status' => 'waiting',
             ]);
         }
