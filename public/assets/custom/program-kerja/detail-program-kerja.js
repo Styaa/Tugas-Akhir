@@ -43,50 +43,50 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Handle user selection
-    document.querySelectorAll('.pilih-anggota').forEach(function (item) {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const userButton = document.getElementById('dropdownUserButton');
-            userButton.textContent = this.dataset.name;
+// document.addEventListener('DOMContentLoaded', function () {
+//     // Handle user selection
+//     document.querySelectorAll('.pilih-anggota').forEach(function (item) {
+//         item.addEventListener('click', function (e) {
+//             e.preventDefault();
+//             const userButton = document.getElementById('dropdownUserButton');
+//             userButton.textContent = this.dataset.name;
 
-            document.querySelector('input[name="anggota"]').value = this.dataset.id;
+//             document.querySelector('input[name="anggota"]').value = this.dataset.id;
 
-            document.querySelectorAll('.pilih-anggota').forEach(function (el) {
-                el.classList.remove('active');
-            });
-            this.classList.add('active');
-        });
-    });
+//             document.querySelectorAll('.pilih-anggota').forEach(function (el) {
+//                 el.classList.remove('active');
+//             });
+//             this.classList.add('active');
+//         });
+//     });
 
-    document.querySelectorAll('.pilih-divisi').forEach(function (item) {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const divisiButton = document.getElementById('dropdownDivisiButton');
-            divisiButton.textContent = this.dataset.name;
+//     document.querySelectorAll('.pilih-divisi').forEach(function (item) {
+//         item.addEventListener('click', function (e) {
+//             e.preventDefault();
+//             const divisiButton = document.getElementById('dropdownDivisiButton');
+//             divisiButton.textContent = this.dataset.name;
 
-            document.querySelector('input[name="divisi"]').value = this.dataset.id;
+//             document.querySelector('input[name="divisi"]').value = this.dataset.id;
 
-            document.querySelectorAll('.pilih-divisi').forEach(function (el) {
-                el.classList.remove('active');
-            });
-            this.classList.add('active');
-        });
-    });
+//             document.querySelectorAll('.pilih-divisi').forEach(function (el) {
+//                 el.classList.remove('active');
+//             });
+//             this.classList.add('active');
+//         });
+//     });
 
-    document.querySelectorAll('.pilih-jabatan').forEach(function (item) {
-        item.addEventListener('click', function (e) {
-            e.preventDefault();
-            const jabatanButton = document.getElementById('dropdownJabatanButton');
-            jabatanButton.textContent = this.dataset.name;
+//     document.querySelectorAll('.pilih-jabatan').forEach(function (item) {
+//         item.addEventListener('click', function (e) {
+//             e.preventDefault();
+//             const jabatanButton = document.getElementById('dropdownJabatanButton');
+//             jabatanButton.textContent = this.dataset.name;
 
-            document.querySelector('input[name="jabatan"]').value = this.dataset.id;
+//             document.querySelector('input[name="jabatan"]').value = this.dataset.id;
 
-            document.querySelectorAll('.pilih-jabatan').forEach(function (el) {
-                el.classList.remove('active');
-            });
-            this.classList.add('active');
-        });
-    });
-});
+//             document.querySelectorAll('.pilih-jabatan').forEach(function (el) {
+//                 el.classList.remove('active');
+//             });
+//             this.classList.add('active');
+//         });
+//     });
+// });

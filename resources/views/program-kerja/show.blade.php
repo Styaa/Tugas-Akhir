@@ -3,7 +3,12 @@
 @section('title', __('Dashboard'))
 
 @section('js_head')
-    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <link href="{{ asset('assets/filepond/filepond.css') }}" rel="stylesheet" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 @endsection
 
 @section('content')
@@ -34,11 +39,13 @@
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         {{ isset($ketua[0]) ? $ketua[0]->name : 'Pilih Ketua Program Kerja' }}
                                     </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <ul class="dropdown-menu disabled" aria-labelledby="dropdownMenuLink">
                                         @foreach ($anggota as $nama)
-                                            <li><a class="dropdown-item pilih-ketua {{ isset($ketua[0]) && $ketua[0]->name === $nama->name ? 'active' : '' }}"
+                                            <li class="{{ Auth::user()->jabatanOrmawa->id == 13 ? 'disabled' : '' }}">
+                                                <a class="dropdown-item pilih-ketua {{ isset($ketua[0]) && $ketua[0]->name === $nama->name ? 'active' : '' }}"
                                                     data-id="{{ $nama->id }}"
-                                                    data-name="{{ $nama->name }}">{{ $nama->name }}</a></li>
+                                                    data-name="{{ $nama->name }}">{{ $nama->name }}</a>
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </div>
@@ -54,34 +61,36 @@
                     </div>
                     {{-- Card Info End --}}
 
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="fw-bold text-center">Anggaran Program Kerja</h5>
-                            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                <!-- Total Pemasukan -->
-                                <div class="text-center mx-3">
-                                    <h6 class="fw-bold text-muted">Total Pemasukan</h6>
-                                    <p class="fs-5 text-success fw-bold">Rp
-                                        {{ number_format($totalPemasukan, 0, ',', '.') }}</p>
-                                </div>
+                    @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-center">Anggaran Program Kerja</h5>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                    <!-- Total Pemasukan -->
+                                    <div class="text-center mx-3">
+                                        <h6 class="fw-bold text-muted">Total Pemasukan</h6>
+                                        <p class="fs-5 text-success fw-bold">Rp
+                                            {{ number_format($totalPemasukan, 0, ',', '.') }}</p>
+                                    </div>
 
-                                <!-- Total Pengeluaran -->
-                                <div class="text-center mx-3">
-                                    <h6 class="fw-bold text-muted">Total Pengeluaran</h6>
-                                    <p class="fs-5 text-danger fw-bold">Rp
-                                        {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
-                                </div>
+                                    <!-- Total Pengeluaran -->
+                                    <div class="text-center mx-3">
+                                        <h6 class="fw-bold text-muted">Total Pengeluaran</h6>
+                                        <p class="fs-5 text-danger fw-bold">Rp
+                                            {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+                                    </div>
 
-                                <!-- Selisih Anggaran -->
-                                <div class="text-center mx-3">
-                                    <h6 class="fw-bold text-muted">Selisih Anggaran</h6>
-                                    <p class="fs-5 fw-bold {{ $selisih >= 0 ? 'text-success' : 'text-danger' }}">
-                                        Rp {{ number_format($selisih, 0, ',', '.') }}
-                                    </p>
+                                    <!-- Selisih Anggaran -->
+                                    <div class="text-center mx-3">
+                                        <h6 class="fw-bold text-muted">Selisih Anggaran</h6>
+                                        <p class="fs-5 fw-bold {{ $selisih >= 0 ? 'text-success' : 'text-danger' }}">
+                                            Rp {{ number_format($selisih, 0, ',', '.') }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="row clearfix g-3 mt-4">
                         <div class="col-xl-8 col-lg-12 col-md-12">
@@ -183,82 +192,88 @@
                                                         </div>
                                                     </div>
                                                 @endforeach
-                                                <button type="button" class="btn btn-dark w-sm-100 mt-3"
-                                                    data-bs-toggle="modal" data-bs-target="#addmember">
-                                                    <i class="icofont-plus-circle me-2 fs-6"></i>Tambah Anggota
-                                                </button>
+                                                @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                                                    <button type="button" class="btn btn-dark w-sm-100 mt-3"
+                                                        data-bs-toggle="modal" data-bs-target="#addmember">
+                                                        <i class="icofont-plus-circle me-2 fs-6"></i>Tambah Anggota
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {{-- Section Dokumen Wajib Program Kerja --}}
-                                <div class="col-md-12 col-lg-12 col-xl-12">
-                                    <div class="card">
-                                        <div
-                                            class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
-                                            <h6 class="mb-0 fw-bold ">Dokumen Wajib Program Kerja</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="flex-grow-1">
-                                                <!-- Rancangan Anggaran Biaya -->
-                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                                    <div class="d-flex align-items-center flex-fill">
-                                                        <span
-                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                                                class="icofont-file-text fs-5"></i></span>
-                                                        <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id]) }}"
-                                                                class="text-decoration-none">
-                                                                <h6 class="fw-bold mb-0 small-14">Rancangan Anggaran Biaya
-                                                                </h6>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <div class="time-block text-truncate">
-                                                        Update status
-                                                    </div>
-                                                </div>
 
-                                                <!-- Proposal -->
-                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                                    <div class="d-flex align-items-center flex-fill">
-                                                        <span
-                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                                                class="icofont-file-text fs-5"></i></span>
-                                                        <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
-                                                                class="text-decoration-none">
-                                                                <h6 class="fw-bold mb-0 small-14">Proposal</h6>
-                                                            </a>
+                                @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                                    {{-- Section Dokumen Wajib Program Kerja --}}
+                                    <div class="col-md-12 col-lg-12 col-xl-12">
+                                        <div class="card">
+                                            <div
+                                                class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom-0">
+                                                <h6 class="mb-0 fw-bold ">Dokumen Wajib Program Kerja</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="flex-grow-1">
+                                                    <!-- Rancangan Anggaran Biaya -->
+                                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                        <div class="d-flex align-items-center flex-fill">
+                                                            <span
+                                                                class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                    class="icofont-file-text fs-5"></i></span>
+                                                            <div class="d-flex flex-column ps-3">
+                                                                <a href="{{ route('program-kerja.rancanganAnggaranDana.create', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id]) }}"
+                                                                    class="text-decoration-none">
+                                                                    <h6 class="fw-bold mb-0 small-14">Rancangan Anggaran
+                                                                        Biaya
+                                                                    </h6>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="time-block text-truncate">
+                                                            Update status
                                                         </div>
                                                     </div>
-                                                    <div class="time-block text-truncate">
-                                                        Update status
-                                                    </div>
-                                                </div>
 
-                                                <!-- Laporan Pertanggungjawaban -->
-                                                <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
-                                                    <div class="d-flex align-items-center flex-fill">
-                                                        <span
-                                                            class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
-                                                                class="icofont-file-text fs-5"></i></span>
-                                                        <div class="d-flex flex-column ps-3">
-                                                            <a href="{{ route('program-kerja.lpj.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
-                                                                class="text-decoration-none">
-                                                                <h6 class="fw-bold mb-0 small-14">Laporan
-                                                                    Pertanggungjawaban</h6>
-                                                            </a>
+                                                    <!-- Proposal -->
+                                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                        <div class="d-flex align-items-center flex-fill">
+                                                            <span
+                                                                class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                    class="icofont-file-text fs-5"></i></span>
+                                                            <div class="d-flex flex-column ps-3">
+                                                                <a href="{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                    class="text-decoration-none">
+                                                                    <h6 class="fw-bold mb-0 small-14">Proposal</h6>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="time-block text-truncate">
+                                                            Update status
                                                         </div>
                                                     </div>
-                                                    <div class="time-block text-truncate">
-                                                        Update status
+
+                                                    <!-- Laporan Pertanggungjawaban -->
+                                                    <div class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                        <div class="d-flex align-items-center flex-fill">
+                                                            <span
+                                                                class="avatar lg bg-white rounded-circle text-center d-flex align-items-center justify-content-center"><i
+                                                                    class="icofont-file-text fs-5"></i></span>
+                                                            <div class="d-flex flex-column ps-3">
+                                                                <a href="{{ route('program-kerja.lpj.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                    class="text-decoration-none">
+                                                                    <h6 class="fw-bold mb-0 small-14">Laporan
+                                                                        Pertanggungjawaban</h6>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="time-block text-truncate">
+                                                            Update status
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
 
                             </div>
                         </div>
@@ -281,11 +296,40 @@
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/program-kerja/detail-program-kerja.js') }}"></script>
+    <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         FilePond.registerPlugin( /* plugin jika diperlukan */ );
         const inputElement = document.querySelector('.filepond');
         const pond = FilePond.create(inputElement);
+
+        $('#multiple-select-field').select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            closeOnSelect: false,
+            dropdownParent: $("#addmember"),
+        });
+
+        $('#single-select-field1').select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            dropdownParent: $("#addmember"),
+        });
+
+        $('#single-select-field2').select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            dropdownParent: $("#addmember"),
+        });
     </script>
+
+
 
 @endsection

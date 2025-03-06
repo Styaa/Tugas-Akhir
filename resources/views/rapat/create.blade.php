@@ -101,10 +101,21 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Location <span class="text-danger">*</span></label>
+                            <label class="form-label">Meeting Type <span class="text-danger">*</span></label>
+                            <select class="form-control" id="sessionFormat" name="sessionFormat" required>
+                                <option value="" selected disabled>Select meeting type</option>
+                                <option value="offline">Offline</option>
+                                <option value="online">Online</option>
+                            </select>
+                            <div class="invalid-feedback">Meeting type is required.</div>
+                        </div>
+
+                        <div class="mb-3" id="locationField" style="display: none;">
+                            <label class="form-label" id="locationLabel">Location <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="meetingLocation" name="meetingLocation"
-                                placeholder="Enter meeting location" required>
-                            <div class="invalid-feedback">Location is required.</div>
+                                placeholder="Enter meeting location">
+                            <div class="invalid-feedback">Location or link is required.</div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
@@ -292,6 +303,25 @@
             }
         }
 
+        const sessionFormat = document.getElementById('sessionFormat');
+        const locationField = document.getElementById('locationField');
+        const locationLabel = document.getElementById('locationLabel');
+        const sessionLocation = document.getElementById('meetingLocation');
+
+        sessionFormat.addEventListener('change', function() {
+            if (this.value === 'offline') {
+                locationLabel.textContent = 'Location *';
+                sessionLocation.placeholder = 'Enter location';
+                locationField.style.display = 'block';
+            } else if (this.value === 'online') {
+                locationLabel.textContent = 'Session Link *';
+                sessionLocation.placeholder = 'Enter session link (Zoom, Google Meet, etc.)';
+                locationField.style.display = 'block';
+            } else {
+                locationField.style.display = 'none';
+            }
+        });
+
         // Memuat divisi dari program kerja menggunakan AJAX
         function loadDivisions(programId) {
             let divisiContainer = document.getElementById('divisi-container');
@@ -478,7 +508,7 @@
                 success: function(response) {
                     alert(response.message);
                     window.location.href =
-                    `/${kodeOrmawa}/rapat/all`; // Redirect ke halaman daftar rapat
+                        `/${kodeOrmawa}/rapat/all`; // Redirect ke halaman daftar rapat
                 },
                 error: function(xhr) {
                     alert("Error: " + xhr.responseJSON.message);

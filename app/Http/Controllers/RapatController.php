@@ -83,6 +83,7 @@ class RapatController extends Controller
             'meetingTopic' => 'nullable|string',
             'meetingDate' => 'required|date',
             'meetingTime' => 'required',
+            'sessionFormat' => 'required',
             'meetingLocation' => 'required|string|max:255',
             'ormawa_id' => 'nullable|string|max:255',
             'divisi_ormawas_id' => 'nullable|integer',
@@ -101,6 +102,7 @@ class RapatController extends Controller
                 'topik' => $validated['meetingTopic'],
                 'tanggal' => $validated['meetingDate'],
                 'waktu' => $validated['meetingTime'],
+                'tipe' => $validated['sessionFormat'],
                 'tempat' => $validated['meetingLocation'],
                 'ormawa_id' => $kode_oramwa,
                 'divisi_ormawas_id' => $validated['divisi_ormawas_id'] ?? null,
@@ -200,5 +202,10 @@ class RapatController extends Controller
     public function kalender($kode_oramwa)
     {
         return view('rapat.kalender');
+    }
+
+    public function tulisNotulensi($id_rapat)
+    {
+        return view('rapat.notulen');
     }
 }

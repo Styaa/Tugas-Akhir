@@ -22,10 +22,10 @@ $(document).on('click', '.accept-button', function () {
         divisiSelectionContainer.classList.remove("d-none");
         divisiSelect.innerHTML += `<option value="${divisi1_id}">${divisi1_name}</option>`;
         divisiSelect.innerHTML += `<option value="${divisi2_id}">${divisi2_name}</option>`;
-    } else if (divisi1) {
+    } else if (divisi1_id) {
         // Jika hanya ada 1 divisi, tampilkan konfirmasi langsung
         singleDivisiConfirmation.classList.remove("d-none");
-        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1}`;
+        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_id}`;
     }
 
     // Update modal content

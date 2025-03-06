@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [RapatController::class, 'store'])->name('store');
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
             Route::get('/kalender', [RapatController::class, 'kalender'])->name('kalender');
+            Route::get('/tulis/notulensi', [RapatController::class, 'tulisNotulensi'])->name('tulis_notulensi');
         });
 
         Route::resource('divisi', DivisiOrmawa::class);

@@ -16,6 +16,7 @@ class Rapat extends Model
         'topik',
         'tanggal',
         'waktu',
+        'tipe',
         'tempat',
         'status',
         'ormawa_id',
@@ -40,9 +41,9 @@ class Rapat extends Model
     }
 
     public function getHariAttribute()
-{
-    return Carbon::parse($this->tanggal)->translatedFormat('l');
-}
+    {
+        return Carbon::parse($this->tanggal)->translatedFormat('l');
+    }
 
     // Relasi ke Ormawa
     public function ormawa()

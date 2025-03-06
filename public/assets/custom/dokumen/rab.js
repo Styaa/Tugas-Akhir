@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Fungsi untuk menghitung total pemasukan secara otomatis
     document.addEventListener('input', function (e) {
         if (e.target.closest('#pemasukan-body')) {
+            console.log(document.querySelectorAll('#pemasukan-body .total').value);
             updateTotalPemasukan();
         }
     });

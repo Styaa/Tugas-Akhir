@@ -143,7 +143,7 @@ class ProgramKerjaController extends Controller
     {
         $this->validateRequest($request);
 
-        // $this->storeProker($request);
+        $this->storeProker($request);
         $this->storeDivisi($request);
 
         // Login user setelah registrasi
@@ -237,11 +237,13 @@ class ProgramKerjaController extends Controller
         $this->updateDivisiProgramKerja($request, $id);
 
         // Redirect atau Response
-        return redirect()->route('dashboard')->with('success', 'Program kerja berhasil diperbaharui.');
+        return response()->json(['success', 'Program kerja berhasil diperbaharui.']);
+        // return redirect()->route('dashboard')->with('success', 'Program kerja berhasil diperbaharui.');
     }
 
     public function show($kode_ormawa, $id)
     {
+        // dd(Auth::user()->jabatanProker);
         // Ambil data program kerja berdasarkan kode ormawa
         $programKerja = ProgramKerja::where('id', $id)->first();
 
@@ -251,7 +253,16 @@ class ProgramKerjaController extends Controller
         }
 
         // Ambil data anggota
-        $anggota = User::where('status', 'aktif')->get();
+        // $anggota = User::where('status', 'aktif')
+        //     ->orderBy('name', 'ASC')
+        //     ->get();
+        $anggota = User::where('status', 'aktif')
+            ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
+                $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
+                    $subQuery->where('program_kerjas_id', $id);
+                });
+            })
+            ->get();
 
         $jabatans = Jabatan::all();
 
@@ -268,8 +279,8 @@ class ProgramKerjaController extends Controller
         $ketua = DB::table('struktur_prokers')
             ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
             ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
-            ->where('struktur_prokers.jabatans_id', 1)
-            ->where('divisi_program_kerjas.divisi_pelaksanas_id', 4)
+            ->where('struktur_prokers.jabatans_id', 2)
+            ->where('divisi_program_kerjas.divisi_pelaksanas_id', 6)
             ->where('divisi_program_kerjas.program_kerjas_id', $id)
             ->select('users.name')
             ->get();
@@ -379,22 +390,21 @@ class ProgramKerjaController extends Controller
         ], 200);
     }
 
-
-
-
     public function pilihAnggota(Request $request, $kode_ormawa, $prokerId, $periode)
     {
-        // dd($request);
+        // dd($request->anggotas);
         // $id = DB::table('divisi_program_kerjas')
         //     ->where('divisi_pelaksanas_id', $request->input('divisi'))
         //     ->where('program_kerjas_id', $prokerId)
         //     ->value('id');
 
-        StrukturProker::create([
-            'users_id' => $request->input('anggota'),
-            'divisi_program_kerjas_id' => $request->input('divisi'),
-            'jabatans_id' => $request->input('jabatan'),
-        ]);
+        foreach ($request->anggotas as $anggota) {
+            StrukturProker::create([
+                'users_id' => $anggota,
+                'divisi_program_kerjas_id' => $request->input('divisi'),
+                'jabatans_id' => $request->input('jabatan'),
+            ]);
+        }
 
         return redirect()->route('program-kerja.show', [
             'kode_ormawa' => $kode_ormawa,

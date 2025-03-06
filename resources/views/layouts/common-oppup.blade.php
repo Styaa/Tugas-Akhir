@@ -331,78 +331,80 @@ $date = \Carbon\Carbon::now();
                         action="{{ route('program-kerja.pilih-anggota', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'periode' => $periode]) }}"
                         method="post">
                         @csrf
-                        <input type="hidden" name="anggota" value="">
+                        {{-- <input type="hidden" name="anggota" value="">
                         <input type="hidden" name="divisi" value="">
-                        <input type="hidden" name="jabatan" value="">
+                        <input type="hidden" name="jabatan" value=""> --}}
                         <div class="mb-3">
                             <label for="anggota" class="form-label">Pilih Anggota</label>
                             <div class="d-flex align-items-center">
-                                <span class="me-2">Anggota:</span>
-                                <div class="dropdown">
-                                    <a href="#" class="dropdown-toggle text-decoration-none"
-                                        id="dropdownUserButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Pilih Anggota
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownUserButton">
-                                        @if (@isset($anggota))
-                                            @foreach ($anggota as $anggotas)
-                                                <li>
-                                                    <a class="dropdown-item pilih-anggota {{ isset($selectedAnggota) && $selectedAnggota->id === $anggotas->id ? 'active' : '' }}"
-                                                        data-id="{{ $anggotas->id }}"
-                                                        data-name="{{ $anggotas->name }}">{{ $anggotas->name }}</a>
-                                                </li>
-                                            @endforeach
-                                        @endif
-                                    </ul>
-                                </div>
+                                <select class="form-select z-10" id="multiple-select-field"
+                                    data-placeholder="Choose anything" name="anggotas[]" multiple>
+                                    @if (@isset($anggota))
+                                        @foreach ($anggota as $anggotas)
+                                            <option value="{{ $anggotas->id }}">
+                                                {{-- <a class="pilih-anggota {{ isset($selectedAnggota) && $selectedAnggota->id === $anggotas->id ? 'active' : '' }}"
+                                                    data-id="{{ $anggotas->id }}"
+                                                    data-name="{{ $anggotas->name }}">{{ $anggotas->name }}</a> --}}
+                                                {{ $anggotas->name }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="divisi" class="form-label">Pilih Divisi Pelaksana</label>
                             <div class="d-flex align-items-center">
-                                <span class="me-2">Divisi:</span>
-                                <div class="dropdown">
-                                    <a href="#" class="dropdown-toggle text-decoration-none"
-                                        id="dropdownDivisiButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Pilih Divisi
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownDivisiButton">
-                                        @if (@isset($divisi))
-                                            @foreach ($divisi as $item)
-                                                <li>
-                                                    <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
-                                                        data-id="{{ $item['id'] }}"
-                                                        data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a>
-                                                </li>
-                                            @endforeach
-                                        @endif
-                                    </ul>
-                                </div>
+                                <select class="form-select" id="single-select-field" data-placeholder="Choose one thing">
+                                    @if (@isset($divisi))
+                                        @foreach ($divisi as $item)
+                                            <option>
+                                                <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
+                                                    data-id="{{ $item['id'] }}"
+                                                    data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a>
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div> --}}
+
+                        <div class="mb-3">
+                            <label for="divisi" class="form-label">Pilih Jabatan</label>
+                            <div class="d-flex align-items-center">
+                                <select class="form-select" id="single-select-field1" name="divisi"
+                                    data-placeholder="Choose one thing">
+                                    @if (@isset($divisi))
+                                        @foreach ($divisi as $item)
+                                            <option value="{{ $item['id'] }}">
+                                                {{-- <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
+                                                    data-id="{{ $item['id'] }}"
+                                                    data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a> --}}
+                                                {{ $item['divisi_pelaksana']['nama'] }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="jabatan" class="form-label">Pilih Jabatan</label>
                             <div class="d-flex align-items-center">
-                                <span class="me-2">Jabatan:</span>
-                                <div class="dropdown">
-                                    <a href="#" class="dropdown-toggle text-decoration-none"
-                                        id="dropdownJabatanButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Pilih Jabatan
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownJabatanButton">
-                                        @if (@isset($jabatans))
-                                            @foreach ($jabatans as $jabatan)
-                                                <li>
-                                                    <a class="dropdown-item pilih-jabatan {{ isset($selectedJabatan) && $selectedJabatan->id === $jabatan->id ? 'active' : '' }}"
-                                                        data-id="{{ $jabatan->id }}"
-                                                        data-name="{{ $jabatan->nama }}">{{ $jabatan->nama }}</a>
-                                                </li>
-                                            @endforeach
-                                        @endif
-                                    </ul>
-                                </div>
+                                <select class="form-select" id="single-select-field2" name="jabatan"
+                                    data-placeholder="Choose one thing">
+                                    @if (@isset($jabatans))
+                                        @foreach ($jabatans as $jabatan)
+                                            <option value="{{ $jabatan->id }}">
+                                                {{-- <a class="dropdown-item pilih-jabatan {{ isset($selectedJabatan) && $selectedJabatan->id === $jabatan->id ? 'active' : '' }}"
+                                                    data-id="{{ $jabatan->id }}"
+                                                    data-name="{{ $jabatan->nama }}">{{ $jabatan->nama }}</a> --}}
+                                                {{ $jabatan->nama }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                         </div>
 

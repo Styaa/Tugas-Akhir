@@ -98,6 +98,7 @@ class MemberController extends Controller
             $query->where('kode', $kode_ormawa);
         })
             ->with(['strukturOrmawas.divisiOrmawas.ormawa', 'strukturOrmawas.jabatan'])
+            ->orderBy('name', 'ASC')
             ->get();
 
         // dd($anggotas[0]->strukturOrmawas[0]);
@@ -121,9 +122,16 @@ class MemberController extends Controller
         $programKerjaUsers = ProgramKerja::whereHas('divisiProgramKerjas.strukturProker', function ($query) use ($id_member) {
             $query->where('users_id', $id_member);
         })->get()->map(function ($programKerja) {
+            $ketuaAcara = $programKerja->strukturProkers
+                ->where('jabatans_id', '2')
+                ->first();
+            $programKerja->ketua_acara = $ketuaAcara ? $ketuaAcara->user->name : 'Belum Ditentukan';
             return [
                 'id_program_kerja' => $programKerja->id,
                 'nama_program_kerja' => $programKerja->nama,
+                'tipe_program_kerja' => $programKerja->tipe,
+                'deskripsi_program_kerja' => $programKerja->deskripsi,
+                'ketua_acara' => $programKerja->ketua_acara,
                 'tanggal_mulai_program_kerja' => Carbon::parse($programKerja->tanggal_mulai)->translatedFormat('d F Y'), // Contoh: 12 Maret 2023
                 'tanggal_selesai_program_kerja' => Carbon::parse($programKerja->tanggal_selesai)->translatedFormat('d F Y'),
             ];
@@ -133,6 +141,8 @@ class MemberController extends Controller
             ->where('users_id', $id_member)
             ->where('periodes_periode', $request->periode)
             ->first();
+
+        // dd($programKerjaUsers[0]['id_program_kerja']);
 
         // dd($divisiUser->divisiOrmawas->nama);
 

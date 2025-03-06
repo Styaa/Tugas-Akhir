@@ -68,78 +68,174 @@
                     <h6 class="fw-bold  py-3 mb-3">Current Work Project</h6>
                     <div class="teachercourse-list">
                         <div class="row g-3 gy-5 py-3 row-deck">
-                            {{-- <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center justify-content-between mt-5">
-                                            <div class="lesson_name">
-                                                <div class="project-block light-info-bg">
-                                                    <i class="icofont-paint"></i>
+                            @foreach ($programKerjaUsers as $programKerjaUser)
+                                {{-- <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between mt-5">
+                                                <div class="lesson_name">
+                                                    <div class="project-block light-info-bg">
+                                                        <i class="icofont-paint"></i>
+                                                    </div>
+                                                    <span class="small text-muted project_name fw-bold"> Social Geek Made
+                                                    </span>
+                                                    <h6 class="mb-0 fw-bold  fs-6  mb-2"></h6>
                                                 </div>
-                                                <span class="small text-muted project_name fw-bold"> Social Geek Made
-                                                </span>
-                                                <h6 class="mb-0 fw-bold  fs-6  mb-2">UI/UX Design</h6>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-list avatar-list-stacked pt-2">
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/avatar2.jpg' }}" alt="">
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/avatar3.jpg' }}" alt="">
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/avatar4.jpg' }}" alt="">
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/avatar8.jpg' }}" alt="">
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 pt-4">
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-paper-clip"></i>
+                                                        <span class="ms-2">5 Attach</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-sand-clock"></i>
+                                                        <span class="ms-2">4 Month</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-group-students "></i>
+                                                        <span class="ms-2">5 Members</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-ui-text-chat"></i>
+                                                        <span class="ms-2">10</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="dividers-block"></div>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <h4 class="small fw-bold mb-0">Progress</h4>
+                                                <span class="small light-danger-bg  p-1 rounded"><i
+                                                        class="icofont-ui-clock"></i> 35 Days Left</span>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
+                                                    aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
+                                                    style="width: 25%" aria-valuenow="30" aria-valuemin="0"
+                                                    aria-valuemax="100">
+                                                </div>
+                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
+                                                    style="width: 10%" aria-valuenow="10" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
                                             </div>
                                         </div>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-list avatar-list-stacked pt-2">
-                                                <img class="avatar rounded-circle sm"
-                                                    src="{{ url('/') . '/images/xs/avatar2.jpg' }}" alt="">
-                                                <img class="avatar rounded-circle sm"
-                                                    src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
-                                                <img class="avatar rounded-circle sm"
-                                                    src="{{ url('/') . '/images/xs/avatar3.jpg' }}" alt="">
-                                                <img class="avatar rounded-circle sm"
-                                                    src="{{ url('/') . '/images/xs/avatar4.jpg' }}" alt="">
-                                                <img class="avatar rounded-circle sm"
-                                                    src="{{ url('/') . '/images/xs/avatar8.jpg' }}" alt="">
-                                            </div>
-                                        </div>
-                                        <div class="row g-2 pt-4">
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="icofont-paper-clip"></i>
-                                                    <span class="ms-2">5 Attach</span>
+                                    </div>
+                                </div> --}}
+
+                                <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between mt-5">
+                                                <div class="lesson_name">
+                                                    <div class="project-block light-info-bg">
+                                                        <i class="icofont-paint"></i>
+                                                    </div>
+                                                    <a
+                                                        href=" {{ route('program-kerja.show', ['id' => $programKerjaUser['id_program_kerja'], 'kode_ormawa' => $kode_ormawa]) }}?periode={{ $periode }} "><span
+                                                            class="fs-6 project_name fw-bold">{{ $programKerjaUser['nama_program_kerja'] }}</span></a>
+                                                    <h6 class="mb-0 small text-muted fw-bold ">
+                                                        {{ $programKerjaUser['deskripsi_program_kerja'] }}
+                                                    </h6>
+                                                </div>
+                                                <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                                    <button type="button" class="btn btn-outline-secondary edit-button"
+                                                        data-bs-toggle="modal"
+                                                        data-id="{{ $programKerjaUser['id_program_kerja'] }}"
+                                                        data-kode="{{ $kode_ormawa }}"><i
+                                                            class="icofont-edit text-success"></i></button>
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteproject{{ $programKerjaUser['id_program_kerja'] }}"><i
+                                                            class="icofont-ui-delete text-danger"></i></button>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="icofont-sand-clock"></i>
-                                                    <span class="ms-2">4 Month</span>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-list avatar-list-stacked pt-2">
+                                                    {{-- @foreach ($program->anggota as $anggota)
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/' . $anggota->avatar }}"
+                                                        alt="">
+                                                @endforeach --}}
+                                                    <img class="avatar rounded-circle sm"
+                                                        src="{{ url('/') . '/images/xs/' }}" alt="">
+                                                    <span class="avatar rounded-circle text-center pointer sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#addUser {{ $programKerjaUser['id_program_kerja'] }}"><i
+                                                            class="icofont-ui-add"></i></span>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="icofont-group-students "></i>
-                                                    <span class="ms-2">5 Members</span>
+                                            <div class="row g-2 pt-4">
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-paper-clip"></i>
+                                                        <span class="ms-2">0
+                                                            Attach</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-sand-clock"></i>
+                                                        <span
+                                                            class="ms-2">{{ $programKerjaUser['tipe_program_kerja'] }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-group-students"></i>
+                                                        <span class="ms-2">{{ $programKerjaUser['ketua_acara'] }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="icofont-ui-text-chat"></i>
+                                                        <span class="ms-2">0</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="icofont-ui-text-chat"></i>
-                                                    <span class="ms-2">10</span>
+                                            <div class="dividers-block"></div>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <h4 class="small fw-bold mb-0">Progress</h4>
+                                                <span class="small light-danger-bg p-1 rounded"><i
+                                                        class="icofont-ui-clock"></i>
+                                                    Days
+                                                    Left</span>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
+                                                    aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
+                                                    style="width: 25%" aria-valuenow="30" aria-valuemin="0"
+                                                    aria-valuemax="100">
                                                 </div>
+                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
+                                                    style="width: 10%" aria-valuenow="10" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
                                             </div>
-                                        </div>
-                                        <div class="dividers-block"></div>
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <h4 class="small fw-bold mb-0">Progress</h4>
-                                            <span class="small light-danger-bg  p-1 rounded"><i
-                                                    class="icofont-ui-clock"></i> 35 Days Left</span>
-                                        </div>
-                                        <div class="progress" style="height: 8px;">
-                                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
-                                                aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                                            <div class="progress-bar bg-secondary ms-1" role="progressbar"
-                                                style="width: 25%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
-                                            </div>
-                                            <div class="progress-bar bg-secondary ms-1" role="progressbar"
-                                                style="width: 10%" aria-valuenow="10" aria-valuemin="0"
-                                                aria-valuemax="100"></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div> --}}
+                            @endforeach
                         </div>
                     </div>
                     <div class="row g-3">
@@ -147,8 +243,8 @@
                             <div class="card">
                                 <div class="card-header py-3 d-flex justify-content-between">
                                     <h6 class="mb-0 fw-bold ">Personal Informations</h6>
-                                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#edit1"><i
-                                            class="icofont-edit text-primary fs-6"></i></button>
+                                    <button type="button" class="btn p-0" data-bs-toggle="modal"
+                                        data-bs-target="#edit1"><i class="icofont-edit text-primary fs-6"></i></button>
                                 </div>
                                 <div class="card-body">
                                     <ul class="list-unstyled mb-0">
@@ -266,7 +362,7 @@
                                             <img class="avatar lg rounded-circle img-thumbnail"
                                                 src="{{ url('/') . '/images/lg/avatar2.jpg' }}" alt="profile">
                                             <div class="d-flex flex-column ps-3">
-                                                <h6 class="fw-bold mb-0 small-14">{{ $aktivitasUser->nama }}</h6>
+                                                <h6 class="fw-bold mb-0 small-14 w-4">{{ $aktivitasUser->nama }}</h6>
                                                 <span class="text-muted">{{ $aktivitasUser->programKerja->nama }}</span>
                                             </div>
                                         </div>

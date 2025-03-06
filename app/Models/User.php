@@ -45,6 +45,24 @@ class User extends Authenticatable
         );
     }
 
+    public function jabatanProker()
+    {
+        // return $this->hasMany(StrukturOrmawa::class, 'users_id');
+        return $this->hasOneThrough(
+            Jabatan::class,
+            StrukturProker::class,
+            'users_id',
+            'id',
+            'id',
+            'jabatans_id'
+        );
+    }
+
+    public function strukturProkers()
+    {
+        return $this->hasMany(StrukturProker::class, 'users_id');
+    }
+
     public function strukturOrmawas()
     {
         return $this->hasMany(StrukturOrmawa::class, 'users_id');

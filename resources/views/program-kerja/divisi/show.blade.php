@@ -28,7 +28,9 @@
                                 <th>Priority</th>
                                 <th>Status</th>
                                 <th>Dependency</th>
-                                <th>Nilai</th>
+                                @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                                    <th>Nilai</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -106,21 +108,28 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td>
-                                            <select class="form-select update-field" name="nilai" id="nilai">
-                                                <option value="">Pilih Nilai</option>
-                                                <option value="1" {{ $activity->nilai == '1' ? 'selected' : '' }}>1
-                                                </option>
-                                                <option value="2" {{ $activity->nilai == '2' ? 'selected' : '' }}>2
-                                                </option>
-                                                <option value="3" {{ $activity->nilai == '3' ? 'selected' : '' }}>3
-                                                </option>
-                                                <option value="4" {{ $activity->nilai == '4' ? 'selected' : '' }}>4
-                                                </option>
-                                                <option value="5" {{ $activity->nilai == '5' ? 'selected' : '' }}>5
-                                                </option>
-                                            </select>
-                                        </td>
+                                        @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                                            <td>
+                                                <select class="form-select update-field" name="nilai" id="nilai">
+                                                    <option value="">Pilih Nilai</option>
+                                                    <option value="1" {{ $activity->nilai == '1' ? 'selected' : '' }}>
+                                                        1
+                                                    </option>
+                                                    <option value="2" {{ $activity->nilai == '2' ? 'selected' : '' }}>
+                                                        2
+                                                    </option>
+                                                    <option value="3" {{ $activity->nilai == '3' ? 'selected' : '' }}>
+                                                        3
+                                                    </option>
+                                                    <option value="4" {{ $activity->nilai == '4' ? 'selected' : '' }}>
+                                                        4
+                                                    </option>
+                                                    <option value="5" {{ $activity->nilai == '5' ? 'selected' : '' }}>
+                                                        5
+                                                    </option>
+                                                </select>
+                                            </td>
+                                        @endif
                                     </tr>
                                 </form>
                             @endforeach
