@@ -1,145 +1,127 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap'); */
-@import url("https://fonts.googleapis.com/css2?family=Cambria, Georgia, serif:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+/* CSS untuk CKEditor dengan Header dan Footer */
 
-@media print {
-	body {
-		margin: 0 !important;
-	}
+/* Styling untuk kontainer editor */
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #c4c4c4;
+    border-radius: 4px;
+    background-color: #fff;
 }
 
-.main-container {
-	--ckeditor5-preview-sidebar-width: 270px;
-	--ckeditor5-preview-height: 700px;
-	font-family: 'Lato';
-	width: fit-content;
-	margin-left: auto;
-	margin-right: auto;
+.editor-container__menu-bar {
+    border-bottom: 1px solid #c4c4c4;
 }
 
-.main-container .presence {
-	margin-bottom: 8px;
-}
-
-.ck-content {
-	font-family: 'Lato';
-	line-height: 1.6;
-	word-break: break-word;
+.editor-container__toolbar {
+    border-bottom: 1px solid #c4c4c4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .editor-container__editor-wrapper {
-	display: flex;
-	width: fit-content;
-}
-
-.editor-container_document-editor {
-	border: 1px solid var(--ck-color-base-border);
-}
-
-.editor-container_document-editor .editor-container__toolbar {
-	display: flex;
-	position: relative;
-	box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
-}
-
-.editor-container_document-editor .editor-container__toolbar > .ck.ck-toolbar {
-	flex-grow: 1;
-	width: 0;
-	border-bottom-right-radius: 0;
-	border-bottom-left-radius: 0;
-	border-top: 0;
-	border-left: 0;
-	border-right: 0;
-}
-
-.editor-container_document-editor .editor-container__menu-bar > .ck.ck-menu-bar {
-	border-bottom-right-radius: 0;
-	border-bottom-left-radius: 0;
-	border-top: 0;
-	border-left: 0;
-	border-right: 0;
-}
-
-.editor-container_document-editor .editor-container__editor-wrapper {
-	max-height: var(--ckeditor5-preview-height);
-	min-height: var(--ckeditor5-preview-height);
-	overflow-y: scroll;
-	background: var(--ck-color-base-foreground);
-}
-
-.editor-container_document-editor .editor-container__editor {
-	margin-top: 28px;
-	margin-bottom: 28px;
-	height: 100%;
-}
-
-.editor-container_document-editor .editor-container__editor .ck.ck-editor__editable {
-	box-sizing: border-box;
-	min-width: calc(210mm + 2px);
-	max-width: calc(210mm + 2px);
-	min-height: 297mm;
-	height: fit-content;
-	padding: 20mm 12mm;
-	border: 1px hsl(0, 0%, 82.7%) solid;
-	background: hsl(0, 0%, 100%);
-	box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
-	flex: 1 1 auto;
-	margin-left: 72px;
-	margin-right: 72px;
-}
-
-.editor-container_include-outline .editor-container__editor .ck.ck-editor__editable {
-	margin-left: 0;
-}
-
-.editor-container_include-annotations .editor-container__editor .ck.ck-editor__editable {
-	margin-right: 0;
+    display: flex;
+    overflow: hidden;
 }
 
 .editor-container__sidebar {
-	min-width: var(--ckeditor5-preview-sidebar-width);
-	max-width: var(--ckeditor5-preview-sidebar-width);
-	margin-top: 28px;
-	margin-left: 10px;
-	margin-right: 10px;
+    width: 15%;
+    border-right: 1px solid #c4c4c4;
+    padding: 10px;
+    overflow-y: auto;
 }
 
-.revision-history {
-	display: none;
+.editor-container__editor {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    min-height: 500px;
 }
 
-.revision-history__wrapper {
-	display: flex;
+/* Styling untuk header dan footer */
+.document-header {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
 }
 
-.revision-history__wrapper .ck.ck-editor {
-	margin: 0;
-	width: 795px;
+.document-footer {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    text-align: right;
 }
 
-.revision-history__wrapper .revision-history__sidebar {
-	border: 1px solid var(--ck-color-base-border);
-	border-left: 0;
-	width: var(--ckeditor5-preview-sidebar-width);
-	min-height: 100%;
+/* Styling untuk tombol cetak */
+.print-button {
+    background-color: #007bff !important;
+    color: white !important;
 }
 
-.revision-history__wrapper .revision-history__sidebar .ck-revision-history-sidebar {
-	height: 100%;
+.print-button:hover {
+    background-color: #0056b3 !important;
 }
 
-.ck-content .table thead {
-	display: table-row-group;
+/* Media query untuk percetakan */
+@media print {
+    .document-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border: none;
+    }
+
+    .document-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border: none;
+    }
+
+    .page-number:after {
+        content: counter(page);
+    }
+
+    body {
+        counter-reset: page;
+    }
+
+    @page {
+        margin-top: 140px;
+        margin-bottom: 100px;
+        size: A4;
+    }
+
+    .editor-container__toolbar,
+    .editor-container__menu-bar,
+    .editor-container__sidebar {
+        display: none !important;
+    }
+
+    .editor-container__editor {
+        padding: 0;
+        overflow: visible;
+    }
+
+    .editor-container {
+        border: none;
+    }
 }
 
-.ck-content .table tr {
-	break-inside: avoid;
-	break-after: auto;
-}
+/* Responsivitas */
+@media (max-width: 992px) {
+    .editor-container__sidebar {
+        display: none;
+    }
 
-
-p {
-    font-family: Cambria, serif;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
+    .editor-container__editor {
+        width: 100%;
+    }
 }

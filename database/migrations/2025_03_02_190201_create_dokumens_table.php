@@ -13,9 +13,16 @@ return new class extends Migration
     {
         Schema::create('dokumens', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_dokumen');
-            $table->string('jenis_dokumen');
-            $table->string('nomor_dokumen');
+            $table->foreignId('program_kerja_id')->constrained('program_kerjas')->onDelete('cascade');
+            $table->string('original_name');
+            $table->string('storage_path');
+            $table->string('extension', 20);
+            $table->bigInteger('size');
+            $table->string('category', 50);
+            $table->string('visibility', 20)->default('committee');
+            $table->text('description')->nullable();
+            $table->json('tags')->nullable();
+            $table->foreignId('uploaded_by')->constrained('users');
             $table->timestamps();
         });
     }

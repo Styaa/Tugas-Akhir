@@ -5,22 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiPelaksana;
 use App\Models\DivisiProgramKerja;
+use App\Models\Document;
+use App\Models\Evaluasi;
 use App\Models\Jabatan;
 use App\Models\ProgramKerja;
 use App\Models\RancanganAnggaranBiaya;
 use App\Models\StrukturProker;
 use App\Models\User;
+use App\Services\SimpleAdditiveWeightingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 
 class ProgramKerjaController extends Controller
 {
     //
+    protected $sawService;
+
+    public function __construct(SimpleAdditiveWeightingService $sawService)
+    {
+        $this->sawService = $sawService;
+    }
+
     public function index()
     {
         //
@@ -243,7 +252,7 @@ class ProgramKerjaController extends Controller
 
     public function show($kode_ormawa, $id)
     {
-        // dd(Auth::user()->jabatanProker);
+        // dd(Auth::user()->id);
         // Ambil data program kerja berdasarkan kode ormawa
         $programKerja = ProgramKerja::where('id', $id)->first();
 
@@ -282,7 +291,7 @@ class ProgramKerjaController extends Controller
             ->where('struktur_prokers.jabatans_id', 2)
             ->where('divisi_program_kerjas.divisi_pelaksanas_id', 6)
             ->where('divisi_program_kerjas.program_kerjas_id', $id)
-            ->select('users.name')
+            ->select('users.name', 'users.id')
             ->get();
 
         $anggotaProker = DB::table('struktur_prokers')
@@ -312,6 +321,7 @@ class ProgramKerjaController extends Controller
         // Hitung selisih anggaran (pemasukan - pengeluaran)
         $selisih = $totalPemasukan - $totalPengeluaran;
 
+        $files = Document::where('program_kerja_id', $id)->latest()->paginate(10);
 
         // dd($activities->first()->personInCharge->name);
 
@@ -322,11 +332,11 @@ class ProgramKerjaController extends Controller
             $tanggal_selesai = Carbon::parse($programKerja->tanggal_selesai)->format('d F Y');
 
             // Kembalikan view dengan semua data
-            return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
+            return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
         }
 
         // Kembalikan view tanpa tanggal selesai
-        return view('program-kerja.show', compact('programKerja', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
+        return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
     }
 
     public function pilihKetua($kode_ormawa, $prokerId, $periode, $userId)
@@ -675,48 +685,40 @@ class ProgramKerjaController extends Controller
         return view('program-kerja.dokumen.proposal.progress', compact('programKerja', 'user'));
     }
 
+    public function selesaikan(Request $request, $id)
+    {
+        // Validasi request
+        $request->validate([
+            'tanggal_selesai' => 'required|date',
+            'deskripsi' => 'nullable|string',
+        ]);
 
-    // public function downloadRAB(Request $request, $kodeOrmawa, $id)
-    // {
-    //     $rabData = json_decode($request->rab_data, true);
+        // Dapatkan program kerja
+        $programKerja = ProgramKerja::findOrFail($id);
 
-    //     // dd($request);
+        // Update status program kerja
+        $programKerja->update([
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'deskripsi' => $request->deskripsi,
+            'disetujui' => 'Ya', // Menandakan program kerja telah selesai
+        ]);
 
-    //     // Header untuk file Excel
-    //     $header = ['No', 'Komponen Biaya', 'Biaya', 'Jumlah', 'Satuan', 'Total', 'Kategori'];
+        // Hitung evaluasi untuk semua panitia
+        $this->sawService->hitungEvaluasiProker($id);
 
-    //     $data = [];
-    //     $counter = 1;
+        return redirect()
+            ->route('program-kerja.evaluasi', $id)
+            ->with('success', 'Program kerja telah diselesaikan dan evaluasi panitia telah dihitung.');
+    }
 
-    //     // Pemasukan
-    //     foreach ($rabData['pemasukan'] as $pemasukan) {
-    //         $data[] = [
-    //             $counter++,
-    //             $pemasukan['komponen'],
-    //             $pemasukan['biaya'],
-    //             $pemasukan['jumlah'],
-    //             $pemasukan['satuan'],
-    //             $pemasukan['total'],
-    //             'Pemasukan',
-    //         ];
-    //     }
+    public function evaluasi($id)
+    {
+        $programKerja = ProgramKerja::findOrFail($id);
+        $evaluasi = Evaluasi::where('program_kerjas_id', $id)
+            ->with('user')
+            ->orderByDesc('score')
+            ->get();
 
-    //     // Pengeluaran
-    //     foreach ($rabData['pengeluaran'] as $pengeluaran) {
-    //         $data[] = [
-    //             $counter++,
-    //             $pengeluaran['komponen'],
-    //             $pengeluaran['biaya'],
-    //             $pengeluaran['jumlah'],
-    //             $pengeluaran['satuan'],
-    //             $pengeluaran['total'],
-    //             'Pengeluaran - ' . $pengeluaran['divisi'],
-    //         ];
-    //     }
-
-    //     return Excel::download(new ArrayExport($data), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
-
-    //     // Unduh file Excel
-    //     // return Excel::download(new ArrayExport(array_merge([$header], $data)), 'RAB-' . now()->format('Y-m-d') . '.xlsx');
-    // }
+        return view('program-kerja.evaluasi', compact('programKerja', 'evaluasi'));
+    }
 }

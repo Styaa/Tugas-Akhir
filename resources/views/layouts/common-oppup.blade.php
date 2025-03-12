@@ -416,6 +416,53 @@ $date = \Carbon\Carbon::now();
             </div>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Penyelesaian Program Kerja -->
+    <div class="modal fade" id="konfirmasiSelesaiModal" tabindex="-1" aria-labelledby="konfirmasiSelesaiModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="konfirmasiSelesaiModalLabel">Konfirmasi Penyelesaian Program Kerja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form
+                    action="{{ route('program-kerja.selesaikan', ['id' => $programKerja->id, 'kode_ormawa' => $kode_ormawa]) }}"
+                    method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p>Anda akan mengkonfirmasi penyelesaian program kerja <strong>{{ $programKerja->nama }}</strong>.
+                        </p>
+                        <p>Setelah konfirmasi, sistem akan menghitung evaluasi kinerja untuk semua panitia berdasarkan:</p>
+                        <ul>
+                            <li>Kehadiran dalam rapat (20%)</li>
+                            <li>Kontribusi terhadap tugas (25%)</li>
+                            <li>Tanggung jawab pada deadline (20%)</li>
+                            <li>Kualitas pekerjaan (20%)</li>
+                            <li>Penilaian dari atasan (15%)</li>
+                        </ul>
+
+                        <div class="mb-3">
+                            <label for="tanggal_selesai" class="form-label">Tanggal Penyelesaian</label>
+                            <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai"
+                                value="{{ now()->format('Y-m-d') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label">Catatan Penyelesaian (Opsional)</label>
+                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3"
+                                placeholder="Masukkan catatan mengenai hasil akhir program kerja"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="icofont-check-circled me-1"></i>Konfirmasi Penyelesaian
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endisset
 
 @isset($namaDivisi)
@@ -1075,6 +1122,29 @@ $date = \Carbon\Carbon::now();
         </div>
     </div>
 @endif
+
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus file <span id="file-name-to-delete" class="fw-bold"></span>?</p>
+                <p class="text-danger small">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="delete-file-form" action="" method="POST" style="display: inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Daftar Izin -->
 @if (isset($daftarIzin))

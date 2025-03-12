@@ -353,7 +353,8 @@ const editorConfig = {
             'Trebuchet MS, Helvetica, sans-serif',
             'Verdana, Geneva, sans-serif'
         ],
-        supportAllValues: true
+        supportAllValues: true,
+        defaultValue: 'Cambria, serif'
     },
     fontSize: {
         options: [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48],
@@ -416,78 +417,257 @@ const editorConfig = {
         ]
     },
     initialData: `
-    <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt;">NOTULEN RAPAT</h2>
-    <h3 style="font-family: 'Cambria', serif; font-size: 12pt;">Informasi Rapat</h3>
-    <table border="0" style="width: 100%; font-family: 'Cambria', serif; font-size: 12pt;">
-        <tr>
-            <td style="width: 150px">Hari/Tanggal</td>
-            <td style="width: 10px">:</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Waktu</td>
-            <td>:</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Tempat</td>
-            <td>:</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Agenda</td>
-            <td>:</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Peserta</td>
-            <td>:</td>
-            <td></td>
-        </tr>
-    </table>
-    <h3 style="font-family: 'Cambria', serif; font-size: 12pt;">Pembahasan</h3>
-    <ol style="font-family: 'Cambria', serif; font-size: 12pt;">
-        <li>
-            <p>Agenda 1</p>
-            <p>Hasil pembahasan...</p>
-        </li>
-        <li>
-            <p>Agenda 2</p>
-            <p>Hasil pembahasan...</p>
-        </li>
-    </ol>
-    <h3 style="font-family: 'Cambria', serif; font-size: 12pt;">Keputusan & Tindak Lanjut</h3>
-    <ol style="font-family: 'Cambria', serif; font-size: 12pt;">
-        <li>
-            <p>Keputusan 1</p>
-            <p>Tindak lanjut...</p>
-        </li>
-        <li>
-            <p>Keputusan 2</p>
-            <p>Tindak lanjut...</p>
-        </li>
-    </ol>
-    <p>&nbsp;</p>
-    <table border="0" style="width: 100%; font-family: 'Cambria', serif; font-size: 12pt;">
-        <tr>
-            <td style="width: 50%; text-align: center;">
-                <p>Mengetahui,</p>
-                <p>Ketua</p>
-                <p>&nbsp;</p>
-                <p>&nbsp;</p>
-                <p>&nbsp;</p>
-                <p>(............................)</p>
-            </td>
-            <td style="width: 50%; text-align: center;">
-                <p>Surabaya, ................ 2025</p>
-                <p>Notulis</p>
-                <p>&nbsp;</p>
-                <p>&nbsp;</p>
-                <p>&nbsp;</p>
-                <p>(............................)</p>
-            </td>
-        </tr>
-    </table>`,
+        <div class="proposal-template">
+            <!-- Header Section -->
+            <div class="proposal-header" style="text-align:center;">
+                <h1 style="text-align:center; font-family: 'Cambria', serif; font-size: 16pt; font-weight: bold; margin-bottom: 5px;">PROPOSAL</h1>
+                <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-style: italic; margin-top: 5px; margin-bottom: 15px;">[NAMA KEGIATAN]</h2>
+                <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">[NAMA ORGANISASI/UNIT]</h3>
+                <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 5px;">[TAHUN]</h3>
+                <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold; margin-top: 20px;">FAKULTAS [NAMA FAKULTAS]</h3>
+                <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold; margin-top: 5px;">UNIVERSITAS SURABAYA</h3>
+            </div>
+
+            <!-- Table of Contents Section -->
+            <div class="table-of-contents" style="margin-bottom: 30px; display: none;">
+                <!-- This will be auto-generated if needed -->
+            </div>
+
+            <!-- Section 1: Latar Belakang -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">LATAR BELAKANG KEGIATAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; text-align: justify; text-indent: 30px;">
+                [Isi latar belakang kegiatan - jelaskan mengapa kegiatan ini perlu diadakan, situasi/kondisi yang melatarbelakangi, serta manfaat yang diharapkan]
+            </p>
+
+            <!-- Section 2: Sasaran & Tujuan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">SASARAN & TUJUAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Sasaran :</strong> [Target peserta/audience dari kegiatan ini]</p>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Tujuan :</strong></p>
+            <ol style="font-family: 'Cambria', serif; font-size: 12pt;">
+                <li>[Tujuan pertama]</li>
+                <li>[Tujuan kedua]</li>
+                <li>[Tujuan ketiga]</li>
+                <li>[Tujuan keempat, dst]</li>
+            </ol>
+
+            <!-- Section 3: Nama Kegiatan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">NAMA KEGIATAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; text-align: justify;">[Nama kegiatan].</p>
+
+            <!-- Section 4: Bentuk Kegiatan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">BENTUK KEGIATAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; text-align: justify;">
+                [Jelaskan format/bentuk kegiatan akan dilaksanakan, misalnya: seminar, workshop, kompetisi, dll. Beri detail tentang metode pelaksanaan kegiatan]
+            </p>
+
+            <!-- Section 5: Pelaksanaan Kegiatan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">PELAKSANAAN KEGIATAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Hari, tanggal :</strong> [Hari, tanggal kegiatan]</p>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Tempat :</strong> [Lokasi kegiatan]</p>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Waktu :</strong></p>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt;"><strong>Rundown Acara</strong></p>
+            <table border="1" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; text-align: center; width: 30%;">Waktu</th>
+                    <th style="padding: 8px; text-align: center; width: 70%;">Kegiatan</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center; font-weight: bold;" colspan="2">[HARI 1, TANGGAL]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">[Waktu]</td>
+                    <td style="padding: 8px;">[Kegiatan]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">[Waktu]</td>
+                    <td style="padding: 8px;">[Kegiatan]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center; font-weight: bold;" colspan="2">[HARI 2, TANGGAL] (jika ada)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">[Waktu]</td>
+                    <td style="padding: 8px;">[Kegiatan]</td>
+                </tr>
+            </table>
+
+            <!-- Section 6: Susunan Panitia -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">SUSUNAN PANITIA PELAKSANAAN</h2>
+            <table border="1" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; text-align: center; width: 10%;">No</th>
+                    <th style="padding: 8px; text-align: center; width: 40%;">Nama</th>
+                    <th style="padding: 8px; text-align: center; width: 20%;">NRP/NPK</th>
+                    <th style="padding: 8px; text-align: center; width: 30%;">Jabatan</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center;">1.</td>
+                    <td style="padding: 8px;">[Nama]</td>
+                    <td style="padding: 8px;">[NRP/NPK]</td>
+                    <td style="padding: 8px;">[Jabatan]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center;">2.</td>
+                    <td style="padding: 8px;">[Nama]</td>
+                    <td style="padding: 8px;">[NRP/NPK]</td>
+                    <td style="padding: 8px;">[Jabatan]</td>
+                </tr>
+            </table>
+
+            <!-- Section 7: Indikator Keberhasilan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">INDIKATOR KEBERHASILAN</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; text-align: justify;">
+                [Jelaskan bagaimana mengukur keberhasilan kegiatan ini, misalnya: jumlah peserta, hasil kuesioner, dsb]
+            </p>
+
+            <!-- Section 8: Sumber Dana & Anggaran -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">SUMBER DANA DAN ANGGARAN DANA</h2>
+
+            <!-- Pemasukan Table -->
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold;">BIAYA PEMASUKAN</p>
+            <table border="1" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-bottom: 20px;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; text-align: center; width: 10%;">No</th>
+                    <th style="padding: 8px; text-align: center; width: 40%;">Komponen Biaya</th>
+                    <th style="padding: 8px; text-align: center; width: 15%;">Biaya</th>
+                    <th style="padding: 8px; text-align: center; width: 15%;">Jumlah</th>
+                    <th style="padding: 8px; text-align: center; width: 20%;">Total</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center;">1.</td>
+                    <td style="padding: 8px;">[Sumber Dana]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Nominal]</td>
+                    <td style="padding: 8px; text-align: center;">[Jumlah]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Total]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center;">2.</td>
+                    <td style="padding: 8px;">[Sumber Dana]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Nominal]</td>
+                    <td style="padding: 8px; text-align: center;">[Jumlah]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Total]</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #f2f2f2;">
+                    <td style="padding: 8px; text-align: center;" colspan="4">TOTAL PEMASUKAN</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Grand Total]</td>
+                </tr>
+            </table>
+
+            <!-- Pengeluaran Table -->
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold;">BIAYA PENGELUARAN</p>
+
+            <!-- Sie 1 Expenses -->
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold;">SIE [NAMA SIE 1]</p>
+            <table border="1" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-bottom: 20px;">
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px; text-align: center; width: 10%;">No</th>
+                    <th style="padding: 8px; text-align: center; width: 30%;">Nama Barang</th>
+                    <th style="padding: 8px; text-align: center; width: 15%;">Harga Barang</th>
+                    <th style="padding: 8px; text-align: center; width: 15%;">Jumlah Barang</th>
+                    <th style="padding: 8px; text-align: center; width: 10%;">Satuan</th>
+                    <th style="padding: 8px; text-align: center; width: 20%;">Total</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; text-align: center;">1.</td>
+                    <td style="padding: 8px;">[Nama Barang]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Harga]</td>
+                    <td style="padding: 8px; text-align: center;">[Jumlah]</td>
+                    <td style="padding: 8px; text-align: center;">[Satuan]</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Total]</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #f2f2f2;">
+                    <td style="padding: 8px; text-align: center;" colspan="5">Subtotal</td>
+                    <td style="padding: 8px; text-align: right;">Rp[Subtotal]</td>
+                </tr>
+            </table>
+
+            <!-- Total Expenses -->
+            <table border="1" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-bottom: 20px;">
+                <tr style="font-weight: bold; background-color: #f2f2f2;">
+                    <td style="padding: 8px; text-align: center; width: 80%;">SUBTOTAL PENGELUARAN</td>
+                    <td style="padding: 8px; text-align: right; width: 20%;">Rp[Grand Total]</td>
+                </tr>
+            </table>
+
+            <!-- Section 9: Penutup -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">PENUTUP</h2>
+            <p style="font-family: 'Cambria', serif; font-size: 12pt; text-align: justify; text-indent: 30px;">
+                Demikian proposal ini kami buat, dengan harapan acara yang akan berjalan dapat memberikan manfaat kepada [target peserta/audience]. Sekian proposal ini, kami dan segenap anggota kepanitiaan mengucapkan terima kasih. Contact Person: <strong>[Nama]</strong> dengan nomor telepon <strong>[Nomor Telepon]</strong>.
+            </p>
+
+            <!-- Section 10: Lembar Pengesahan -->
+            <h2 style="font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 30px;">LEMBAR PENGESAHAN</h2>
+            <table border="0" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt;">
+                <tr>
+                    <td style="width: 50%;"></td>
+                    <td style="width: 50%;">[Kota], [Tanggal]</td>
+                </tr>
+                <tr>
+                    <td colspan="2">Dengan hormat,</td>
+                </tr>
+            </table>
+            <table border="0" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-top: 20px;">
+                <tr>
+                    <td style="width: 50%; text-align: center;">Ketua Acara</td>
+                    <td style="width: 50%; text-align: center;">Sekretaris dan Bendahara</td>
+                </tr>
+                <tr>
+                    <td style="height: 80px;"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Ketua]</td>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Sekretaris]</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">([NRP Ketua])</td>
+                    <td style="text-align: center;">([NRP Sekretaris])</td>
+                </tr>
+            </table>
+            <table border="0" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-top: 20px;">
+                <tr>
+                    <td colspan="2">Menyetujui,</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%; text-align: center;">Gubernur BEM Fakultas</td>
+                    <td style="width: 50%; text-align: center;">Ketua [Nama Organisasi]</td>
+                </tr>
+                <tr>
+                    <td style="height: 80px;"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Gubernur BEM]</td>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Ketua Organisasi]</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">([NRP Gubernur BEM])</td>
+                    <td style="text-align: center;">([NRP Ketua Organisasi])</td>
+                </tr>
+            </table>
+            <table border="0" style="width: 100%; border-collapse: collapse; font-family: 'Cambria', serif; font-size: 12pt; margin-top: 20px;">
+                <tr>
+                    <td colspan="2">Mengetahui,</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%; text-align: center;">Ketua Jurusan [Nama Jurusan]</td>
+                    <td style="width: 50%; text-align: center;">Dosen Pembimbing</td>
+                </tr>
+                <tr>
+                    <td style="height: 80px;"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Ketua Jurusan]</td>
+                    <td style="text-align: center; text-decoration: underline;">[Nama Dosen Pembimbing]</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;"></td>
+                    <td style="text-align: center;"></td>
+                </tr>
+            </table>
+        </div>
+        `,
     licenseKey: LICENSE_KEY,
     link: {
         addTargetToExternalLinks: true,
@@ -530,7 +710,7 @@ style.innerHTML = `
     /* Styling untuk editor di tampilan web */
     .editor-container__editor {
         background-color: #f5f5f5;
-        padding: 20px;
+        padding: 10px;
         display: flex;
         justify-content: center;
     }
@@ -679,7 +859,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Cetak Notulen Rapat</title>
+            <title>Cetak Proposal Program Kerja</title>
             <style>
                 /* Base styling */
                 @media print {
@@ -721,7 +901,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                     min-height: 297mm;
                     height: 297mm;
                     page-break-after: always;
-                    margin: 0 auto;
+                    margin: 0;
                     background: white;
                     box-sizing: border-box;
                     overflow: hidden;
@@ -733,7 +913,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                     top: 0;
                     left: 0;
                     right: 0;
-                    height: 48px;
+                    height: 32.7mm;
                     padding: 8mm 15mm 0;
                 }
 
@@ -748,9 +928,8 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
 
                 /* Content container */
                 .content-container {
-                    padding: 125px 15mm 50px;
+                    padding: 12px 15mm 50px;
                     box-sizing: border-box;
-                    max-height: calc(297mm - 125px - 50px);
                     overflow: hidden;
                 }
 
@@ -889,7 +1068,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                         // Initialize variables for automatic pagination
                         let currentPageContent = '';
                         let currentPageHeight = 0;
-                        const maxPageContentHeight = 730; // Approximate content height for A4 in pixels
+                        const maxPageContentHeight = 1069; // Approximate content height for A4 in pixels
 
                         // Process each element for automatic pagination
                         elements.forEach(element => {
@@ -956,7 +1135,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
             // Ini contoh implementasi sederhana
             // Dalam prakteknya, fungsi ini perlu dibuat lebih robust untuk menangani kondisi kompleks
             const contentHeight = editor.editing.view.domRoots.get('main').getBoundingClientRect().height;
-            const pageHeight = 1123; // Tinggi halaman A4 dalam piksel
+            const pageHeight = 1069; // Tinggi halaman A4 dalam piksel
 
             if (contentHeight > pageHeight) {
                 // Tambahkan page break otomatis

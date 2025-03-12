@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisiOrmawaController;
 use App\Http\Controllers\DivisiProgramKerjaController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProgramKerjaController;
@@ -82,6 +83,24 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{id}/proposal/store', [ProgramKerjaController::class, 'storeProposal'])->name('proposal.store');
             Route::post('{id}/proposal/generate', [ProgramKerjaController::class, 'generateProposal'])->name('proposal.generate');
             Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
+
+            Route::prefix('{id}/files')->name('files.')->group(function () {
+                Route::get('/upload', [DocumentController::class, 'showUploadForm'])->name('upload');
+                Route::post('/store', [DocumentController::class, 'storeFiles'])->name('store');
+                Route::post('/temp', [DocumentController::class, 'storeTemporaryFile'])->name('temp');
+                Route::delete('/temp', [DocumentController::class, 'deleteTemporaryFile'])->name('temp.delete');
+                Route::post('/store-from-temp', [DocumentController::class, 'storeFromTemporary'])->name('store-from-temp');
+                Route::get('/download/{file_id}', [DocumentController::class, 'downloadFile'])->name('download');
+                Route::get('/preview/{file_id}', [DocumentController::class, 'previewFile'])->name('preview');
+                Route::delete('/delete/{file_id}', [DocumentController::class, 'deleteFile'])->name('delete');
+            });
+
+            Route::post('/selesaikan', [ProgramKerjaController::class, 'selesaikan'])
+                ->name('selesaikan');
+
+            // Tambahkan juga route untuk melihat hasil evaluasi
+            Route::get('/{id}/evaluasi', [ProgramKerjaController::class, 'evaluasi'])
+                ->name('evaluasi');
 
 
             // Divisi Program Kerja Routes

@@ -46,4 +46,14 @@ class ProgramKerja extends Model
             'id' // Primary key di tabel DivisiProgramKerja
         );
     }
+
+    public function rapat()
+    {
+        return $this->hasMany(Rapat::class, 'program_kerjas_id');
+    }
+
+    public function evaluasi()
+    {
+        return $this->hasMany(Evaluasi::class, 'program_kerjas_id');
+    }
 }
