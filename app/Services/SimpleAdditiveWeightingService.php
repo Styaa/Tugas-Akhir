@@ -29,7 +29,7 @@ class SimpleAdditiveWeightingService
         $proker = ProgramKerja::findOrFail($proker_id);
 
         // Dapatkan semua panitia dalam proker ini melalui struktur proker
-        $panitia = StrukturProker::where('divisi_program_kerjas_id', function ($query) use ($proker_id) {
+        $panitia = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($proker_id) {
             $query->select('id')
                 ->from('divisi_program_kerjas')
                 ->where('program_kerjas_id', $proker_id);
@@ -69,8 +69,9 @@ class SimpleAdditiveWeightingService
 
             // Simpan ke database
             Evaluasi::updateOrCreate(
-                ['user_id' => $user->id, 'program_kerjas_id' => $proker_id],
                 [
+                    'user_id' => $user->id,
+                    'program_kerjas_id' => $proker_id,
                     'kehadiran' => $nilaiKehadiran[$user->id],
                     'kontribusi' => $nilaiKontribusi[$user->id],
                     'tanggung_jawab' => $nilaiTanggungJawab[$user->id],
@@ -255,7 +256,7 @@ class SimpleAdditiveWeightingService
         // atau bisa diambil dari nilai yang diberikan oleh ketua proker
 
         // Dapatkan atasan (ketua proker)
-        $ketua = StrukturProker::where('divisi_program_kerjas_id', function ($query) use ($proker_id) {
+        $ketua = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($proker_id) {
             $query->select('id')
                 ->from('divisi_program_kerjas')
                 ->where('program_kerjas_id', $proker_id);

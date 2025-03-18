@@ -648,7 +648,7 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-// Inisialisasi editor
+// Modifikasi kode untuk memindahkan tombol ke header
 DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
     .then(editor => {
         // Lampirkan toolbar dan menu bar ke elemen yang ditentukan
@@ -659,17 +659,104 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
             document.querySelector('#editor-menu-bar').appendChild(editor.ui.view.menuBarView.element);
         }
 
-        // Tambahkan tombol cetak dan export dalam container terpisah
-        const exportButtons = document.createElement('div');
-        exportButtons.className = 'export-buttons';
+        // Buat tombol save dan print
+        // Tombol Save to Database
+        const buttonSave = document.createElement('button');
+        buttonSave.textContent = 'Save to Database';
+        buttonSave.className = 'ck ck-button save-button';
+        buttonSave.style.marginLeft = '10px';
+        buttonSave.addEventListener('click', async () => {
+            // Kode event listener yang sama seperti sebelumnya
+            const content = editor.getData();
+            const title = document.querySelector('h2') ? document.querySelector('h2').textContent.trim() : 'Notulen Rapat';
+
+            try {
+                // Show loading indicator
+                buttonSave.textContent = 'Saving...';
+                buttonSave.disabled = true;
+
+                // Get information from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const rapatId = urlParams.get('id_rapat');
+
+                // Periksa dan ambil parameter yang ada (selain ormawa_id yang selalu ada)
+                const programKerjaId = urlParams.get('program_kerjas_id');
+                const divisiOrmawaId = urlParams.get('divisi_ormawas_id');
+                const divisiProgramKerjaId = urlParams.get('divisi_program_kerjas_id');
+
+                // Log for debugging
+                console.log('Rapat ID:', rapatId);
+                console.log('Params:', {
+                    program_kerjas_id: programKerjaId,
+                    divisi_ormawas_id: divisiOrmawaId,
+                    divisi_program_kerjas_id: divisiProgramKerjaId
+                });
+
+                // Buat object data dasar
+                const postData = {
+                    title: title,
+                    content: content,
+                    rapat_id: rapatId
+                };
+
+                // Tambahkan parameter lain jika ada
+                if (programKerjaId) {
+                    postData.program_kerjas_id = programKerjaId;
+                } else if (divisiOrmawaId) {
+                    postData.divisi_ormawas_id = divisiOrmawaId;
+                } else if (divisiProgramKerjaId) {
+                    postData.divisi_program_kerjas_id = divisiProgramKerjaId;
+                } else {
+                    const pathSegments = window.location.pathname.split('/');
+                    const ormawaCode = pathSegments[1];
+
+                    postData.ormawa_id = ormawaCode;
+
+                }
+
+                // Dapatkan kode ormawa dari URL
+                const pathSegments = window.location.pathname.split('/');
+                const ormawaCode = pathSegments[1]; // Asumsikan format URL adalah /{KODE_ORMAWA}/rapat/...
+
+                // Send the content to the server
+                const response = await fetch('/api/notulens/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Notulen berhasil disimpan!');
+
+                    // Redirect ke halaman yang sesuai
+                    if (result.id) {
+                        window.location.href = `/${ormawaCode}/notulens/${result.id}`;
+                    } else {
+                        window.location.href = `/${ormawaCode}/notulens`;
+                    }
+                } else {
+                    const error = await response.json();
+                    alert(`Error menyimpan notulen: ${error.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving document:', error);
+                alert('Gagal menyimpan notulen. Silakan coba lagi.');
+            } finally {
+                // Reset button state
+                buttonSave.textContent = 'Save to Database';
+                buttonSave.disabled = false;
+            }
+        });
 
         // Tombol Cetak
         const buttonPrint = document.createElement('button');
         buttonPrint.textContent = 'Cetak Dokumen';
         buttonPrint.className = 'ck ck-button print-button';
-        // Modifikasi fungsi cetak untuk menambahkan page break otomatis
-        // Tambahkan ini ke bagian tombol Print pada kode CKEditor Anda
-
+        buttonPrint.style.marginLeft = '10px';
         buttonPrint.addEventListener('click', () => {
             const content = editor.getData();
             const printWindow = window.open('', '_blank');
@@ -950,24 +1037,46 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
             printWindow.document.close();
         });
 
-        // Optionaly, tambahkan skrip untuk deteksi panjang konten dan penambahan page break otomatis saat edit
-        // Fungsi ini bisa ditambahkan ke event editor.model.document.on('change:data')
-        function detectContentOverflow() {
-            // Ini contoh implementasi sederhana
-            // Dalam prakteknya, fungsi ini perlu dibuat lebih robust untuk menangani kondisi kompleks
-            const contentHeight = editor.editing.view.domRoots.get('main').getBoundingClientRect().height;
-            const pageHeight = 1123; // Tinggi halaman A4 dalam piksel
-
-            if (contentHeight > pageHeight) {
-                // Tambahkan page break otomatis
-                // Implementasi lebih lanjut dibutuhkan untuk menambahkan page break di posisi yang tepat
-                console.log("Content overflow detected, automatic page break should be added");
+        // Tambahkan CSS untuk tombol-tombol
+        const buttonStyle = document.createElement('style');
+        buttonStyle.innerHTML = `
+            .save-button {
+                background-color: #4CAF50 !important;
+                color: white !important;
             }
-        }
-        exportButtons.appendChild(buttonPrint);
 
-        // Sisipkan tombol export setelah toolbar
-        document.querySelector('#editor-toolbar').parentNode.insertBefore(exportButtons, document.querySelector('#editor-toolbar').nextSibling);
+            .save-button:hover {
+                background-color: #45a049 !important;
+            }
+
+            .save-button:disabled {
+                background-color: #cccccc !important;
+                cursor: not-allowed !important;
+            }
+
+            .print-button {
+                background-color: #1a73e8 !important;
+                color: white !important;
+            }
+
+            .print-button:hover {
+                background-color: #0d64d8 !important;
+            }
+        `;
+        document.head.appendChild(buttonStyle);
+
+        // PENTING: Tambahkan tombol-tombol ke toolbar CKEditor
+        // Ini adalah bagian kunci untuk memasukkan tombol ke dalam header
+        const toolbar = document.querySelector('#editor-toolbar .ck-toolbar__items');
+
+        // Buat pembatas untuk memisahkan tombol-tombol
+        const separator = document.createElement('span');
+        separator.className = 'ck ck-toolbar__separator';
+        toolbar.appendChild(separator);
+
+        // Tambahkan tombol-tombol ke toolbar
+        toolbar.appendChild(buttonSave);
+        toolbar.appendChild(buttonPrint);
 
         return editor;
     })

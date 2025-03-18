@@ -9,6 +9,7 @@ use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotulenController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\RancanganAnggaranDanaController;
 use App\Http\Controllers\RapatController;
@@ -34,7 +35,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+Route::post('/api/notulens/save', [NotulenController::class, 'apiSave'])->name('api.notulens.save');
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard Route
@@ -64,6 +65,16 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
             Route::get('/kalender', [RapatController::class, 'kalender'])->name('kalender');
             Route::get('/tulis/notulensi', [RapatController::class, 'tulisNotulensi'])->name('tulis_notulensi');
+
+            route::prefix('notulen')->name('notulen.')->group(function () {
+                Route::get('/all', [NotulenController::class, 'index'])->name('index');
+                Route::get('/create', [NotulenController::class, 'create'])->name('create');
+                Route::post('/store', [NotulenController::class, 'store'])->name('store');
+                Route::get('/{id}', [NotulenController::class, 'show'])->name('show');
+                Route::get('/{id}/edit', [NotulenController::class, 'edit'])->name('edit');
+                Route::put('/{id}/update', [NotulenController::class, 'update'])->name('update');
+                Route::delete('/{id}/destroy', [NotulenController::class, 'destroy'])->name('destroy');
+            });
         });
 
         Route::resource('divisi', DivisiOrmawa::class);
@@ -95,7 +106,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/delete/{file_id}', [DocumentController::class, 'deleteFile'])->name('delete');
             });
 
-            Route::post('/selesaikan', [ProgramKerjaController::class, 'selesaikan'])
+            Route::post('/{id}/selesaikan', [ProgramKerjaController::class, 'selesaikan'])
                 ->name('selesaikan');
 
             // Tambahkan juga route untuk melihat hasil evaluasi

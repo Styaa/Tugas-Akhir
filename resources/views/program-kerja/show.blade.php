@@ -415,10 +415,10 @@
                                                                     src="{{ url('/') . '/images/lg/avatar2.jpg' }}"
                                                                     alt="profile" width="40" height="40">
                                                                 <div class="d-flex flex-column ps-3">
-                                                                    <h6 class="fw-bold mb-0 small-14">
+                                                                    <h6 class="fw-bold mb-0 small-14 text-truncate">
                                                                         {{ $item->nama_user }}</h6>
                                                                     <span
-                                                                        class="text-muted small">{{ $item->nama_jabatan }}</span>
+                                                                        class="text-muted small text-truncate">{{ $item->nama_jabatan }}</span>
                                                                 </div>
                                                             </div>
                                                             <div class="badge bg-light text-dark ms-2">
@@ -548,31 +548,43 @@
     <script src="{{ asset('assets/custom/program-kerja/detail-program-kerja.js') }}"></script>
     <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.min.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $('#multiple-select-field').select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-            placeholder: $(this).data('placeholder'),
-            closeOnSelect: false,
-            dropdownParent: $("#addmember"),
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Select2
+            $('#multiple-select-field').select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' :
+                    'style',
+                placeholder: $(this).data('placeholder'),
+                closeOnSelect: false,
+                dropdownParent: $("#addmember"),
+            });
 
-        $('#single-select-field1').select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' : 'style',
-            placeholder: $(this).data('placeholder'),
-            dropdownParent: $("#addmember"),
-        });
+            $('#single-select-field1').select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' :
+                    'style',
+                placeholder: $(this).data('placeholder'),
+                dropdownParent: $("#addmember"),
+            });
 
-        $('#single-select-field2').select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' : 'style',
-            placeholder: $(this).data('placeholder'),
-            dropdownParent: $("#addmember"),
+            $('#single-select-field2').select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-200') ? '100%' :
+                    'style',
+                placeholder: $(this).data('placeholder'),
+                dropdownParent: $("#addmember"),
+            });
+
+            // Re-initialize all Bootstrap dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+            var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl)
+            });
         });
 
         document.addEventListener('DOMContentLoaded', function() {

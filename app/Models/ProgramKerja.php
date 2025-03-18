@@ -20,8 +20,11 @@ class ProgramKerja extends Model
         'indikator_keberhasilan',
         'tanggal_mulai',
         'tanggal_selesai',
+        'konfirmasi_penyelesaian',
+        'pengkonfirmasi',
         'ormawas_kode',
         'periode',
+        'updated_at'
     ];
 
     public function divisi_pelaksanas()

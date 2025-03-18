@@ -11,10 +11,10 @@
                     <div
                         class="card-header py-3 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom">
                         <h3 class="fw-bold mb-0">Calendar</h3>
-                        <div class="col-auto d-flex">
+                        {{-- <div class="col-auto d-flex">
                             <button type="button" class="btn btn-dark " data-bs-toggle="modal" data-bs-target="#addevent"><i
                                     class="icofont-plus-circle me-2 fs-6"></i>Add Event</button>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div> <!-- Row end  -->

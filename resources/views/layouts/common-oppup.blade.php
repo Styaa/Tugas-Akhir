@@ -427,7 +427,7 @@ $date = \Carbon\Carbon::now();
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form
-                    action="{{ route('program-kerja.selesaikan', ['id' => $programKerja->id, 'kode_ormawa' => $kode_ormawa]) }}"
+                    action="{{ route('program-kerja.selesaikan', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
                     method="POST">
                     @csrf
                     <div class="modal-body">

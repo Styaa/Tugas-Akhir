@@ -9,7 +9,7 @@
                 <h2 class="fw-bold">{{ $rapat->nama }}</h2>
                 <p class="text-muted">{{ $rapat->topik }}</p>
             </div>
-            <a href="{{ route('rapat.tulis_notulensi', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $rapat->id]) }}"
+            <a href="{{ route('rapat.tulis_notulensi', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $rapat->id, $rapat->penyelenggara => $rapat->id_penyelenggara]) }}"
                 class="btn btn-primary">
                 <i class="fas fa-edit"></i> Tulis Notulen
             </a>
@@ -34,7 +34,7 @@
                     </tr>
                     <tr class="border-top">
                         <th scope="row">Kegiatan</th>
-                        <td>{{ $rapat->tipe_penyelenggara }}</td>
+                        <td>{{ $rapat->nama_penyelenggara }}</td>
                     </tr>
                     <tr class="border-top">
                         <th scope="row">Status</th>

@@ -707,7 +707,7 @@ const editorConfig = {
 // Tambahkan CSS kustom untuk header, footer, dan layouting A4
 const style = document.createElement('style');
 style.innerHTML = `
-    /* Styling untuk editor di tampilan web */
+    /* Original styles preserved */
     .editor-container__editor {
         background-color: #f5f5f5;
         padding: 10px;
@@ -758,7 +758,7 @@ style.innerHTML = `
         /* Hide UI elements */
         .editor-container__toolbar,
         .editor-container__menu-bar,
-        .print-button,
+        .editor-header-buttons,
         .export-buttons {
             display: none !important;
         }
@@ -807,23 +807,44 @@ style.innerHTML = `
         }
     }
 
-    /* Tambahan styling untuk tombol cetak */
+    /* Header buttons container */
+    .editor-header-buttons {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Button styling */
+    .editor-button {
+        margin-left: 10px;
+        padding: 8px 16px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
     .print-button {
-        background-color: #1a73e8 !important;
-        color: white !important;
+        background-color: #1a73e8;
+        color: white;
     }
 
     .print-button:hover {
-        background-color: #0d64d8 !important;
+        background-color: #0d64d8;
     }
 
-    .export-buttons {
-        margin: 10px 0;
-        text-align: right;
+    .save-button {
+        background-color: #34a853;
+        color: white;
     }
 
-    .export-buttons button {
-        margin-left: 10px !important;
+    .save-button:hover {
+        background-color: #2d9249;
     }
 `;
 document.head.appendChild(style);
@@ -838,6 +859,97 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
         if (editor.ui.view.menuBarView && document.querySelector('#editor-menu-bar')) {
             document.querySelector('#editor-menu-bar').appendChild(editor.ui.view.menuBarView.element);
         }
+
+        const buttonSave = document.createElement('button');
+        buttonSave.textContent = 'Save to Database';
+        buttonSave.className = 'ck ck-button save-button';
+        buttonSave.style.marginLeft = '10px';
+        buttonSave.addEventListener('click', async () => {
+            // Kode event listener yang sama seperti sebelumnya
+            const content = editor.getData();
+            const title = document.querySelector('h2') ? document.querySelector('h2').textContent.trim() : 'Notulen Rapat';
+
+            try {
+                // Show loading indicator
+                buttonSave.textContent = 'Saving...';
+                buttonSave.disabled = true;
+
+                // Get information from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const rapatId = urlParams.get('id_rapat');
+
+                // Periksa dan ambil parameter yang ada (selain ormawa_id yang selalu ada)
+                const programKerjaId = urlParams.get('program_kerjas_id');
+                const divisiOrmawaId = urlParams.get('divisi_ormawas_id');
+                const divisiProgramKerjaId = urlParams.get('divisi_program_kerjas_id');
+
+                // Log for debugging
+                console.log('Rapat ID:', rapatId);
+                console.log('Params:', {
+                    program_kerjas_id: programKerjaId,
+                    divisi_ormawas_id: divisiOrmawaId,
+                    divisi_program_kerjas_id: divisiProgramKerjaId
+                });
+
+                // Buat object data dasar
+                const postData = {
+                    title: title,
+                    content: content,
+                    rapat_id: rapatId
+                };
+
+                // Tambahkan parameter lain jika ada
+                if (programKerjaId) {
+                    postData.program_kerjas_id = programKerjaId;
+                } else if (divisiOrmawaId) {
+                    postData.divisi_ormawas_id = divisiOrmawaId;
+                } else if (divisiProgramKerjaId) {
+                    postData.divisi_program_kerjas_id = divisiProgramKerjaId;
+                } else {
+                    const pathSegments = window.location.pathname.split('/');
+                    const ormawaCode = pathSegments[1];
+
+                    postData.ormawa_id = ormawaCode;
+
+                }
+
+                // Dapatkan kode ormawa dari URL
+                const pathSegments = window.location.pathname.split('/');
+                const ormawaCode = pathSegments[1]; // Asumsikan format URL adalah /{KODE_ORMAWA}/rapat/...
+
+                // Send the content to the server
+                const response = await fetch('/api/notulens/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Notulen berhasil disimpan!');
+
+                    // Redirect ke halaman yang sesuai
+                    if (result.id) {
+                        window.location.href = `/${ormawaCode}/notulens/${result.id}`;
+                    } else {
+                        window.location.href = `/${ormawaCode}/notulens`;
+                    }
+                } else {
+                    const error = await response.json();
+                    alert(`Error menyimpan notulen: ${error.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving document:', error);
+                alert('Gagal menyimpan notulen. Silakan coba lagi.');
+            } finally {
+                // Reset button state
+                buttonSave.textContent = 'Save to Database';
+                buttonSave.disabled = false;
+            }
+        });
 
         // Tambahkan tombol cetak dan export dalam container terpisah
         const exportButtons = document.createElement('div');
@@ -1143,7 +1255,19 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                 console.log("Content overflow detected, automatic page break should be added");
             }
         }
-        exportButtons.appendChild(buttonPrint);
+        // exportButtons.appendChild(buttonPrint);
+        // exportButtons.appendChild(buttonSave);
+
+        const toolbar = document.querySelector('#editor-toolbar .ck-toolbar__items');
+
+        // Buat pembatas untuk memisahkan tombol-tombol
+        const separator = document.createElement('span');
+        separator.className = 'ck ck-toolbar__separator';
+        toolbar.appendChild(separator);
+
+        // Tambahkan tombol-tombol ke toolbar
+        toolbar.appendChild(buttonSave);
+        toolbar.appendChild(buttonPrint);
 
         // Sisipkan tombol export setelah toolbar
         document.querySelector('#editor-toolbar').parentNode.insertBefore(exportButtons, document.querySelector('#editor-toolbar').nextSibling);

@@ -115,7 +115,8 @@
                             </li>
                         @endif
                         <li>
-                            <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}" href="">
+                            <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}"
+                                href="{{ route('rapat.notulen.index', ['kode_ormawa' => $kode_ormawa]) }}">
                                 <span>Notulen Rapat</span>
                             </a>
                         </li>

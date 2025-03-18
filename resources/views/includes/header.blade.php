@@ -95,7 +95,8 @@
                 </div>
                 <div class="dropdown user-profile ml-2 ml-sm-3 d-flex align-items-center zindex-popover">
                     <div class="u-info me-2">
-                        <p class="mb-0 text-end line-height-sm "><span class="font-weight-bold">{{ Auth::user()->name }}</span>
+                        <p class="mb-0 text-end line-height-sm "><span
+                                class="font-weight-bold">{{ Auth::user()->name }}</span>
                         </p>
                         <small>Admin Profile</small>
                     </div>
@@ -111,7 +112,8 @@
                                     <img class="avatar rounded-circle" src="{{ url('/') . '/images/profile_av.png' }}"
                                         alt="profile">
                                     <div class="flex-fill ms-3">
-                                        <p class="mb-0"><span class="font-weight-bold">{{ Auth::user()->name }}</span></p>
+                                        <p class="mb-0"><span
+                                                class="font-weight-bold">{{ Auth::user()->name }}</span></p>
                                         <small class="">{{ Auth::user()->email }}</small>
                                     </div>
                                 </div>
@@ -121,18 +123,19 @@
                                 </div>
                             </div>
                             <div class="list-group m-2 ">
-                                <a href="#" class="list-group-item list-group-item-action border-0 "><i
-                                        class="icofont-tasks fs-5 me-3"></i>My Task</a>
-                                <a href="#" class="list-group-item list-group-item-action border-0 "><i
-                                        class="icofont-ui-user-group fs-6 me-3"></i>members</a>
+                                {{-- <a href="#" class="list-group-item list-group-item-action border-0 "><i
+                                        class="icofont-tasks fs-5 me-3"></i>My Task</a> --}}
+                                <a href="{{ route('our-member.members', ['kode_ormawa' => $kode_ormawa]) }}"
+                                    class="list-group-item list-group-item-action border-0 "><i
+                                        class="icofont-ui-user-group fs-6 me-3"></i>Members</a>
                                 <a href="{{ route('logout') }}"
                                     class="list-group-item list-group-item-action border-0 "><i
                                         class="icofont-logout fs-6 me-3"></i>Signout</a>
                                 <div>
                                     <hr class="dropdown-divider border-dark">
                                 </div>
-                                <a href="#" class="list-group-item list-group-item-action border-0 "><i
-                                        class="icofont-contact-add fs-5 me-3"></i>Add personal account</a>
+                                {{-- <a href="#" class="list-group-item list-group-item-action border-0 "><i
+                                        class="icofont-contact-add fs-5 me-3"></i>Add personal account</a> --}}
                             </div>
                         </div>
                     </div>

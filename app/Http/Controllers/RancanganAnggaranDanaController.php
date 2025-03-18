@@ -27,8 +27,8 @@ class RancanganAnggaranDanaController extends Controller
         $periode = $programKerja->periode;
         // $divisis = DivisiProgramKerja::where('program_kerjas_id', $request->prokerId)->get();
         $divisis = DivisiProgramKerja::with('divisiPelaksana')
-        ->where('program_kerjas_id', $request->prokerId)
-        ->get();
+            ->where('program_kerjas_id', $request->prokerId)
+            ->get();
 
         // Ambil pemasukan dan pengeluaran dari database
         $pemasukans = RancanganAnggaranBiaya::where('program_kerjas_id', $request->prokerId)

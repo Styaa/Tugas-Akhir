@@ -38,6 +38,8 @@ class RapatController extends Controller
 
         $meetings = $meetings->get();
 
+        // $meetings['penyelengara'] =
+
         // Jika request AJAX, kembalikan hanya HTML rapat
         if ($request->ajax()) {
             return response()->json([

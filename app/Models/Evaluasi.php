@@ -14,7 +14,7 @@ class Evaluasi extends Model
 
     protected $fillable = [
         'user_id',
-        'proker_id',
+        'program_kerjas_id',
         'kehadiran',
         'kontribusi',
         'tanggung_jawab',

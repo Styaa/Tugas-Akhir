@@ -685,23 +685,19 @@ class ProgramKerjaController extends Controller
         return view('program-kerja.dokumen.proposal.progress', compact('programKerja', 'user'));
     }
 
-    public function selesaikan(Request $request, $id)
+    public function selesaikan(Request $request, $kode_ormawa, $id)
     {
-        // Validasi request
-        $request->validate([
-            'tanggal_selesai' => 'required|date',
-            'deskripsi' => 'nullable|string',
-        ]);
-
         // Dapatkan program kerja
-        $programKerja = ProgramKerja::findOrFail($id);
+        $programKerja = ProgramKerja::find($id);
 
         // Update status program kerja
         $programKerja->update([
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'deskripsi' => $request->deskripsi,
-            'disetujui' => 'Ya', // Menandakan program kerja telah selesai
+            'updated_at' => now(),
+            'konfirmasi_penyelesaian' => 'Ya',
+            'pengkonfirmasi' => Auth::user()->id, // Menandakan program kerja telah selesai
         ]);
+
+        // dd($programKerja);
 
         // Hitung evaluasi untuk semua panitia
         $this->sawService->hitungEvaluasiProker($id);

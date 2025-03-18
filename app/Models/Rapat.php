@@ -27,7 +27,20 @@ class Rapat extends Model
     ];
 
     // Menentukan tipe penyelenggara rapat
-    public function getTipePenyelenggaraAttribute()
+    public function getIdPenyelenggaraAttribute()
+    {
+        if ($this->divisi_ormawas_id) {
+            return $this->divisiOrmawa ? $this->divisiOrmawa->id : 'Divisi Ormawa';
+        } elseif ($this->program_kerjas_id) {
+            return $this->programKerja ? $this->programKerja->id : 'Program Kerja';
+        } elseif ($this->divisi_program_kerjas_id) {
+            return $this->divisiProgramKerja ? $this->divisiProgramKerja->id : 'Divisi Program Kerja';
+        } else {
+            return $this->ormawa ? $this->ormawa->id : 'Ormawa';
+        }
+    }
+
+    public function getNamaPenyelenggaraAttribute()
     {
         if ($this->divisi_ormawas_id) {
             return $this->divisiOrmawa ? $this->divisiOrmawa->nama : 'Divisi Ormawa';
@@ -37,6 +50,19 @@ class Rapat extends Model
             return $this->divisiProgramKerja ? $this->divisiProgramKerja->nama : 'Divisi Program Kerja';
         } else {
             return $this->ormawa ? $this->ormawa->nama : 'Ormawa';
+        }
+    }
+
+    public function getPenyelenggaraAttribute()
+    {
+        if ($this->divisi_ormawas_id) {
+            return $this->divisiOrmawa ? 'divisi_ormawas_id' : '';
+        } elseif ($this->program_kerjas_id) {
+            return $this->programKerja ? 'program_kerjas_id' : '';
+        } elseif ($this->divisi_program_kerjas_id) {
+            return $this->divisiProgramKerja ? 'divisi_program_kerjas_id' : '';
+        } else {
+            return $this->ormawa ? 'ormawa_id' : '';
         }
     }
 

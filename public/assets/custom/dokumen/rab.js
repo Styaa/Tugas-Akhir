@@ -1,4 +1,69 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    function initializeCalculations() {
+        // Hitung total pemasukan
+        updateTotalPemasukan();
+
+        // Hitung total pengeluaran untuk setiap divisi
+        document.querySelectorAll('[id^="pengeluaran-body-"]').forEach(tbody => {
+            updateTotalPengeluaranPerDivisi(tbody.id);
+        });
+
+        // Hitung total pengeluaran keseluruhan dan selisih
+        updateTotalPengeluaran();
+    }
+
+    // Fungsi untuk menghitung total pengeluaran keseluruhan
+    function updateTotalPengeluaran() {
+        let totalPengeluaran = 0;
+
+        document.querySelectorAll('[id^="total-pengeluaran-divisi-"]').forEach(span => {
+            // Hapus format ribuan dan konversi ke angka
+            const value = span.textContent.replace(/\./g, '').replace(/,/g, '.');
+            totalPengeluaran += parseFloat(value) || 0;
+        });
+
+        document.getElementById('total-pengeluaran').textContent = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
+
+        // Hitung selisih
+        const totalPemasukan = parseFloat(document.getElementById('total-pemasukan').textContent.replace(/[^\d,-]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+        const selisih = totalPemasukan - totalPengeluaran;
+        document.getElementById('selisih').textContent = `Rp ${selisih.toLocaleString('id-ID')}`;
+    }
+
+    // Fungsi untuk menghitung total pemasukan
+    function updateTotalPemasukan() {
+        let totalPemasukan = 0;
+
+        document.querySelectorAll('#pemasukan-body .total').forEach(input => {
+            totalPemasukan += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('total-pemasukan').textContent = `Rp ${totalPemasukan.toLocaleString('id-ID')}`;
+
+        // Update selisih setiap kali total pemasukan berubah
+        updateTotalPengeluaran();
+    }
+
+    // Fungsi untuk memperbarui total pengeluaran per divisi
+    function updateTotalPengeluaranPerDivisi(tbodyId) {
+        const tbody = document.getElementById(tbodyId);
+        const divisiId = tbodyId.split('-')[2]; // Extract divisi ID
+        let totalPengeluaran = 0;
+
+        tbody.querySelectorAll('.total').forEach(input => {
+            totalPengeluaran += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById(`total-pengeluaran-divisi-${divisiId}`).textContent = totalPengeluaran.toLocaleString('id-ID');
+
+        // Update total pengeluaran keseluruhan
+        updateTotalPengeluaran();
+    }
+
+    // Inisialisasi perhitungan saat halaman dimuat
+    initializeCalculations();
+
     // Fungsi untuk menambahkan baris baru ke tabel pemasukan
     document.getElementById('add-pemasukan').addEventListener('click', function () {
         const tbody = document.getElementById('pemasukan-body');
@@ -60,6 +125,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('biaya') || e.target.classList.contains('jumlah')) {
+            const row = e.target.closest('tr');
+            const biaya = row.querySelector('.biaya').value || 0;
+            const jumlah = row.querySelector('.jumlah').value || 0;
+            const total = row.querySelector('.total');
+            total.value = biaya * jumlah;
+
+            if (e.target.closest('#pemasukan-body')) {
+                updateTotalPemasukan();
+            } else if (e.target.closest('[id^="pengeluaran-body-"]')) {
+                const tbodyId = e.target.closest('tbody').id;
+                updateTotalPengeluaranPerDivisi(tbodyId);
+            }
+        }
+    });
+
     // Fungsi untuk menghapus baris
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-row')) {
@@ -110,6 +192,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+document.querySelectorAll('input[type="number"]').forEach(function (input) {
+    input.addEventListener('keydown', function (e) {
+        // Cegah karakter 'e' atau 'E'
+        if (e.key === 'e' || e.key === 'E') {
+            e.preventDefault();
+        }
+    });
+});
 
 document.getElementById('rab-download-form').addEventListener('submit', function (e) {
     const pemasukanData = [];
