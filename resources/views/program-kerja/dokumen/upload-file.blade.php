@@ -339,7 +339,6 @@
             // Handle form submission
             document.getElementById('uploadForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                alert(uploadedFiles);
 
                 // Check if we have any files
                 if (uploadedFiles.length === 0) {
