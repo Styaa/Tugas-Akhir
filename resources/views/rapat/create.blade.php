@@ -218,23 +218,28 @@
 
                                     @foreach ($usersByDivision as $divisionName => $divisionUsers)
                                         <div class="participant-group">
-                                            {{-- <div
+                                            <div
                                                 class="bg-light p-2 border-bottom d-flex justify-content-between align-items-center">
                                                 <span class="fw-medium">{{ $divisionName }}</span>
                                                 <button type="button" class="btn btn-sm btn-link select-division"
                                                     data-division="{{ $divisionName }}">Select All</button>
-                                            </div> --}}
+                                            </div>
 
                                             @foreach ($divisionUsers as $user)
                                                 <label class="participant-item d-flex align-items-center p-3 border-bottom"
                                                     data-division="{{ $divisionName }}"
+                                                    data-division-id="{{ $user->division ? $user->division->id : '' }}"
                                                     data-role="{{ $user->role ? $user->role->nama : 'No Role' }}"
-                                                    data-name="{{ strtolower($user->name) }}">
+                                                    data-name="{{ strtolower($user->name) }}"
+                                                    @if (!empty($user->program_ids)) data-program-ids="{{ json_encode($user->program_ids) }}" @endif
+                                                    @if (!empty($user->division_proker_ids)) data-division-proker-ids="{{ json_encode($user->division_proker_ids) }}" @endif>
                                                     <input type="checkbox" name="participants[]"
                                                         value="{{ $user->id }}"
                                                         class="form-check-input participant-checkbox me-3"
                                                         data-division="{{ $divisionName }}"
-                                                        data-role="{{ $user->role ? $user->role->id : '' }}">
+                                                        data-division-id="{{ $user->division ? $user->division->id : '' }}"
+                                                        @if (!empty($user->program_ids)) data-program-ids="{{ json_encode($user->program_ids) }}" @endif
+                                                        @if (!empty($user->division_proker_ids)) data-division-proker-ids="{{ json_encode($user->division_proker_ids) }}" @endif>
                                                     <div>
                                                         <span class="d-block text-dark">{{ $user->name }}</span>
                                                         <small
@@ -351,30 +356,42 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // Global variables
         let currentStep = 1;
         let selectedType = null;
         let kodeOrmawa = "{{ $kode_ormawa }}";
+        let participantsSelected = false;
+        let selectedDivisionId = null;
+        let selectedProgramId = null;
+        let selectedDivisionProkerId = null;
 
         // Pilih tipe rapat
         function selectMeetingType(type, event) {
             selectedType = type;
+            // Reset selection flags when type changes
+            participantsSelected = false;
+            selectedDivisionId = null;
+            selectedProgramId = null;
+            selectedDivisionProkerId = null;
 
             document.getElementById('meetingType').value = type;
-            // Hapus semua class 'selected' pada card meeting
+            // Remove 'selected' class from all meeting cards
             document.querySelectorAll('.meeting-type-card').forEach(card => card.classList.remove('selected'));
 
-            // Tambahkan class 'selected' pada card yang diklik
+            // Add 'selected' class to clicked card
             event.currentTarget.classList.add('selected');
             document.getElementById('step1-error').classList.add('d-none');
 
             let additionalOptions = document.getElementById('additional-options');
             additionalOptions.innerHTML = '';
 
+            // Handle different meeting types
             if (type === 'Rapat Divisi Ormawa') {
+                // For division meetings, show division selection
                 additionalOptions.innerHTML = `
             <div class="card mt-4 p-3">
                 <label class="form-label">Select Division <span class="text-danger">*</span></label>
-                <select class="form-select" id="multiple-select-field-division" name="divisi_ormawas_id"  required>
+                <select class="form-select" id="multiple-select-field-division" name="divisi_ormawas_id" required>
                     <option value="">Choose a division</option>
                     @foreach ($divisiOrmawas as $divisi)
                         <option value="{{ $divisi->id }}">{{ $divisi->nama }}</option>
@@ -392,11 +409,18 @@
                         placeholder: "Choose divisions...",
                         closeOnSelect: false,
                         allowClear: true,
-                        dropdownParent: $('#additional-options') // Note: correct parameter name
+                        dropdownParent: $('#additional-options')
+                    });
+
+                    // Add event listener to handle automatic participant selection
+                    $('#multiple-select-field-division').on('change', function() {
+                        // Store the selected division ID for later use in selectParticipantsByDivision
+                        selectedDivisionId = $(this).val();
                     });
                 }, 100);
+
             } else if (type === 'Rapat Program Kerja') {
-                // Your existing code
+                // For work program meetings, show work program selection
                 additionalOptions.innerHTML = `
             <div class="card mt-4 p-3">
                 <label class="form-label">Select Work Program <span class="text-danger">*</span></label>
@@ -407,10 +431,18 @@
                     @endforeach
                 </select>
                 <div class="invalid-feedback">Please select a work program</div>
-                <div id="divisi-container" class="mt-3"></div>
             </div>
         `;
+
+                // Add event listener to handle automatic participant selection
+                setTimeout(function() {
+                    $('#programSelect').on('change', function() {
+                        selectedProgramId = $(this).val();
+                    });
+                }, 100);
+
             } else if (type === 'Rapat Divisi Program Kerja') {
+                // For work program division meetings, show work program and division selection
                 additionalOptions.innerHTML = `
             <div class="card mt-4 p-3">
                 <label class="form-label">Select Work Program <span class="text-danger">*</span></label>
@@ -424,27 +456,39 @@
                 <div id="divisi-container" class="mt-3"></div>
             </div>
         `;
+
+                // Add event listener for programSelect
+                setTimeout(function() {
+                    $('#programSelect').on('change', function() {
+                        selectedProgramId = $(this).val();
+                    });
+                }, 100);
             }
         }
 
-        const sessionFormat = document.getElementById('sessionFormat');
-        const locationField = document.getElementById('locationField');
-        const locationLabel = document.getElementById('locationLabel');
-        const sessionLocation = document.getElementById('meetingLocation');
+        // Handle session format change
+        function initSessionFormatListener() {
+            const sessionFormat = document.getElementById('sessionFormat');
+            const locationField = document.getElementById('locationField');
+            const locationLabel = document.getElementById('locationLabel');
+            const sessionLocation = document.getElementById('meetingLocation');
 
-        sessionFormat.addEventListener('change', function() {
-            if (this.value === 'offline') {
-                locationLabel.textContent = 'Location *';
-                sessionLocation.placeholder = 'Enter location';
-                locationField.style.display = 'block';
-            } else if (this.value === 'online') {
-                locationLabel.textContent = 'Session Link *';
-                sessionLocation.placeholder = 'Enter session link (Zoom, Google Meet, etc.)';
-                locationField.style.display = 'block';
-            } else {
-                locationField.style.display = 'none';
+            if (sessionFormat) {
+                sessionFormat.addEventListener('change', function() {
+                    if (this.value === 'offline') {
+                        locationLabel.textContent = 'Location *';
+                        sessionLocation.placeholder = 'Enter location';
+                        locationField.style.display = 'block';
+                    } else if (this.value === 'online') {
+                        locationLabel.textContent = 'Session Link *';
+                        sessionLocation.placeholder = 'Enter session link (Zoom, Google Meet, etc.)';
+                        locationField.style.display = 'block';
+                    } else {
+                        locationField.style.display = 'none';
+                    }
+                });
             }
-        });
+        }
 
         // Memuat divisi dari program kerja menggunakan AJAX
         function loadDivisions(programId) {
@@ -469,7 +513,7 @@
                     divisiOptions += '<div class="invalid-feedback">Please select a division</div>';
                     divisiContainer.innerHTML = divisiOptions;
 
-                    // Initialize Select2 immediately after creating the element
+                    // Initialize Select2 and add event listener for auto-selection
                     setTimeout(function() {
                         $('#multiple-select-field-division-proker').select2({
                             theme: "bootstrap-5",
@@ -477,7 +521,12 @@
                             placeholder: "Choose divisions...",
                             closeOnSelect: false,
                             allowClear: true,
-                            dropdownParent: $('#divisi-container') // Note: correct parameter name
+                            dropdownParent: $('#divisi-container')
+                        });
+
+                        // Store the selected division ID
+                        $('#multiple-select-field-division-proker').on('change', function() {
+                            selectedDivisionProkerId = $(this).val();
                         });
                     }, 100);
                 }).fail(function(xhr, status, error) {
@@ -499,20 +548,22 @@
                     return;
                 }
 
-                if (selectedType === 'divisi_ormawa' && !document.getElementById('divisiSelect').value) {
+                // Additional validation for each meeting type
+                if (selectedType === 'Rapat Divisi Ormawa' && !document.getElementById('multiple-select-field-division')
+                    .value) {
                     alert('Please select a division');
                     return;
                 }
 
-                if ((selectedType === 'program_kerja' || selectedType === 'divisi_program_kerja') &&
+                if ((selectedType === 'Rapat Program Kerja' || selectedType === 'Rapat Divisi Program Kerja') &&
                     !document.getElementById('programSelect').value) {
                     alert('Please select a work program');
                     return;
                 }
 
-                if (selectedType === 'divisi_program_kerja' &&
+                if (selectedType === 'Rapat Divisi Program Kerja' &&
                     document.getElementById('divisi-container').innerHTML.trim() !== "" &&
-                    !document.getElementById('divisiSelect').value) {
+                    !document.getElementById('multiple-select-field-division-proker').value) {
                     alert('Please select a division in the work program');
                     return;
                 }
@@ -521,6 +572,19 @@
                     return;
                 }
             } else if (currentStep === 3) {
+                // Auto-select participants based on meeting type before moving to the next step
+                if (!participantsSelected) {
+                    autoSelectParticipants();
+                    participantsSelected = true;
+                }
+
+                // Make sure we have at least one participant selected
+                const selectedParticipants = document.querySelectorAll('.participant-checkbox:checked');
+                if (selectedParticipants.length === 0) {
+                    alert('Please select at least one participant for the meeting');
+                    return;
+                }
+
                 updateReview(); // Update Review Data before moving to Step 4
             }
 
@@ -530,7 +594,22 @@
         // Validate Step 2 Fields
         function validateStep2() {
             let valid = true;
-            let fields = ['meetingName', 'meetingTopic', 'meetingDate', 'meetingTime', 'meetingLocation'];
+            const sessionFormat = document.getElementById('sessionFormat');
+
+            // Check if sessionFormat has a value
+            if (!sessionFormat.value) {
+                sessionFormat.classList.add('is-invalid');
+                valid = false;
+            } else {
+                sessionFormat.classList.remove('is-invalid');
+            }
+
+            let fields = ['meetingName', 'meetingTopic', 'meetingDate', 'meetingTime'];
+
+            // Add meetingLocation to required fields if a format is selected
+            if (sessionFormat.value) {
+                fields.push('meetingLocation');
+            }
 
             fields.forEach(fieldId => {
                 let field = document.getElementById(fieldId);
@@ -602,7 +681,69 @@
             console.log(`Returned to step ${currentStep}`);
         }
 
-        // Update progress bar berdasarkan langkah saat ini
+        // Function to auto-select participants based on meeting type
+        function autoSelectParticipants() {
+            console.log("Auto-selecting participants based on meeting type:", selectedType);
+
+            // Deselect all participants first
+            document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            if (selectedType === 'Rapat Divisi Ormawa' && selectedDivisionId) {
+                console.log("Selecting participants from division:", selectedDivisionId);
+
+                // Select all participants from the chosen division
+                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                    const divisionId = checkbox.getAttribute('data-division-id');
+                    if (divisionId === selectedDivisionId) {
+                        checkbox.checked = true;
+                    }
+                });
+
+            } else if (selectedType === 'Rapat Program Kerja' && selectedProgramId) {
+                console.log("Selecting participants from program:", selectedProgramId);
+
+                // Select all participants from the chosen work program
+                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                    const programIdsStr = checkbox.getAttribute('data-program-ids');
+                    if (programIdsStr) {
+                        try {
+                            const programIds = JSON.parse(programIdsStr);
+                            if (programIds.includes(parseInt(selectedProgramId))) {
+                                checkbox.checked = true;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing program IDs:", e);
+                        }
+                    }
+                });
+
+            } else if (selectedType === 'Rapat Divisi Program Kerja' && selectedProgramId && selectedDivisionProkerId) {
+                console.log("Selecting participants from division:", selectedDivisionProkerId, "in program:",
+                    selectedProgramId);
+
+                // Select all participants from the chosen division in the work program
+                document.querySelectorAll('.participant-checkbox').forEach(checkbox => {
+                    const divisionProkerIdsStr = checkbox.getAttribute('data-division-proker-ids');
+                    if (divisionProkerIdsStr) {
+                        try {
+                            const divisionProkerIds = JSON.parse(divisionProkerIdsStr);
+                            if (divisionProkerIds.includes(parseInt(selectedDivisionProkerId))) {
+                                checkbox.checked = true;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing division proker IDs:", e);
+                        }
+                    }
+                });
+            }
+
+            // Update the selected count display
+            updateSelectedCount();
+        }
+
+        // Update progress bar based on current step
         function updateProgressBar() {
             let progressBar = document.getElementById('progress-bar');
             if (progressBar) {
@@ -612,8 +753,8 @@
             }
         }
 
+        // Update review information for step 4
         function updateReview() {
-            console.log(selectedType);
             document.getElementById('reviewType').innerText = selectedType;
             document.getElementById('reviewName').innerText = document.getElementById('meetingName').value;
             document.getElementById('reviewTopic').innerText = document.getElementById('meetingTopic').value;
@@ -622,122 +763,81 @@
             document.getElementById('reviewLocation').innerText = document.getElementById('meetingLocation').value;
         }
 
-        // Set minimal tanggal hari ini pada input date
-        window.addEventListener('load', function() {
-            let dateInput = document.getElementById('meetingDate');
-            if (dateInput) {
-                dateInput.min = new Date().toISOString().split('T')[0];
-            } else {
-                console.error("Date input element not found!");
+        // Function to update selected count display
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.participant-checkbox:checked').length;
+            const selectedCountElement = document.getElementById('selectedCount');
+            if (selectedCountElement) {
+                selectedCountElement.textContent = `${count} selected`;
             }
-        });
+        }
 
-
-        $('#rapatForm').on('submit', function(e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    alert(response.message);
-                    window.location.href =
-                        `/${kodeOrmawa}/rapat/all`; // Redirect ke halaman daftar rapat
-                },
-                error: function(xhr) {
-                    alert("Error: " + xhr.responseJSON.message);
-                }
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Wait for Select2 to be fully loaded
-            setTimeout(function() {
-                // Initialize Select2 for division selection
-                $('#multiple-select-field-division').select2({
-                    theme: "bootstrap-5",
-                    width: 'resolve', // Use 'resolve' to respect the parent width
-                    placeholder: "Choose divisions...",
-                    closeOnSelect: false,
-                    allowClear: true,
-                    dropDownParent: $('#additional-options')
-                });
-
-            }, 100); // Small delay to ensure everything is loaded
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Wait for Select2 to be fully loaded
-            setTimeout(function() {
-
-
-                $('#multiple-select-field-division-proker').select2({
-                    theme: "bootstrap-5",
-                    width: 'resolve', // Use 'resolve' to respect the parent width
-                    placeholder: "Choose divisions...",
-                    closeOnSelect: false,
-                    allowClear: true,
-                    dropDownParent: $('#divisi-container')
-                });
-
-            }, 100); // Small delay to ensure everything is loaded
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
+        // Initialize participant selection controls
+        function initParticipantControls() {
             const participantCheckboxes = document.querySelectorAll('.participant-checkbox');
             const selectAllBtn = document.getElementById('selectAll');
             const deselectAllBtn = document.getElementById('deselectAll');
-            const filterByDivision = document.getElementById('filterByDivision');
-            const filterByRole = document.getElementById('filterByRole');
             const searchMembers = document.getElementById('searchMembers');
             const participantItems = document.querySelectorAll('.participant-item');
             const noResults = document.getElementById('no-results');
-            const selectedCount = document.getElementById('selectedCount');
             const selectDivisionBtns = document.querySelectorAll('.select-division');
 
-            // Update selected count
-            function updateSelectedCount() {
-                const count = document.querySelectorAll('.participant-checkbox:checked').length;
-                selectedCount.textContent = `${count} selected`;
+            // Update initial count
+            updateSelectedCount();
+
+            // Select/Deselect All buttons
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', function() {
+                    participantCheckboxes.forEach(checkbox => {
+                        if (!checkbox.closest('.participant-item').classList.contains('d-none')) {
+                            checkbox.checked = true;
+                        }
+                    });
+                    updateSelectedCount();
+                });
             }
 
-            // Select/Deselect All
-            selectAllBtn.addEventListener('click', function() {
-                participantCheckboxes.forEach(checkbox => {
-                    if (!checkbox.closest('.participant-item').classList.contains('d-none')) {
-                        checkbox.checked = true;
+            if (deselectAllBtn) {
+                deselectAllBtn.addEventListener('click', function() {
+                    participantCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    updateSelectedCount();
+                });
+            }
+
+            // Search functionality
+            if (searchMembers) {
+                searchMembers.addEventListener('input', function() {
+                    const searchText = this.value.toLowerCase();
+                    let hasVisibleItems = false;
+
+                    participantItems.forEach(item => {
+                        const name = item.getAttribute('data-name');
+
+                        if (name && name.includes(searchText)) {
+                            item.classList.remove('d-none');
+                            hasVisibleItems = true;
+                        } else {
+                            item.classList.add('d-none');
+                        }
+                    });
+
+                    // Show/hide no results message
+                    if (noResults) {
+                        if (!hasVisibleItems) {
+                            noResults.classList.remove('d-none');
+                        } else {
+                            noResults.classList.add('d-none');
+                        }
                     }
+
+                    // Update division headers visibility
+                    updateDivisionHeaders();
                 });
-                updateSelectedCount();
-            });
+            }
 
-            deselectAllBtn.addEventListener('click', function() {
-                participantCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                updateSelectedCount();
-            });
-
-            // Filter by Division
-            filterByDivision.addEventListener('change', function() {
-                const divisionId = this.value;
-                applyFilters();
-            });
-
-            // Filter by Role
-            filterByRole.addEventListener('change', function() {
-                const roleId = this.value;
-                applyFilters();
-            });
-
-            // Search Members
-            searchMembers.addEventListener('input', function() {
-                applyFilters();
-            });
-
-            // Select Division
+            // Select Division buttons
             selectDivisionBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const division = this.getAttribute('data-division');
@@ -755,107 +855,66 @@
                 });
             });
 
-            // Apply all filters
-            function applyFilters() {
-                const divisionFilter = filterByDivision.value;
-                const roleFilter = filterByRole.value;
-                const searchFilter = searchMembers.value.toLowerCase();
-
-                let hasVisibleItems = false;
-
-                participantItems.forEach(item => {
-                    const division = item.getAttribute('data-division');
-                    const role = item.getAttribute('data-role');
-                    const name = item.getAttribute('data-name');
-
-                    // Check if item matches all filters
-                    const matchesDivision = !divisionFilter ||
-                        divisionFilter === 'select-all-divisions' ||
-                        division === divisionFilter;
-
-                    const matchesRole = !roleFilter ||
-                        roleFilter === 'select-all-roles' ||
-                        role === roleFilter;
-
-                    const matchesSearch = !searchFilter ||
-                        name.includes(searchFilter);
-
-                    // Show/hide based on filter results
-                    if (matchesDivision && matchesRole && matchesSearch) {
-                        item.classList.remove('d-none');
-                        hasVisibleItems = true;
-                    } else {
-                        item.classList.add('d-none');
-                    }
-                });
-
-                // Show/hide no results message
-                if (!hasVisibleItems) {
-                    noResults.classList.remove('d-none');
-                } else {
-                    noResults.classList.add('d-none');
-                }
-
-                // Update visual state of division headers
-                updateDivisionHeaders();
-            }
-
-            // Update division headers visibility
-            function updateDivisionHeaders() {
-                const groups = document.querySelectorAll('.participant-group');
-
-                groups.forEach(group => {
-                    const header = group.querySelector('.bg-light');
-                    const items = group.querySelectorAll('.participant-item');
-
-                    // Check if any items in this division are visible
-                    const hasVisibleItems = Array.from(items).some(item => !item.classList.contains(
-                        'd-none'));
-
-                    // Show/hide division header accordingly
-                    if (header) {
-                        if (hasVisibleItems) {
-                            header.classList.remove('d-none');
-                        } else {
-                            header.classList.add('d-none');
-                        }
-                    }
-                });
-            }
-
             // Update count when checkboxes are clicked
             participantCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', updateSelectedCount);
             });
+        }
 
-            // Initial count update
-            updateSelectedCount();
+        // Update division headers visibility
+        function updateDivisionHeaders() {
+            const groups = document.querySelectorAll('.participant-group');
 
-            // Special behavior for "Select All" option in filters
-            filterByDivision.addEventListener('change', function() {
-                if (this.value === 'select-all-divisions') {
-                    const checkboxes = document.querySelectorAll('.participant-checkbox:not(:checked)');
-                    checkboxes.forEach(checkbox => {
-                        if (!checkbox.closest('.participant-item').classList.contains('d-none')) {
-                            checkbox.checked = true;
-                        }
-                    });
-                    updateSelectedCount();
+            groups.forEach(group => {
+                const header = group.querySelector('.bg-light');
+                const items = group.querySelectorAll('.participant-item');
+
+                // Check if any items in this division are visible
+                const hasVisibleItems = Array.from(items).some(item => !item.classList.contains('d-none'));
+
+                // Show/hide division header accordingly
+                if (header) {
+                    if (hasVisibleItems) {
+                        header.classList.remove('d-none');
+                    } else {
+                        header.classList.add('d-none');
+                    }
                 }
             });
+        }
 
-            filterByRole.addEventListener('change', function() {
-                if (this.value === 'select-all-roles') {
-                    const selectedRole = this.options[this.selectedIndex].text.replace('All ', '');
-                    const checkboxes = document.querySelectorAll(
-                        `.participant-checkbox[data-role*="${selectedRole}"]:not(:checked)`);
-                    checkboxes.forEach(checkbox => {
-                        if (!checkbox.closest('.participant-item').classList.contains('d-none')) {
-                            checkbox.checked = true;
-                        }
-                    });
-                    updateSelectedCount();
-                }
+        // Document ready initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date to today
+            let dateInput = document.getElementById('meetingDate');
+            if (dateInput) {
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            // Initialize session format listener
+            initSessionFormatListener();
+
+            // Initialize participant controls
+            initParticipantControls();
+
+            // Form submission handler
+            $('#rapatForm').on('submit', function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        alert(response.message);
+                        window.location.href =
+                            `/${kodeOrmawa}/rapat/all`; // Redirect to meeting list
+                    },
+                    error: function(xhr) {
+                        alert("Error: " + (xhr.responseJSON ? xhr.responseJSON.message :
+                            "An unknown error occurred"));
+                    }
+                });
             });
         });
     </script>

@@ -9,7 +9,8 @@
         <!-- Search Bar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <input type="text" class="form-control form-control-lg w-75" placeholder="Search for a meeting...">
-            <a href="{{ route('rapat.create', ['kode_ormawa' => $kode_ormawa]) }}" class="btn btn-primary btn-lg">+ Add Meeting</a>
+            <a href="{{ route('rapat.create', ['kode_ormawa' => $kode_ormawa]) }}" class="btn btn-primary btn-lg">+ Add
+                Meeting</a>
         </div>
 
         <!-- Filter Buttons -->
@@ -20,7 +21,7 @@
 
         <!-- Meeting List -->
         <div class="row meeting-list-container">
-            @include('includes.partials.meeting-list' , ['meetings' => $meetings])
+            @include('includes.partials.meeting-list', ['meetings' => $meetings])
         </div>
     </div>
 
@@ -29,26 +30,116 @@
     <script src="{{ asset('js/template.js') }}"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.filter-btn').on('click', function () {
+        $(document).ready(function() {
+            // Filter button handling
+            $('.filter-btn').on('click', function() {
                 let filter = $(this).data('filter');
-                let kodeOrmawa = "{{ $kode_ormawa }}"; // Ambil kode ormawa dari URL
+                let kodeOrmawa = "{{ $kode_ormawa }}";
 
-                // Ubah tombol aktif
+                // Update active button
                 $('.filter-btn').removeClass('active btn-dark').addClass('btn-outline-secondary');
                 $(this).addClass('active btn-dark');
 
                 $.ajax({
-                    url: `/${kodeOrmawa}/rapat/all`, // Panggil route dengan kode ormawa
+                    url: `/${kodeOrmawa}/rapat/all`,
                     type: 'GET',
-                    data: { filter: filter }, // Kirim filter ke backend
-                    success: function (response) {
-                        $('.meeting-list-container').html(response.html); // Perbarui daftar rapat
+                    data: {
+                        filter: filter
                     },
-                    error: function (xhr) {
+                    success: function(response) {
+                        $('.meeting-list-container').html(response.html);
+                    },
+                    error: function(xhr) {
                         alert("Terjadi kesalahan dalam memuat data rapat.");
                     }
                 });
+            });
+
+            // Search functionality
+            $('input[placeholder="Search for a meeting..."]').on('keyup', function() {
+                const searchText = $(this).val().toLowerCase();
+
+                // Get current active filter
+                const currentFilter = $('.filter-btn.active').data('filter');
+
+                if (searchText.length > 0) {
+                    // Client-side filtering for immediate response
+                    $('.meeting-card').each(function() {
+                        const meetingTitle = $(this).find('.meeting-title').text().toLowerCase();
+                        const meetingDate = $(this).find('.meeting-date').text().toLowerCase();
+                        const meetingLocation = $(this).find('.meeting-location').text()
+                            .toLowerCase();
+
+                        if (meetingTitle.includes(searchText) ||
+                            meetingDate.includes(searchText) ||
+                            meetingLocation.includes(searchText)) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+
+                    // Show "no results" message if all cards are hidden
+                    if ($('.meeting-card:visible').length === 0) {
+                        if ($('.no-results-message').length === 0) {
+                            $('.meeting-list-container').append(
+                                '<div class="col-12 text-center py-5 no-results-message">' +
+                                '<i class="fas fa-search fa-3x text-muted mb-3"></i>' +
+                                '<h4 class="text-muted">No meetings found matching "' + searchText +
+                                '"</h4>' +
+                                '</div>'
+                            );
+                        }
+                    } else {
+                        $('.no-results-message').remove();
+                    }
+                } else {
+                    // If search field is emptied, reset to current filter view
+                    $('.meeting-card').show();
+                    $('.no-results-message').remove();
+
+                    // Optional: refresh from server for complete reset
+                    if (currentFilter) {
+                        let kodeOrmawa = "{{ $kode_ormawa }}";
+                        $.ajax({
+                            url: `/${kodeOrmawa}/rapat/all`,
+                            type: 'GET',
+                            data: {
+                                filter: currentFilter
+                            },
+                            success: function(response) {
+                                $('.meeting-list-container').html(response.html);
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Server-side search with 500ms debounce for performance
+            let searchTimer;
+            $('input[placeholder="Search for a meeting..."]').on('keyup', function() {
+                const searchText = $(this).val();
+                const currentFilter = $('.filter-btn.active').data('filter');
+                const kodeOrmawa = "{{ $kode_ormawa }}";
+
+                clearTimeout(searchTimer);
+
+                // Only make the server request if at least 2 characters are entered
+                if (searchText.length >= 2) {
+                    searchTimer = setTimeout(function() {
+                        $.ajax({
+                            url: `/${kodeOrmawa}/rapat/all`,
+                            type: 'GET',
+                            data: {
+                                filter: currentFilter,
+                                search: searchText
+                            },
+                            success: function(response) {
+                                $('.meeting-list-container').html(response.html);
+                            }
+                        });
+                    }, 500); // Wait 500ms after typing stops
+                }
             });
         });
     </script>

@@ -284,18 +284,18 @@ class SimpleAdditiveWeightingService
      */
     protected function normalisasi($nilai, $tipe)
     {
-        // Jika array kosong, kembalikan array kosong
+        // If array is empty, return empty array
         if (empty($nilai)) {
             return [];
         }
 
-        // Cari nilai min dan max
+        // Find min and max values
         $min = min($nilai);
         $max = max($nilai);
 
-        // Hindari division by zero
+        // Avoid division by zero
         if ($min == $max) {
-            // Jika semua nilai sama, normalisasi jadi 1
+            // If all values are the same, normalize to 1
             $hasil = [];
             foreach ($nilai as $userId => $value) {
                 $hasil[$userId] = 1;
@@ -303,14 +303,14 @@ class SimpleAdditiveWeightingService
             return $hasil;
         }
 
-        // Lakukan normalisasi sesuai tipe
+        // Normalize according to type
         $hasil = [];
         foreach ($nilai as $userId => $value) {
             if ($tipe == 'benefit') {
-                // Untuk kriteria benefit: nilai / nilai maksimum
+                // For benefit criteria: value / maximum value
                 $hasil[$userId] = $value / $max;
             } else {
-                // Untuk kriteria cost: nilai minimum / nilai
+                // For cost criteria: minimum value / value
                 $hasil[$userId] = $min / $value;
             }
         }

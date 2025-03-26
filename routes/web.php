@@ -52,6 +52,11 @@ Route::middleware(['auth'])->group(function () {
         return response()->json($divisions);
     });
 
+    Route::get('/get-divisions/{programId}', [RapatController::class, 'getDivisions']);
+    Route::get('/get-division-members/{divisionId}', [RapatController::class, 'getDivisionMembers']);
+    Route::get('/get-program-members/{programId}', [RapatController::class, 'getProgramMembers']);
+    Route::get('/get-division-program-members/{divisionProgramId}', [RapatController::class, 'getDivisionProgramMembers']);
+
     // Routes based on Kode Ormawa
     Route::prefix('{kode_ormawa}')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -85,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{id}/edit', [ProgramKerjaController::class, 'edit'])->name('edit'); // Mengambil data program kerja untuk form edit
             Route::put('{id}/update', [ProgramKerjaController::class, 'update'])->name('update'); // Mengupdate program kerja
             Route::get('{id}', [ProgramKerjaController::class, 'show'])->name('show'); // Menampilkan detail program kerja
+            Route::delete('{id}/destroy', [ProgramKerjaController::class, 'destroy'])->name('destroy');
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
 

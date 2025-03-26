@@ -9,6 +9,8 @@ use App\Models\Ormawa;
 use App\Models\ProgramKerja;
 use App\Models\Rapat;
 use App\Models\RapatPartisipasi;
+use App\Models\StrukturOrmawa;
+use App\Models\StrukturProker;
 use App\Models\User;
 use App\Notifications\RapatDibuatNotification;
 use Illuminate\Http\Request;
@@ -25,22 +27,30 @@ class RapatController extends Controller
     public function index(Request $request)
     {
         $kodeOrmawa = $request->kode_ormawa;
-        $userId = Auth::id(); // Ambil user yang sedang login
+        $userId = Auth::id();
 
-        // Ambil semua rapat berdasarkan kode Ormawa
+        // Start building the query
         $meetings = Rapat::where('ormawa_id', $kodeOrmawa);
 
-        // Jika user memilih "Your Meetings", cari rapat yang diikuti oleh user
+        // Filter for user's meetings if requested
         if ($request->has('filter') && $request->filter == 'your_meetings') {
-            $rapatIds = RapatPartisipasi::where('user_id', $userId)->pluck('rapat_id'); // Ambil ID rapat yang diikuti
+            $rapatIds = RapatPartisipasi::where('user_id', $userId)->pluck('rapat_id');
             $meetings = $meetings->whereIn('id', $rapatIds);
+        }
+
+        // Add search functionality
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $meetings = $meetings->where(function ($query) use ($searchTerm) {
+                $query->where('nama', 'like', "%{$searchTerm}%")
+                    ->orWhere('topik', 'like', "%{$searchTerm}%")
+                    ->orWhere('tempat', 'like', "%{$searchTerm}%");
+            });
         }
 
         $meetings = $meetings->get();
 
-        // $meetings['penyelengara'] =
-
-        // Jika request AJAX, kembalikan hanya HTML rapat
+        // If AJAX request, return only the HTML
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('includes.partials.meeting-list', compact('meetings'))->render()
@@ -70,6 +80,25 @@ class RapatController extends Controller
                 $q->where('ormawas_kode', $kode_ormawa);
             });
         })->get();
+
+        // Get division data for each user
+        foreach ($users as $user) {
+            // Get division information
+            $divisionData = StrukturOrmawa::where('users_id', $user->id)
+                ->with('divisiOrmawas')
+                ->first();
+
+            $user->division = $divisionData ? $divisionData->divisiOrmawas : null;
+
+            // Get program_kerja data where user is a member
+            $prokerStructures = StrukturProker::where('users_id', $user->id)
+                ->with('divisiProgramKerja.programKerja')
+                ->get();
+
+            // Add program and division proker IDs to user for easier filtering
+            $user->program_ids = $prokerStructures->pluck('divisiProgramKerja.program_kerjas_id')->unique()->toArray();
+            $user->division_proker_ids = $prokerStructures->pluck('divisi_program_kerjas_id')->toArray();
+        }
 
         return view('rapat.create', compact('divisiOrmawas', 'programKerjas', 'divisiProgramKerjas', 'users'));
     }

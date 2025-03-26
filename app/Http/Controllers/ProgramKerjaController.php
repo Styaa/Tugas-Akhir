@@ -7,17 +7,24 @@ use App\Models\DivisiPelaksana;
 use App\Models\DivisiProgramKerja;
 use App\Models\Document;
 use App\Models\Evaluasi;
+use App\Models\IzinRapat;
 use App\Models\Jabatan;
+use App\Models\Notulen;
 use App\Models\ProgramKerja;
 use App\Models\RancanganAnggaranBiaya;
+use App\Models\Rapat;
+use App\Models\RapatPartisipasi;
 use App\Models\StrukturProker;
 use App\Models\User;
+use App\Notifications\EvaluasiSelesaiNotification;
 use App\Services\SimpleAdditiveWeightingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\IOFactory;
 
 class ProgramKerjaController extends Controller
@@ -148,7 +155,7 @@ class ProgramKerjaController extends Controller
         }
     }
 
-    public function create(Request $request)
+    public function create(Request $request, $kode_ormawa)
     {
         $this->validateRequest($request);
 
@@ -158,7 +165,7 @@ class ProgramKerjaController extends Controller
         // Login user setelah registrasi
         // auth()->login($user);
 
-        return response()->json(['success', 'Program kerja berhasil ditambahkan.']); // Ganti dengan route yang sesuai
+        return redirect()->route('program-kerja.index', ['kode_ormawa' => $kode_ormawa])->with('success', 'Program kerja berhasil ditambahkan.'); // Ganti dengan route yang sesuai
     }
 
     public function edit(Request $request)
@@ -337,6 +344,74 @@ class ProgramKerjaController extends Controller
 
         // Kembalikan view tanpa tanggal selesai
         return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
+    }
+
+    public function destroy($kode_ormawa, $id)
+    {
+        try {
+            // Start a database transaction to ensure all related data is deleted properly
+            DB::beginTransaction();
+
+            $programKerja = ProgramKerja::findOrFail($id);
+
+            // 1. Delete all related documents
+            $documents = Document::where('program_kerja_id', $id)->get();
+            foreach ($documents as $document) {
+                // Delete the physical file if it exists
+                if (Storage::exists($document->storage_path)) {
+                    Storage::delete($document->storage_path);
+                }
+                $document->delete();
+            }
+
+            // 2. Delete all evaluations related to this program
+            Evaluasi::where('program_kerjas_id', $id)->delete();
+
+            // 3. Delete all budget plans (RAB)
+            RancanganAnggaranBiaya::where('program_kerjas_id', $id)->delete();
+
+            // 4. Delete all activities for this program
+            $divisiIds = DivisiProgramKerja::where('program_kerjas_id', $id)->pluck('id')->toArray();
+            AktivitasDivisiProgramKerja::where('program_kerjas_id', $id)->delete();
+
+            // 5. Delete all meeting records related to this program
+            Rapat::where('program_kerjas_id', $id)->delete();
+
+            // 6. Delete all meeting participants for this program's meetings
+            $rapatIds = Rapat::where('program_kerjas_id', $id)->pluck('id')->toArray();
+            if (!empty($rapatIds)) {
+                RapatPartisipasi::whereIn('rapat_id', $rapatIds)->delete();
+
+                // Delete meeting permissions/excuses
+                IzinRapat::whereIn('rapat_id', $rapatIds)->delete();
+
+                // Delete meeting notes
+                Notulen::whereIn('rapats_id', $rapatIds)->delete();
+            }
+
+            // 7. Delete all structure members (panitia) for this program
+            foreach ($divisiIds as $divisiId) {
+                StrukturProker::where('divisi_program_kerjas_id', $divisiId)->delete();
+            }
+
+            // 8. Delete all divisions associated with this program
+            DivisiProgramKerja::where('program_kerjas_id', $id)->delete();
+
+            // 9. Finally, delete the program itself
+            $programKerja->delete();
+
+            // Commit the transaction
+            DB::commit();
+
+            return redirect()->route('dashboard')
+                ->with('success', 'Program kerja dan semua data terkait berhasil dihapus.');
+        } catch (\Exception $e) {
+            // Roll back the transaction if any errors occur
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menghapus program kerja: ' . $e->getMessage());
+        }
     }
 
     public function pilihKetua($kode_ormawa, $prokerId, $periode, $userId)
@@ -687,24 +762,62 @@ class ProgramKerjaController extends Controller
 
     public function selesaikan(Request $request, $kode_ormawa, $id)
     {
-        // Dapatkan program kerja
-        $programKerja = ProgramKerja::find($id);
+        try {
+            // Wrap in a transaction to ensure all operations complete
+            DB::beginTransaction();
 
-        // Update status program kerja
-        $programKerja->update([
-            'updated_at' => now(),
-            'konfirmasi_penyelesaian' => 'Ya',
-            'pengkonfirmasi' => Auth::user()->id, // Menandakan program kerja telah selesai
-        ]);
+            // Get the program kerja
+            $programKerja = ProgramKerja::find($id);
 
-        // dd($programKerja);
+            // Update status program kerja
+            $programKerja->update([
+                'updated_at' => now(),
+                'konfirmasi_penyelesaian' => 'Ya',
+                'disetujui' => 'Ya', // Mark as approved
+                'pengkonfirmasi' => Auth::user()->id,
+            ]);
 
-        // Hitung evaluasi untuk semua panitia
-        $this->sawService->hitungEvaluasiProker($id);
+            // Calculate evaluation for all committee members
+            $this->sawService->hitungEvaluasiProker($id);
 
-        return redirect()
-            ->route('program-kerja.evaluasi', $id)
-            ->with('success', 'Program kerja telah diselesaikan dan evaluasi panitia telah dihitung.');
+            // Get evaluations results to send in notifications
+            $evaluations = Evaluasi::where('program_kerjas_id', $id)
+                ->with('user')
+                ->get();
+
+            // Get all users who were part of this program
+            $users = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($id) {
+                $query->select('id')
+                    ->from('divisi_program_kerjas')
+                    ->where('program_kerjas_id', $id);
+            })->with('user')->get()->pluck('user');
+
+            // Send notification to each user with their evaluation result
+            foreach ($users as $user) {
+                $userEvaluation = $evaluations->where('user_id', $user->id)->first();
+
+                // dd($user);
+
+                if ($userEvaluation) {
+                    // dd($userEvaluation);
+                    // Create and send notification
+                    Notification::send($user, new EvaluasiSelesaiNotification($programKerja, $userEvaluation));
+                }
+            }
+
+            DB::commit();
+
+            // Redirect back to the same page with success message
+            return redirect()
+                ->route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $id])
+                ->with('success', 'Program kerja telah diselesaikan dan evaluasi panitia telah dihitung. Notifikasi telah dikirim ke seluruh anggota.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan saat menyelesaikan program kerja: ' . $e->getMessage());
+        }
     }
 
     public function evaluasi($id)

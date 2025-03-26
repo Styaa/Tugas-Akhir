@@ -129,6 +129,54 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="modal fade" id="deleteproject{{ $program->id }}" tabindex="-1"
+                                        role="dialog" aria-labelledby="deleteProjectModalLabel{{ $program->id }}"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title"
+                                                        id="deleteProjectModalLabel{{ $program->id }}">Hapus Program
+                                                        Kerja</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="text-center mb-4">
+                                                        <i class="icofont-ui-delete text-danger display-4 mb-3"></i>
+                                                        <h4 class="text-danger">Perhatian!</h4>
+                                                        <p class="mb-0">Apakah Anda yakin ingin menghapus program kerja:
+                                                        </p>
+                                                        <p class="fw-bold">{{ $program->nama }}</p>
+                                                        <p class="text-muted">Tindakan ini akan menghapus semua data
+                                                            terkait program kerja ini, termasuk:</p>
+                                                        <ul class="text-start text-muted">
+                                                            <li>Dokumen dan berkas program kerja</li>
+                                                            <li>Struktur kepanitiaan</li>
+                                                            <li>Aktivitas dan tugas</li>
+                                                            <li>Rapat dan notulensi</li>
+                                                            <li>Anggaran dan evaluasi</li>
+                                                        </ul>
+                                                        <p class="text-danger small fw-bold">Tindakan ini tidak dapat
+                                                            dibatalkan!</p>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer justify-content-center">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        data-bs-dismiss="modal">Batal</button>
+                                                    <form
+                                                        action="{{ route('program-kerja.destroy', ['kode_ormawa' => $kode_ormawa, 'id' => $program->id]) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger">Hapus Program
+                                                            Kerja</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
