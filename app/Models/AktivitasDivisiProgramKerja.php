@@ -10,7 +10,7 @@ class AktivitasDivisiProgramKerja extends Model
     //
     use HasFactory;
 
-    protected $table = 'aktivitas_divisi_program_kerjas';
+    protected $table = 'tugas_divisi_program_kerjas';
 
     protected $fillable = [
         'nama',

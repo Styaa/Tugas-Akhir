@@ -15,10 +15,10 @@
                                 <h1 class="display-6 fw-bold mb-1">{{ $ormawas[0]['nama'] }}</h1>
                                 <p class="mb-3 opacity-75">{{ $ormawas[0]['kode'] }}</p>
                             </div>
-                            <div class="d-none d-md-block">
+                            {{-- <div class="d-none d-md-block">
                                 <img src="{{ asset('images/ormawa_logo.png') }}" alt="Logo" class="img-fluid"
                                     style="max-height: 80px;">
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="bg-white bg-opacity-10 p-3 mt-4 rounded-3">
@@ -535,9 +535,9 @@
                             </li>
                         </ul>
 
-                        <div class="mt-4">
+                        {{-- <div class="mt-4">
                             <div id="divisionActivityChart"></div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

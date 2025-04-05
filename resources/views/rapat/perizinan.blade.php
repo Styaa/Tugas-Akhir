@@ -49,10 +49,11 @@
                                                 <span class="fw-bold ms-1">{{ $izin->user->name }}</span>
                                             </td>
                                             <td>
-                                                <a href="{{route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id])}}" class="underline">{{ $izin->rapat->nama }}</a>
+                                                <a href="{{ route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id]) }}"
+                                                    class="underline">{{ $izin->rapat->nama }}</a>
                                             </td>
                                             <td>
-                                                {{ $izin->rapat->tipe_penyelenggara }}
+                                                {{ $izin->rapat->nama_penyelenggara }}
                                             </td>
                                             <td>
                                                 {{ $izin->alasan }}
@@ -68,12 +69,10 @@
                                                         data-user-name="{{ $user->name }}"><i
                                                             class="icofont-close-circled text-danger"></i></button> --}}
                                                     <button type="button" class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="1"
-                                                        data-user-name="Satya"><i
+                                                        data-user-id="1" data-user-name="Satya"><i
                                                             class="icofont-check-circled text-success"></i></button>
                                                     <button type="button" class="btn btn-outline-secondary reject-button"
-                                                        data-user-id="1" data-bs-toggle="modal"
-                                                        data-user-name="Satya"><i
+                                                        data-user-id="1" data-bs-toggle="modal" data-user-name="Satya"><i
                                                             class="icofont-close-circled text-danger"></i></button>
                                                 </div>
                                             </td>

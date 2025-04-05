@@ -312,6 +312,8 @@ class ProgramKerjaController extends Controller
             ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
             ->get();
 
+        // dd($anggotaProker);
+
         // Ambil aktivitas untuk semua divisi pelaksana yang terkait
         $activities = AktivitasDivisiProgramKerja::where('program_kerjas_id', $programKerja->id)->get();
 
