@@ -59,4 +59,23 @@ class ProgramKerja extends Model
     {
         return $this->hasMany(Evaluasi::class, 'program_kerjas_id');
     }
+
+    public function laporanDokumens()
+    {
+        return $this->hasMany(LaporanDokumen::class, 'program_kerja_id');
+    }
+
+    public function proposal()
+    {
+        return $this->hasOne(LaporanDokumen::class, 'program_kerja_id')
+            ->where('tipe', 'proposal')
+            ->latest('created_at');
+    }
+
+    public function lpj()
+    {
+        return $this->hasOne(LaporanDokumen::class, 'program_kerja_id')
+            ->where('tipe', 'laporan_pertanggungjawaban')
+            ->latest('created_at');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiOrmawa;
 use App\Models\DivisiPelaksana;
+use App\Models\LaporanDokumen;
 use App\Models\Ormawa;
 use App\Models\ProgramKerja;
 use Illuminate\Http\Request;
@@ -30,6 +31,40 @@ class DashboardController extends Controller
                 'tanggal_selesai_program_kerja' => Carbon::parse($programKerja->tanggal_selesai)->translatedFormat('d F Y'),
             ];
         });
+
+        $programKerjaCount = ProgramKerja::where('ormawas_kode', $kodeOrmawa)->count();
+
+        $lateProposals = ProgramKerja::where('ormawas_kode', $kodeOrmawa)
+            ->where('tanggal_mulai', '<=', now()->addDays(10))
+            ->whereDoesntHave('laporanDokumens', function ($query) {
+                $query->where('tipe', 'proposal')
+                    ->where('status', 'disetujui');
+            })
+            ->count();
+
+        $lateLPJ = ProgramKerja::where('ormawas_kode', $kodeOrmawa)
+            ->whereNotNull('konfirmasi_penyelesaian')
+            ->where('tanggal_selesai', '<=', now()->subDays(10))
+            ->whereDoesntHave('laporanDokumens', function ($query) {
+                $query->where('tipe', 'laporan_pertanggungjawaban')
+                    ->where('status', 'disetujui');
+            })
+            ->count();
+
+        $dokumenTelat = $lateProposals + $lateLPJ;
+
+        $totalPrograms = ProgramKerja::where('ormawas_kode', $kodeOrmawa)->count();
+        $completedPrograms = ProgramKerja::where('ormawas_kode', $kodeOrmawa)
+            ->where('tanggal_selesai', '<', now())
+            ->whereNotNull('konfirmasi_penyelesaian')
+            ->count();
+        $progressPercentage = $totalPrograms > 0 ? round(($completedPrograms / $totalPrograms) * 100) : 0;
+
+        $totalDocuments = LaporanDokumen::where('ormawas_kode', $kodeOrmawa)->count();
+        $approvedDocuments = LaporanDokumen::where('ormawas_kode', $kodeOrmawa)
+            ->where('status', 'disetujui')
+            ->count();
+        $approvalPercentage = $totalDocuments > 0 ? round(($approvedDocuments / $totalDocuments) * 100) : 0;
 
         // Program Kerja Mendatang
         $today = Carbon::now();
@@ -85,7 +120,17 @@ class DashboardController extends Controller
             'kodeOrmawa',
             'kritikalTasksCount',
             'completedTasksCount',
-            'overdueTasksCount'
+            'overdueTasksCount',
+            'programKerjaCount',
+            'dokumenTelat',
+            'lateProposals',
+            'lateLPJ',
+            'totalPrograms',
+            'completedPrograms',
+            'progressPercentage',
+            'totalDocuments',
+            'approvedDocuments',
+            'approvalPercentage'
         ));
     }
 

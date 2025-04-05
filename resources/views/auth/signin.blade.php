@@ -1,6 +1,6 @@
 @extends('layouts.login')
 
-@section('title', __('Sign In'))
+@section('title', __('Dashboard'))
 
 @section('content')
     <!-- main body area -->
@@ -37,15 +37,12 @@
                             <!-- Form -->
                             <form class="row g-1 p-0 p-4" method="POST" action="{{ route('post-login') }}">
                                 @csrf
-                                <div class="col-12 text-center mb-5">
+                                <div class="col-12 text-center mb-4">
                                     <h1>Sign in</h1>
-                                    <div class="col-12">
-                                        @if ($errors->has('login_gagal'))
-                                            <div class="alert alert-danger" role="alert">
-                                                {{ $errors->first('login_gagal') }}
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <span>Free access to our dashboard.</span>
+                                    <span class="d-flex justify-content-center text-secondary">Email :
+                                        john.doe@student.ubaya.ac.id</span>
+                                    <span class="d-flex justify-content-center text-secondary">Password : password</span>
                                 </div>
                                 <div class="col-12 text-center mb-4">
                                     <a class="btn btn-lg btn-outline-secondary btn-block" href="#">

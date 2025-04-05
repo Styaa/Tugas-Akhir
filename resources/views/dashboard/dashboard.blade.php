@@ -45,43 +45,53 @@
             <div class="col-md-4">
                 <!-- Quick Stats -->
                 <div class="row g-3">
-                    <div class="col-md-12">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                                            <i class="bi bi-calendar-check text-white fs-4"></i>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                                                <i class="bi bi-calendar-check text-white fs-4"></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h5 class="fw-bold mb-1">Program Kerja</h5>
-                                        <h3 class="mb-0">{{ count($programKerjaUsers) }}</h3>
-                                        <div class="progress mt-2" style="height: 5px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 75%"
-                                                aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="fw-bold mb-1">Program Kerja</h5>
+                                            <h3 class="mb-0">{{ $programKerjaCount }}</h3>
+                                            <div class="progress mt-2" style="height: 5px;">
+                                                <div class="progress-bar bg-primary" role="progressbar"
+                                                    style="width: {{ $progressPercentage }}%"
+                                                    aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-muted">{{ $completedPrograms }} dari {{ $totalPrograms }}
+                                                selesai</small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-12">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                                            <i class="bi bi-clipboard-data text-white fs-4"></i>
+                        <div class="col-md-12">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                                                <i class="bi bi-clipboard-data text-white fs-4"></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h5 class="fw-bold mb-1">Proposal/LPJ Telat</h5>
-                                        <h3 class="mb-0">74</h3>
-                                        <div class="progress mt-2" style="height: 5px;">
-                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 42%"
-                                                aria-valuenow="42" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="fw-bold mb-1">Proposal/LPJ Telat</h5>
+                                            <h3 class="mb-0">{{ $dokumenTelat }}</h3>
+                                            <div class="progress mt-2" style="height: 5px;">
+                                                <div class="progress-bar bg-danger" role="progressbar"
+                                                    style="width: {{ $approvalPercentage }}%"
+                                                    aria-valuenow="{{ $approvalPercentage }}" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-muted">{{ $approvedDocuments }} dari {{ $totalDocuments }}
+                                                disetujui</small>
                                         </div>
                                     </div>
                                 </div>
