@@ -43,7 +43,8 @@
                             </div>
 
                             <!-- Form -->
-                            <form class="row g-3 p-0 p-4" method="POST" action="{{ route('post-regist') }}">
+                            <form class="row g-3 p-0 p-4" method="POST" action="{{ route('post-regist') }}"
+                                enctype="multipart/form-data" id="uploadForm">
                                 @csrf
                                 <!-- Step 1 -->
                                 <div class="step" id="step-1">
@@ -86,7 +87,7 @@
                                 <!-- Step 2 -->
                                 <div class="step d-none" id="step-2">
                                     <h5 class="mt-4">Step 2: Buat Password</h5>
-                                    <div class="row">
+                                    <div class="row mb-4">
                                         <div class="col-6">
                                             <label class="form-label">Password</label>
                                             <input type="password" name="password" class="form-control"
@@ -97,6 +98,32 @@
                                             <input type="password" name="password_confirmation" class="form-control"
                                                 placeholder="Ulangi password" required>
                                         </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Upload CV</label>
+                                        <div class="file-upload-container">
+                                            <input type="file" id="cv-input" class="filepond" name="cv"
+                                                data-max-file-size="10MB" data-max-files="5" required />
+                                            <small class="text-muted d-block mt-2">Format yang didukung: PDF, DOC, DOCX,
+                                                XLS,
+                                                XLSX, PPT, PPTX, JPG, PNG (Maks. 10MB)</small>
+                                        </div>
+                                        @error('files')
+                                            <div class="text-danger mt-2">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Upload Portofolio</label>
+                                        <div class="file-upload-container">
+                                            <input type="file" id="porto-input" class="filepond" name="porto"
+                                                multiple data-max-file-size="10MB" data-max-files="5" />
+                                            <small class="text-muted d-block mt-2">Format yang didukung: PDF, DOC, DOCX,
+                                                XLS,
+                                                XLSX, PPT, PPTX, JPG, PNG (Maks. 10MB)</small>
+                                        </div>
+                                        @error('files')
+                                            <div class="text-danger mt-2">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                     <button type="button" class="btn btn-secondary mt-3 prev-step">Previous</button>
                                     <button type="button" class="btn btn-primary mt-3 next-step">Next</button>
@@ -171,28 +198,285 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verifikasi elemen ada sebelum inisialisasi
+            const cvInput = document.getElementById('cv-input');
+            const portoInput = document.getElementById('porto-input');
+
+            if (!cvInput || !portoInput) {
+                console.error('Input file tidak ditemukan');
+                return;
+            }
+
+            // Verifikasi FilePond tersedia
+            if (typeof FilePond === 'undefined') {
+                console.error('FilePond tidak tersedia. Periksa URL library.');
+                return;
+            }
+
+            // Verifikasi plugin tersedia
+            if (typeof FilePondPluginFileValidateType === 'undefined' ||
+                typeof FilePondPluginFileValidateSize === 'undefined' ||
+                typeof FilePondPluginImagePreview === 'undefined' ||
+                typeof FilePondPluginFilePoster === 'undefined') {
+                console.error('Plugin FilePond tidak tersedia.');
+                return;
+            }
+
+            // Register FilePond plugins
+            FilePond.registerPlugin(
+                FilePondPluginFileValidateType,
+                FilePondPluginFileValidateSize,
+                FilePondPluginImagePreview,
+                FilePondPluginFilePoster
+            );
+
+            // Simpan daftar file yang sudah diupload ke temporary storage
+            window.uploadedCVFiles = [];
+            window.uploadedPortoFiles = [];
+
+            // Definisi route untuk upload dan delete
+            const uploadRoute = '{{ route('upload.temp') }}'; // Sesuaikan dengan route Anda
+            const deleteRoute = '{{ route('delete.temp') }}'; // Sesuaikan dengan route Anda
+
+            // Konfigurasi dasar yang sama untuk kedua FilePond
+            const commonConfig = {
+                maxFileSize: '10MB',
+                acceptedFileTypes: [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'image/jpeg',
+                    'image/png'
+                ],
+                labelFileTypeNotAllowed: 'Format file tidak didukung',
+                fileValidateTypeLabelExpectedTypes: 'File yang didukung: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG',
+                labelMaxFileSizeExceeded: 'File terlalu besar',
+                labelMaxFileSize: 'Ukuran maksimal file adalah {filesize}',
+            };
+
+            // Fungsi pemrosesan file
+            function processFile(file, fileType, uploadedFiles, load, error, progress) {
+                console.log(`Processing ${fileType} file:`, file.name);
+
+                // Periksa apakah CSRF token tersedia
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    console.error(
+                        'CSRF token tidak ditemukan! Tambahkan <meta name="csrf-token" content="{{ csrf_token() }}"> di head.'
+                    );
+                    error('CSRF token tidak tersedia');
+                    return;
+                }
+
+                // Buat FormData untuk kirim file
+                const formData = new FormData();
+                formData.append('file', file, file.name);
+                formData.append('file_type', fileType);
+                formData.append('_token', csrfToken);
+
+                // Buat XHR request
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.onprogress = (e) => {
+                    progress(e.lengthComputable, e.loaded, e.total);
+                };
+
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.status === 'success') {
+                                uploadedFiles.push(response.temp_file);
+                                console.log(`${fileType} uploaded:`, response.temp_file);
+                                load(response.temp_file);
+                            } else {
+                                console.error('Server returned error:', response.message);
+                                error(response.message);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                            error('Error parsing server response');
+                        }
+                    } else {
+                        console.error('XHR error - HTTP status:', xhr.status);
+                        error('Upload failed with status ' + xhr.status);
+                    }
+                };
+
+                xhr.onerror = function() {
+                    console.error('XHR network error');
+                    error('Network error occurred');
+                };
+
+                // Open and send the request
+                xhr.open('POST', uploadRoute);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                xhr.send(formData);
+
+                // Return abort function
+                return {
+                    abort: () => {
+                        xhr.abort();
+                    }
+                };
+            }
+
+            // Fungsi revert file
+            function revertFile(uniqueFileId, fileType, uploadedFiles, load, error) {
+                console.log(`Reverting ${fileType} file:`, uniqueFileId);
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    error('CSRF token tidak tersedia');
+                    return;
+                }
+
+                fetch(deleteRoute, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            file_path: uniqueFileId,
+                            file_type: fileType
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Revert response:', data);
+
+                        // Hapus dari daftar file yang sudah diupload
+                        const index = uploadedFiles.findIndex(file => file === uniqueFileId);
+                        if (index !== -1) {
+                            uploadedFiles.splice(index, 1);
+                            console.log(`${fileType} file removed:`, uniqueFileId);
+                        }
+
+                        load();
+                    })
+                    .catch(err => {
+                        console.error('Error reverting file:', err);
+                        error(err.message);
+                    });
+            }
+
+            // Konfigurasi untuk upload CV
+            const cvPond = FilePond.create(cvInput, {
+                allowMultiple: true,
+                maxFiles: 5,
+                maxFileSize: '10MB',
+                acceptedFileTypes: [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'image/jpeg',
+                    'image/png'
+                ],
+                labelIdle: 'Seret & lepas file disini atau <span class="filepond--label-action">Pilih File</span>',
+                labelFileTypeNotAllowed: 'Format file tidak didukung',
+                fileValidateTypeLabelExpectedTypes: 'File yang didukung: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG',
+                labelMaxFileSizeExceeded: 'File terlalu besar',
+                labelMaxFileSize: 'Ukuran maksimal file adalah {filesize}',
+                server: {
+                    process: (fieldName, file, metadata, load, error, progress, abort) =>
+                        processFile(file, 'cv', uploadedCVFiles, load, error, progress),
+                    revert: (uniqueFileId, load, error) =>
+                        revertFile(uniqueFileId, 'cv', uploadedCVFiles, load, error)
+                }
+            });
+
+            // Konfigurasi untuk upload Portofolio
+            const portfolioPond = FilePond.create(portoInput, {
+                ...commonConfig,
+                allowMultiple: true,
+                maxFiles: 5,
+                labelIdle: 'Seret & lepas portofolio disini atau <span class="filepond--label-action">Pilih File</span>',
+                server: {
+                    process: (fieldName, file, metadata, load, error, progress, abort) =>
+                        processFile(file, 'portfolio', uploadedPortoFiles, load, error, progress),
+                    revert: (uniqueFileId, load, error) =>
+                        revertFile(uniqueFileId, 'portfolio', uploadedPortoFiles, load, error)
+                }
+            });
+
+            // Handle form submission
+            document.querySelector('form').addEventListener('submit', function(e) {
+                // Tambahkan data file ke form sebelum submit
+                const cvFilesInput = document.createElement('input');
+                cvFilesInput.type = 'hidden';
+                cvFilesInput.name = 'cv_files';
+                cvFilesInput.value = JSON.stringify(uploadedCVFiles);
+                this.appendChild(cvFilesInput);
+
+                const portoFilesInput = document.createElement('input');
+                portoFilesInput.type = 'hidden';
+                portoFilesInput.name = 'porto_files';
+                portoFilesInput.value = JSON.stringify(uploadedPortoFiles);
+                this.appendChild(portoFilesInput);
+
+                // Validasi form sebelum submit
+                if (document.querySelector('input[name="cv"]').required && uploadedCVFiles.length === 0) {
+                    e.preventDefault();
+                    alert('Silakan upload CV Anda');
+                    return false;
+                }
+            });
+        });
+
         let currentStep = 1;
 
         document.querySelectorAll(".next-step").forEach(button => {
             button.addEventListener("click", function() {
-                if (validateStep(currentStep)) {
-                    // Khusus Step 2: Validasi Password dan Confirm Password
-                    if (currentStep === 2) {
-                        let password = document.querySelector("input[name='password']").value;
-                        let confirmPassword = document.querySelector("input[name='password_confirmation']")
-                            .value;
+                console.log("Attempting to validate step", currentStep);
 
-                        if (password !== confirmPassword) {
-                            alert("Password dan Konfirmasi Password harus sama!");
-                            return; // Hentikan proses jika tidak sama
+                try {
+                    if (validateStep(currentStep)) {
+                        console.log("Step", currentStep, "validated successfully");
+
+                        // Khusus Step 2: Validasi Password dan Confirm Password
+                        if (currentStep === 2) {
+                            let password = document.querySelector("input[name='password']").value;
+                            let confirmPassword = document.querySelector(
+                                "input[name='password_confirmation']").value;
+
+                            if (password !== confirmPassword) {
+                                alert("Password dan Konfirmasi Password harus sama!");
+                                return; // Hentikan proses jika tidak sama
+                            }
                         }
-                    }
 
-                    document.getElementById("step-" + currentStep).classList.add("d-none");
-                    currentStep++;
-                    document.getElementById("step-" + currentStep).classList.remove("d-none");
-                    updateProgressBar();
+                        document.getElementById("step-" + currentStep).classList.add("d-none");
+                        currentStep++;
+                        document.getElementById("step-" + currentStep).classList.remove("d-none");
+                        updateProgressBar();
+                        console.log("Moved to step", currentStep);
+                    } else {
+                        console.log("Validation failed for step", currentStep);
+                    }
+                } catch (error) {
+                    console.error("Error in next-step handler:", error);
                 }
             });
         });
@@ -214,8 +498,24 @@
 
         function validateStep(step) {
             let isValid = true;
-            document.querySelectorAll("#step-" + step + " input, #step-" + step + " select").forEach(input => {
-                if (!input.value) {
+
+            // Seleksi input dan select yang perlu divalidasi, kecuali FilePond input
+            const inputs = document.querySelectorAll("#step-" + step + " input:not(.filepond), #step-" + step + " select");
+
+            inputs.forEach(input => {
+                // Lewati input yang tersembunyi atau input FilePond
+                if (input.type === 'file' || input.classList.contains('filepond') ||
+                    input.parentElement.classList.contains('filepond--root')) {
+                    return;
+                }
+
+                // Lewati checkbox jika step bukan 3
+                if (input.type === 'checkbox' && step !== 3) {
+                    return;
+                }
+
+                // Validasi hanya jika input punya atribut required
+                if (input.hasAttribute('required') && !input.value) {
                     isValid = false;
                     input.classList.add("is-invalid");
                 } else {
@@ -223,11 +523,20 @@
                 }
             });
 
+            // Khusus untuk step 2, validasi password
             if (step === 2) {
                 let password = document.querySelector("input[name='password']").value;
                 let confirmPassword = document.querySelector("input[name='password_confirmation']").value;
+
                 if (password !== confirmPassword) {
                     alert("Password dan Konfirmasi Password harus sama!");
+                    isValid = false;
+                }
+
+                // Validasi CV upload jika diperlukan
+                if (document.querySelector('input[name="cv"]').hasAttribute('required') &&
+                    window.uploadedCVFiles && window.uploadedCVFiles.length === 0) {
+                    alert("Silakan upload CV Anda");
                     isValid = false;
                 }
             }

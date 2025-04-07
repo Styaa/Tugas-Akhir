@@ -32,6 +32,9 @@ Route::prefix('auth')->group(function () {
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register'])->name('post-regist');
+
+    Route::post('/upload-temp-file', [AuthController::class, 'uploadTemp'])->name('upload.temp');
+    Route::delete('/delete-temp-file', 'FileUploadController@deleteTemp')->name('delete.temp');
 });
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
