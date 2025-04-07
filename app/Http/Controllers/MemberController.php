@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\DB;
 class MemberController extends Controller
 {
     //
-    public function candidateMembers(Request $request)
+    public function candidateMembers(Request $request, $kode_ormawa)
     {
-        $candidate = User::whereHas('registrations', function ($query) {
-            $query->where('ormawas_kode', 'KSMIF')
+        $candidate = User::whereHas('registrations', function ($query) use ($kode_ormawa) {
+            $query->where('ormawas_kode', $kode_ormawa)
                 ->where('status', 'waiting'); // Hanya ambil yang statusnya "waiting"
         })
             ->with(['registrations.divisi1', 'registrations.divisi2']) // Ambil data registrasi_ormawas juga
