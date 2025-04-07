@@ -44,7 +44,7 @@ class DivisiProgramKerjaController extends Controller
             ->get();
 
 
-        $activities = DB::table('aktivitas_divisi_program_kerjas')
+        $activities = DB::table('tugas_divisi_program_kerjas')
             ->where('divisi_pelaksana_id', $id)
             ->where('program_kerjas_id', $prokerId)
             ->get();
