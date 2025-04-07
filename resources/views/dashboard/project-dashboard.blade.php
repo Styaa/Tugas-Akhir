@@ -18,7 +18,7 @@
                         class="card-header p-0 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
                         <h3 class="fw-bold py-3 mb-0">Program Kerja KSM Informatika Periode 2023/2024</h3>
                         <div class="d-flex py-2 project-tab flex-wrap w-sm-100">
-                            @if (Auth::user()->jabatanOrmawa->id === 2)
+                            @if (Auth::user()->jabatanOrmawa->nama === 'Ketua')
                                 <button type="button" class="btn btn-dark w-sm-100" data-bs-toggle="modal"
                                     data-bs-target="#createproject"><i class="icofont-plus-circle me-2 fs-6"></i>Create
                                     Project</button>
