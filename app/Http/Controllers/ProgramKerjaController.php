@@ -295,8 +295,7 @@ class ProgramKerjaController extends Controller
         $ketua = DB::table('struktur_prokers')
             ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
             ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
-            ->where('struktur_prokers.jabatans_id', 2)
-            ->where('divisi_program_kerjas.divisi_pelaksanas_id', 6)
+            ->where('struktur_prokers.jabatans_id', 1)
             ->where('divisi_program_kerjas.program_kerjas_id', $id)
             ->select('users.name', 'users.id')
             ->get();
