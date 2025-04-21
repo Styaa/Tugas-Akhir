@@ -25,7 +25,7 @@
                                         class="avatar xl rounded-circle img-thumbnail shadow-sm">
                                 </a>
                                 <div class="about-info d-flex align-items-center mt-3 justify-content-center flex-column">
-                                    <h6 class="mb-0 fw-bold d-block fs-6">{{ $divisiUser->divisiOrmawas->keterangan }}</h6>
+                                    <h6 class="mb-0 fw-bold d-block fs-6">{{ $divisiUser->divisiOrmawas->nama }}</h6>
                                     <span class="text-muted small">Member Id : {{ $anggotaOrmawa->id }}</span>
                                 </div>
                             </div>
@@ -286,7 +286,7 @@
                                                     <span class="fw-bold">Jabatan</span>
                                                 </div>
                                                 <div class="col-6">
-                                                    <span class="text-muted">7468953210</span>
+                                                    <span class="text-muted">{{ $divisiUser->jabatan->nama }}</span>
                                                 </div>
                                             </li>
                                         @endif

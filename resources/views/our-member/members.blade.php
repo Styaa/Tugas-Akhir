@@ -55,7 +55,7 @@
                                 <div class="teacher-info border-start ps-xl-4 ps-md-3 ps-sm-4 ps-4 w-100">
                                     <h6 class="mb-0 mt-2  fw-bold d-block fs-6">{{ $anggota->name }}</h6>
                                     <span
-                                        class="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">{{ $anggota->strukturOrmawas[0]->divisiOrmawas->keterangan }}
+                                        class="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-11 mb-0 mt-1">{{ $anggota->strukturOrmawas[0]->divisiOrmawas->nama }}
                                         ({{ $anggota->strukturOrmawas[0]->jabatan->nama }})
                                     </span>
                                     <div class="video-setting-icon mt-3 pt-3 border-top">

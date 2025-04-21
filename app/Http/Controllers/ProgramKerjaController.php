@@ -98,22 +98,23 @@ class ProgramKerjaController extends Controller
     {
         // Validasi input request
         $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'tujuan' => 'required|string|max:255',
+            'nama' => 'required|string|max:100',
+            'tujuan' => 'required|array',
+            'tujuan.*' => 'string|max:255',
             'deskripsi' => 'required|string|max:255',
-            'manfaat' => 'required|string|max:255',
-            'tipe' => 'required|string|max:255',
-            'anggaran_dana' => 'required|string|max:255',
-            'konsep' => 'required|string|max:45',
-            'tempat' => 'required|string|max:45',
-            'sasaran_kegiatan' => 'required|string|max:255',
-            'indikator_keberhasilan' => 'required|string|max:255',
-            'tanggal_mulai' => 'required|timestamp',
-            'tanggal_selesai' => 'required|timestamp',
+            'manfaat' => 'required|array',
+            'manfaat.*' => 'string|max:255',
+            'tipe' => 'required|in:Internal,Eksternal',
             'anggaran' => 'required|array',
             'anggaran.*' => 'string',
+            'konsep' => 'required|in:Online,Offline',
+            'tempat' => 'required|string|max:45',
+            'sasaran' => 'required|string|max:255',
+            'indikator' => 'required|string|max:255',
+            'mulai' => 'required|date',
+            'selesai' => 'required|date|after_or_equal:mulai',
             'divisis' => 'required|array',
-            'divisis.*' => 'string'
+            'divisis.*' => 'integer'
         ]);
 
         if ($validator->fails()) {

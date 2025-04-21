@@ -5,7 +5,7 @@
 
             <!-- header rightbar icon -->
             <div class="h-right d-flex align-items-center mr-5 mr-lg-0 order-1">
-                <div class="d-flex">
+                {{-- <div class="d-flex">
                     <a class="nav-link text-primary collapsed" href="#" title="Get Help">
                         <i class="icofont-info-square fs-5"></i>
                     </a>
@@ -25,7 +25,7 @@
                         <span class="avatar rounded-circle text-center pointer" data-bs-toggle="modal"
                             data-bs-target="#addUser"><i class="icofont-ui-add"></i></span>
                     </div>
-                </div>
+                </div> --}}
                 <div class="dropdown notifications zindex-popover">
                     <a class="nav-link dropdown-toggle pulse" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="icofont-alarm fs-5"></i>
@@ -112,8 +112,8 @@
                                     <img class="avatar rounded-circle" src="{{ url('/') . '/images/profile_av.png' }}"
                                         alt="profile">
                                     <div class="flex-fill ms-3">
-                                        <p class="mb-0"><span
-                                                class="font-weight-bold">{{ Auth::user()->name }}</span></p>
+                                        <p class="mb-0"><span class="font-weight-bold">{{ Auth::user()->name }}</span>
+                                        </p>
                                         <small class="">{{ Auth::user()->email }}</small>
                                     </div>
                                 </div>

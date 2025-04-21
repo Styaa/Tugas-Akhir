@@ -15,7 +15,6 @@
                     <div
                         class="card-header p-0 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
                         <h3 class="fw-bold py-3 mb-0">Program Kerja
-                            {{ $strukturOrmawa->divisiOrmawas->ormawa->tipe_ormawa }}
                             {{ $strukturOrmawa->divisiOrmawas->ormawa->nama }}
                             Periode {{ $strukturOrmawa->periodes_periode }}</h3>
                         <div class="d-flex py-2 project-tab flex-wrap w-sm-100">

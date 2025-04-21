@@ -230,7 +230,7 @@ class RapatController extends Controller
 
     public function kalender($kode_oramwa)
     {
-        return view('rapat.kalender');
+        return view('kalender');
     }
 
     public function tulisNotulensi($id_rapat)

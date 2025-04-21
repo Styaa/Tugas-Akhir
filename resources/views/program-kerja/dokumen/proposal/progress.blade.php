@@ -796,7 +796,6 @@
                 const completedPercentage = (completedSteps / totalSteps) * 100;
                 const inProgressPercentage = (inProgressSteps / totalSteps) * 100;
 
-                // Update progress bar
                 const progressBar = document.querySelector('.progress-bar.bg-success');
                 const progressBarInProgress = document.querySelector('.progress-bar.bg-warning');
 

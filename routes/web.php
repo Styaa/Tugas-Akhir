@@ -69,6 +69,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('{kode_ormawa}')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        Route::get('/kalender', [RapatController::class, 'kalender'])->name('kalender');
+
         Route::prefix('rapat')->name('rapat.')->group(function () {
             Route::get('/all', [RapatController::class, 'index'])->name('index');
             Route::get('/create', [RapatController::class, 'create'])->name('create');
@@ -76,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/show', [RapatController::class, 'show'])->name('show');
             Route::post('/store', [RapatController::class, 'store'])->name('store');
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
-            Route::get('/kalender', [RapatController::class, 'kalender'])->name('kalender');
+
             Route::get('/tulis/notulensi', [RapatController::class, 'tulisNotulensi'])->name('tulis_notulensi');
 
             route::prefix('notulen')->name('notulen.')->group(function () {

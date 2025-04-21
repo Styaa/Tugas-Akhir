@@ -55,14 +55,14 @@
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'members' ? 'active' : '' }}"
                                 href="{{ route('our-member.members', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>All Members</span>
+                                <span>Daftar Anggota</span>
                             </a>
                         </li>
                         @if (Auth::user()->jabatanOrmawa->id !== 13)
                             <li>
                                 <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
                                     href="{{ route('our-member.candidate', ['kode_ormawa' => $kode_ormawa]) }}">
-                                    <span>Candidate Members</span>
+                                    <span>Calon Anggota</span>
                                 </a>
                             </li>
                         @endif
@@ -103,30 +103,31 @@
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'all' ? 'active' : '' }}"
                                 href="{{ route('rapat.index', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>Semua Rapat</span>
+                                <span>Daftar Rapat</span>
                             </a>
                         </li>
                         @if (Auth::user()->jabatanOrmawa->id !== 13)
                             <li>
-                                <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
+                                <a class="ms-link {{ Request::segment(3) == 'Daftar Izin' ? 'active' : '' }}"
                                     href="{{ route('rapat.perizinan', ['kode_ormawa' => $kode_ormawa]) }}">
-                                    <span>Perizinan</span>
+                                    <span>Daftar Izin</span>
                                 </a>
                             </li>
                         @endif
                         <li>
                             <a class="ms-link {{ Request::segment(3) == 'notulen' ? 'active' : '' }}"
                                 href="{{ route('rapat.notulen.index', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>Notulen Rapat</span>
+                                <span>Daftar Notulen</span>
                             </a>
                         </li>
-                        <li>
-                            <a class="ms-link {{ Request::segment(3) == 'kalender' ? 'active' : '' }}"
-                                href="{{ route('rapat.kalender', ['kode_ormawa' => $kode_ormawa]) }}">
-                                <span>Kalender</span>
-                            </a>
-                        </li>
+
                     </ul>
+                </li>
+                <li class="collapsed">
+                    <a class="m-link {{ Request::segment(2) == 'kalender' ? 'active' : '' }}"
+                        href="{{ route('kalender', ['kode_ormawa' => $kode_ormawa]) }}">
+                        <i class="icofont-ui-calendar"></i> <span>Kalender</span>
+                    </a>
                 </li>
             </ul>
 
