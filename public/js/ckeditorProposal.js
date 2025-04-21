@@ -910,7 +910,6 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                     const ormawaCode = pathSegments[1];
 
                     postData.ormawa_id = ormawaCode;
-
                 }
 
                 // Dapatkan kode ormawa dari URL
@@ -1255,8 +1254,6 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                 console.log("Content overflow detected, automatic page break should be added");
             }
         }
-        // exportButtons.appendChild(buttonPrint);
-        // exportButtons.appendChild(buttonSave);
 
         const toolbar = document.querySelector('#editor-toolbar .ck-toolbar__items');
 

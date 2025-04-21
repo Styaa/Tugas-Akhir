@@ -176,11 +176,9 @@ class RapatController extends Controller
      */
     public function show($kode_ormawa, Request $request)
     {
-        //
         $rapat = Rapat::with(['peserta.user'])->where('ormawa_id', $kode_ormawa)->findOrFail($request->id_rapat);
         $daftarIzin = IzinRapat::where('rapat_id', $request->id_rapat);
 
-        // Kirim data ke tampilan
         return view('rapat.show', compact('rapat', 'daftarIzin'));
     }
 

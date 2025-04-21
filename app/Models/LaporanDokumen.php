@@ -18,6 +18,7 @@ class LaporanDokumen extends Model
         'status',
         'catatan_revisi',
         'peninjau_id',
+        'step',
         'tanggal_pengajuan',
         'tanggal_peninjauan',
         'created_by',

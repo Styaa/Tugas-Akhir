@@ -2,6 +2,7 @@
 
 @section('title', __('Sign Up'))
 
+
 @section('content')
     <!-- main body area -->
     <div class="main p-2 py-3 p-xl-5">
@@ -79,6 +80,19 @@
                                             <label class="form-label">Nomor HP</label>
                                             <input type="text" name="no_hp" class="form-control"
                                                 placeholder="Masukkan nomor HP" required>
+                                        </div>
+                                        <div class="col-6 mt-2">
+                                            <label class="form-label">Fakultas</label>
+                                            <select class="form-select" id="registrasi-select-fakultas" name="fakultas"
+                                                data-placeholder="Pilih Fakultas Anda" required>
+                                                <option value="">Pilih Fakultas Anda
+                                                </option>
+                                                @foreach ($fakultas as $item)
+                                                    <option value="{{ $item['nama_fakultas'] }}">
+                                                        {{ $item['nama_fakultas'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-primary mt-3 next-step">Next</button>
@@ -187,7 +201,8 @@
 
                             <!-- Tombol untuk kembali ke login -->
                             <div class="text-center mt-4">
-                                <p>Sudah memiliki akun? <a href="{{ route('login') }}" class="text-light fw-bold">Login di
+                                <p>Sudah memiliki akun? <a href="{{ route('login') }}" class="text-light fw-bold">Login
+                                        di
                                         sini</a></p>
                             </div>
                         </div>
@@ -203,6 +218,7 @@
     <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
     <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Verifikasi elemen ada sebelum inisialisasi
@@ -337,26 +353,36 @@
             function revertFile(uniqueFileId, fileType, uploadedFiles, load, error) {
                 console.log(`Reverting ${fileType} file:`, uniqueFileId);
 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                // Dapatkan CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 if (!csrfToken) {
                     error('CSRF token tidak tersedia');
                     return;
                 }
 
+                // Kirim request ke server untuk menghapus file
                 fetch(deleteRoute, {
-                        method: 'DELETE',
+                        method: 'POST', // Gunakan POST dengan _method=DELETE
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': csrfToken
                         },
                         body: JSON.stringify({
                             file_path: uniqueFileId,
-                            file_type: fileType
+                            file_type: fileType,
+                            _method: 'DELETE'
                         })
                     })
                     .then(response => {
+                        // Log response untuk debugging
+                        console.log('Response status:', response.status);
+
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            return response.text().then(text => {
+                                throw new Error(
+                                    `Server responded with status: ${response.status}, message: ${text}`
+                                    );
+                            });
                         }
                         return response.json();
                     })
@@ -373,7 +399,7 @@
                         load();
                     })
                     .catch(err => {
-                        console.error('Error reverting file:', err);
+                        console.error('Error details:', err);
                         error(err.message);
                     });
             }
@@ -595,6 +621,92 @@
         // Event listener untuk Pilihan Ormawa 2
         document.getElementById("ormawa2").addEventListener("change", function() {
             fetchDivisi(this.value, "divisi-container2", "divisi2_1", "divisi2_2");
+        });
+
+        document.getElementById("registrasi-select-fakultas").addEventListener("change", function() {
+            const selectedFakultas = this.value;
+            const ormawa1Select = document.getElementById("ormawa1");
+            const ormawa2Select = document.getElementById("ormawa2");
+
+            console.log(selectedFakultas);
+
+            if (selectedFakultas) {
+                // Reset dropdown ormawa
+                ormawa1Select.innerHTML = '<option value="" selected>Pilih Ormawa</option>';
+                ormawa2Select.innerHTML = '<option value="" selected>Pilih Ormawa</option>';
+
+                // Reset container divisi
+                document.getElementById("divisi-container1").innerHTML = "";
+                document.getElementById("divisi-container2").innerHTML = "";
+
+                // Fetch ormawa berdasarkan fakultas
+                fetch(`/auth/get-ormawa/${encodeURIComponent(selectedFakultas)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        console.log("Ormawa filtered by fakultas:", data);
+
+                        if (data.length > 0) {
+                            // Tambahkan opsi ormawa ke dropdown
+                            data.forEach(ormawa => {
+                                // Tambahkan ke dropdown ormawa 1
+                                const option1 = document.createElement("option");
+                                option1.value = ormawa.kode;
+                                option1.textContent = ormawa.nama;
+                                ormawa1Select.appendChild(option1);
+
+                                // Tambahkan ke dropdown ormawa 2
+                                const option2 = document.createElement("option");
+                                option2.value = ormawa.kode;
+                                option2.textContent = ormawa.nama;
+                                ormawa2Select.appendChild(option2);
+                            });
+                        } else {
+                            // Jika tidak ada ormawa yang sesuai dengan fakultas
+                            const noOption1 = document.createElement("option");
+                            noOption1.value = "";
+                            noOption1.textContent = "Tidak ada ormawa untuk fakultas ini";
+                            noOption1.disabled = true;
+                            ormawa1Select.appendChild(noOption1);
+
+                            const noOption2 = document.createElement("option");
+                            noOption2.value = "";
+                            noOption2.textContent = "Tidak ada ormawa untuk fakultas ini";
+                            noOption2.disabled = true;
+                            ormawa2Select.appendChild(noOption2);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching ormawa:", error);
+                        alert("Terjadi kesalahan saat memuat data ormawa");
+                    });
+            } else {
+                // Jika tidak ada fakultas yang dipilih, tampilkan semua ormawa
+                // Kita perlu mengambil semua data ormawa dari server
+                fetch('/auth/get-all-ormawa')
+                    .then(response => response.json())
+                    .then(data => {
+                        ormawa1Select.innerHTML = '<option value="" selected>Pilih Ormawa</option>';
+                        ormawa2Select.innerHTML = '<option value="" selected>Pilih Ormawa</option>';
+
+                        data.forEach(ormawa => {
+                            // Tambahkan ke dropdown ormawa 1
+                            const option1 = document.createElement("option");
+                            option1.value = ormawa.kode;
+                            option1.textContent = ormawa.nama;
+                            ormawa1Select.appendChild(option1);
+
+                            // Tambahkan ke dropdown ormawa 2
+                            const option2 = document.createElement("option");
+                            option2.value = ormawa.kode;
+                            option2.textContent = ormawa.nama;
+                            ormawa2Select.appendChild(option2);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching all ormawa:", error);
+                    });
+            }
         });
     </script>
 @endsection

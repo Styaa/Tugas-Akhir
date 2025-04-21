@@ -8,14 +8,17 @@ use App\Http\Controllers\DivisiOrmawaController;
 use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\LaporanDokumenController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotulenController;
+use App\Http\Controllers\OrmawaController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\RancanganAnggaranDanaController;
 use App\Http\Controllers\RapatController;
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiOrmawa;
 use App\Models\DivisiProgramKerja;
+use App\Models\LaporanDokumen;
 use App\Models\StrukturProker;
 use Illuminate\Support\Facades\Route;
 
@@ -29,12 +32,14 @@ Route::prefix('auth')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/get-divisi/{ormawa}', [DivisiOrmawaController::class, 'getDivisi'])->name('get-divisi');
+    Route::get('/get-ormawa/{fakultas}', [OrmawaController::class, 'getOrmawa'])->name('get-ormawa');
+
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register'])->name('post-regist');
 
     Route::post('/upload-temp-file', [AuthController::class, 'uploadTemp'])->name('upload.temp');
-    Route::delete('/delete-temp-file', 'FileUploadController@deleteTemp')->name('delete.temp');
+    Route::delete('/delete-temp-file', [AuthController::class, 'deleteTemp'])->name('delete.temp');
 });
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -99,10 +104,13 @@ Route::middleware(['auth'])->group(function () {
 
             Route::resource('rancanganAnggaranDana', RancanganAnggaranDanaController::class);
             Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
-            Route::get('{id}/proposal/progress', [ProgramKerjaController::class, 'progressProposal'])->name('proposal.progress');
             Route::get('{id}/proposal/store', [ProgramKerjaController::class, 'storeProposal'])->name('proposal.store');
             Route::post('{id}/proposal/generate', [ProgramKerjaController::class, 'generateProposal'])->name('proposal.generate');
             Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
+
+            Route::get('{id}/proposal/progress', [LaporanDokumenController::class, 'progressProposal'])->name('proposal.progress');
+            Route::post('{id}/proposal/update-step', [LaporanDokumenController::class, 'updateStep'])->name('proposal.update-step');
+            Route::post('{id}/proposal/upload-bukti', [LaporanDokumenController::class, 'uploadBukti'])->name('proposal.upload-bukti');
 
             Route::prefix('{id}/files')->name('files.')->group(function () {
                 Route::get('/upload', [DocumentController::class, 'showUploadForm'])->name('upload');

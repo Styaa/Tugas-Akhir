@@ -19,6 +19,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('jurusan');
+            $table->string('fakultas', 100);
+            $table->foreign('fakultas')->references('nama_fakultas')->on('fakultas');
             $table->string('id_line');
             $table->string('no_hp');
             $table->enum('status', ['aktif', 'tidak aktif']);

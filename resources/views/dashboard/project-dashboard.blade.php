@@ -3,12 +3,10 @@
 @section('title', __('Dashboard'))
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    <div id="success-alert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+        <span id="success-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <!-- Body: Body -->
     <div class="body d-flex py-lg-3 py-md-2">
         <div class="container-xxl">
@@ -16,7 +14,10 @@
                 <div class="border-0 mb-4">
                     <div
                         class="card-header p-0 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
-                        <h3 class="fw-bold py-3 mb-0">Program Kerja KSM Informatika Periode 2023/2024</h3>
+                        <h3 class="fw-bold py-3 mb-0">Program Kerja
+                            {{ $strukturOrmawa->divisiOrmawas->ormawa->tipe_ormawa }}
+                            {{ $strukturOrmawa->divisiOrmawas->ormawa->nama }}
+                            Periode {{ $strukturOrmawa->periodes_periode }}</h3>
                         <div class="d-flex py-2 project-tab flex-wrap w-sm-100">
                             @if (Auth::user()->jabatanOrmawa->nama === 'Ketua')
                                 <button type="button" class="btn btn-dark w-sm-100" data-bs-toggle="modal"

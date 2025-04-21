@@ -644,7 +644,7 @@ $date = \Carbon\Carbon::now();
             </div>
             <div class="modal-body">
                 <form
-                    action="{{ route('program-kerja.create', ['kode_ormawa' => 'KSMIF']) }}?periode={{ $periode }}"
+                    action="{{ route('program-kerja.create', ['kode_ormawa' => $kode_ormawa]) }}?periode={{ $periode }}"
                     method="post">
                     @csrf
                     <div class="mb-3">
@@ -821,7 +821,7 @@ $date = \Carbon\Carbon::now();
                     </div>
                     <div class="modal-body">
                         <form
-                            action="{{ route('program-kerja.update', ['id' => $program->id, 'kode_ormawa' => 'KSMIF']) }}?periode={{ $periode }}"
+                            action="{{ route('program-kerja.update', ['id' => $program->id, 'kode_ormawa' => $kode_ormawa]) }}?periode={{ $periode }}"
                             method="post">
                             @csrf
                             @method('PUT')

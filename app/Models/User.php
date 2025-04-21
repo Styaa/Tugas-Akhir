@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'nrp',
         'jurusan',
+        'fakultas',
         'id_line',
         'no_hp',
     ];
@@ -43,6 +44,11 @@ class User extends Authenticatable
             'id',
             'jabatan_id'
         );
+    }
+
+    public function fakultas()
+    {
+        return $this->belongsTo(Fakultas::class, 'fakultas', 'nama_fakultas');
     }
 
     public function jabatanProker()

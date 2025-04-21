@@ -97,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
     $(document).on('click', '.edit-button', function () {
         let id = $(this).data('id'); // Get the ID from the button
         let kode_ormawa = $(this).data('kode');
-        console.log(id);
         $.ajax({
             url: `/${kode_ormawa}/program-kerja/${id}/edit`, // URL to the Laravel route
             method: 'get',

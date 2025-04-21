@@ -3,23 +3,30 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
+use App\Models\Fakultas;
 use App\Models\Ormawa;
 use App\Models\RegistrasiOrmawas;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
     public function showRegistrationForm()
     {
         $ormawas = Ormawa::all();
-        return view('auth.signup', compact('ormawas'));
+        $fakultas = Fakultas::all();
+        return view('auth.signup', compact('ormawas', 'fakultas'));
     }
 
-    protected function validateRequest(Request $request)
+    public function register(Request $request)
     {
+        // Validate request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -37,25 +44,23 @@ class RegisterController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Double-check password match
         if ($request->password !== $request->password_confirmation) {
             return back()->withErrors(['password' => 'Password dan Konfirmasi Password harus sama.'])->withInput();
         }
-    }
 
-    protected function createUser(Request $request)
-    {
-        // dd($request->all());
+        // Create user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Hash password
+            'password' => Hash::make($request->password),
             'nrp' => $request->nrp,
             'jurusan' => $request->jurusan,
             'id_line' => $request->id_line,
             'no_hp' => $request->no_hp,
         ]);
 
-        // Simpan pilihan ormawa ke tabel registrasi_ormawa
+        // Save organization registration for first choice
         if ($request->filled('pilihan_ormawa_1')) {
             RegistrasiOrmawas::create([
                 'users_id' => $user->id,
@@ -66,6 +71,7 @@ class RegisterController extends Controller
             ]);
         }
 
+        // Save organization registration for second choice (if provided)
         if ($request->filled('pilihan_ormawa_2')) {
             RegistrasiOrmawas::create([
                 'users_id' => $user->id,
@@ -75,17 +81,162 @@ class RegisterController extends Controller
                 'status' => 'waiting',
             ]);
         }
+
+        // Process uploaded files (CV and portfolio)
+        if ($request->filled('cv_files')) {
+            $this->processCVFiles($user, $request->cv_files);
+        }
+
+        if ($request->filled('porto_files')) {
+            $this->processPortfolioFiles($user, $request->porto_files);
+        }
+
+        return redirect()->route('login')->with('success', 'Pendaftaran berhasil. Silakan login.');
     }
 
-    public function register(Request $request)
+    private function processCVFiles($user, $cvFiles)
     {
-        $this->validateRequest($request);
+        try {
+            $files = json_decode($cvFiles, true);
+            if (empty($files)) {
+                return;
+            }
 
-        $this->createUser($request);
+            // Dapatkan informasi file dari session
+            $tempFilesInfo = session()->get('temp_files', []);
 
-        // Login user setelah registrasi
-        // auth()->login($user);
+            // Ambil hanya file pertama karena CV seharusnya hanya satu file
+            $cvFilePath = $files[0];
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil, silakan login.'); // Ganti dengan route yang sesuai
+            if (!isset($tempFilesInfo[$cvFilePath])) {
+                Log::warning('CV file info not found in session', [
+                    'user_id' => $user->id,
+                    'file_path' => $cvFilePath
+                ]);
+                return;
+            }
+
+            $fileInfo = $tempFilesInfo[$cvFilePath];
+
+            // Buat direktori jika belum ada
+            $directory = 'user-files/cv/' . $user->id;
+            Storage::disk('public')->makeDirectory($directory);
+
+            // Pindahkan file dari temporary ke penyimpanan permanen
+            $newPath = $directory . '/' . Str::uuid() . '.' . $fileInfo['extension'];
+
+            if (Storage::disk('public')->exists($fileInfo['temp_path'])) {
+                // Pindahkan file
+                Storage::disk('public')->move($fileInfo['temp_path'], $newPath);
+
+                // Buat record di database
+                $document = Document::create([
+                    'program_kerja_id' => null, // CV tidak terkait dengan program kerja
+                    'original_name' => $fileInfo['original_name'],
+                    'storage_path' => $newPath,
+                    'extension' => $fileInfo['extension'],
+                    'size' => $fileInfo['size'],
+                    'category' => 'cv',
+                    'visibility' => 'committee', // Hanya committee yang bisa melihat
+                    'description' => 'CV for user ' . $user->name,
+                    'tags' => json_encode(['cv', 'registration', 'user-' . $user->id]),
+                    'uploaded_by' => $user->id,
+                ]);
+
+                // Update user dengan dokumen CV
+                $user->cv_document_id = $document->id;
+                $user->save();
+
+                Log::info('CV file processed successfully', [
+                    'user_id' => $user->id,
+                    'document_id' => $document->id
+                ]);
+
+                // Hapus informasi file dari session
+                unset($tempFilesInfo[$cvFilePath]);
+                session()->put('temp_files', $tempFilesInfo);
+            } else {
+                Log::warning('CV temporary file not found', [
+                    'user_id' => $user->id,
+                    'temp_path' => $fileInfo['temp_path']
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error processing CV files', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    private function processPortfolioFiles($user, $portfolioFiles)
+    {
+        try {
+            $files = json_decode($portfolioFiles, true);
+            if (empty($files)) {
+                return;
+            }
+
+            // Dapatkan informasi file dari session
+            $tempFilesInfo = session()->get('temp_files', []);
+
+            // Buat direktori jika belum ada
+            $directory = 'user-files/portfolio';
+            Storage::disk('public')->makeDirectory($directory);
+
+            foreach ($files as $filePath) {
+                // Cek apakah informasi file ada di session
+                if (!isset($tempFilesInfo[$filePath])) {
+                    continue;
+                }
+
+                $fileInfo = $tempFilesInfo[$filePath];
+
+                // Pindahkan file dari temporary ke penyimpanan permanen
+                $newPath = $directory . '/' . Str::uuid() . '.' . $fileInfo['extension'];
+
+                if (Storage::disk('public')->exists($fileInfo['temp_path'])) {
+                    // Pindahkan file
+                    Storage::disk('public')->move($fileInfo['temp_path'], $newPath);
+
+                    // Buat record di database sesuai dengan struktur tabel dokumen
+                    $document = Document::create([
+                        'program_kerja_id' => null, // Portfolio tidak terkait dengan program kerja
+                        'original_name' => $fileInfo['original_name'],
+                        'storage_path' => $newPath,
+                        'extension' => $fileInfo['extension'],
+                        'size' => $fileInfo['size'],
+                        'category' => 'portfolio',
+                        'visibility' => 'committee', // Hanya committee yang bisa melihat
+                        'description' => 'Portfolio for user ' . $user->name,
+                        'tags' => json_encode(['portfolio', 'registration', 'user-' . $user->id]),
+                        'uploaded_by' => $user->id,
+                    ]);
+
+                    Log::info('Portfolio file processed successfully', [
+                        'user_id' => $user->id,
+                        'document_id' => $document->id
+                    ]);
+
+                    // Hapus informasi file dari session
+                    unset($tempFilesInfo[$filePath]);
+                } else {
+                    Log::warning('Portfolio temporary file not found', [
+                        'user_id' => $user->id,
+                        'temp_path' => $fileInfo['temp_path']
+                    ]);
+                }
+            }
+
+            // Update session
+            session()->put('temp_files', $tempFilesInfo);
+        } catch (\Exception $e) {
+            Log::error('Error processing portfolio files', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 }

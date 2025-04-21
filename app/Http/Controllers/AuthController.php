@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification as Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 
@@ -41,33 +42,17 @@ class AuthController extends Controller
             ]);
         }
 
-        // $aktivitas = DB::table('aktivitas_divisi_program_kerjas')
-        // ->select('*', DB::raw('DATEDIFF(DATE(tenggat_waktu), CURDATE()) AS sisa_hari'))
-        // ->whereRaw("DATE(tenggat_waktu) IN (
-        //     CURDATE() + INTERVAL 1 DAY,
-        //     CURDATE() + INTERVAL 2 DAY,
-        //     CURDATE() + INTERVAL 3 DAY,
-        //     CURDATE() + INTERVAL 4 DAY,
-        //     CURDATE() + INTERVAL 5 DAY
-        // )")
-        // ->get();
-
-        // dd($aktivitas[0]->nama);
-
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Ambil kode_ormawa dari relasi user
             $kodeOrmawa = $user->strukturOrmawas()
                 ->with('divisiOrmawas.ormawa')
                 ->get()
                 ->pluck('divisiOrmawas.ormawa.kode')
                 ->first();
 
-            // Ambil periode dari request atau fallback ke tahun saat ini
             $periode = date('Y');
 
-            // Redirect ke halaman program kerja dengan kode_ormawa dan periode
             return redirect()->route('dashboard', ['kode_ormawa' => $kodeOrmawa]) . "?periode=$periode";
         }
 
@@ -117,7 +102,7 @@ class AuthController extends Controller
                 }
 
                 // Buat nama unik untuk file temporary
-                $tempFilename = 'temp_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $tempFilename = 'tempUser_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
 
                 // Simpan file ke folder temporary
                 $path = $file->storeAs('temp', $tempFilename, 'public');
@@ -217,6 +202,69 @@ class AuthController extends Controller
             ], 400);
         } catch (\Exception $e) {
             Log::error('Error storing temporary file', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteTemp(Request $request)
+    {
+        try {
+            $filePath = 'temp/' . $request->input('file_path');
+            $fileType = $request->input('file_type', 'unknown');
+
+            if (!$filePath) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Path file tidak valid'
+                ], 400);
+            }
+
+            \Log::info('Attempting to delete file:', ['path' => $filePath, 'type' => $fileType]);
+
+            // Periksa apakah file ada di storage
+            if (Storage::exists($filePath)) {
+                // Hapus file dari storage
+                Storage::delete($filePath);
+
+                // Hapus informasi file dari session
+                $tempFiles = session('temp_files', []);
+                unset($tempFiles[$filePath]);
+                session(['temp_files' => $tempFiles]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'File berhasil dihapus'
+                ]);
+            }
+
+            // Coba periksa juga di storage public
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+
+                $tempFiles = session('temp_files', []);
+                unset($tempFiles[$filePath]);
+                session(['temp_files' => $tempFiles]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'File berhasil dihapus dari storage public'
+                ]);
+            }
+
+            // Jika file tidak ditemukan di kedua lokasi
+            return response()->json([
+                'status' => 'warning',
+                'message' => 'File tidak ditemukan di storage'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting temporary file:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

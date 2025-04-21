@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('ormawas', function (Blueprint $table) {
             $table->string('kode', 9)->primary();
             $table->string('naungan', 100);
+            $table->string('fakultas', 100);
+            $table->foreign('fakultas')->references('nama_fakultas')->on('fakultas');
             $table->string('visi', 255);
             $table->string('misi', 255);
             // $table->string('tipe_ormawa', 4);

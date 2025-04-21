@@ -14,6 +14,7 @@ use App\Models\ProgramKerja;
 use App\Models\RancanganAnggaranBiaya;
 use App\Models\Rapat;
 use App\Models\RapatPartisipasi;
+use App\Models\StrukturOrmawa;
 use App\Models\StrukturProker;
 use App\Models\User;
 use App\Notifications\EvaluasiSelesaiNotification;
@@ -47,6 +48,10 @@ class ProgramKerjaController extends Controller
             ->with('divisiOrmawas.ormawa')
             ->get()
             ->pluck('divisiOrmawas.ormawa.kode')
+            ->first();
+
+        $strukturOrmawa = StrukturOrmawa::with('divisiOrmawas')
+            ->where('users_id', $user->id)
             ->first();
 
         $programKerjas = ProgramKerja::where('ormawas_kode', $kode_ormawa)
@@ -86,11 +91,12 @@ class ProgramKerjaController extends Controller
             });
 
         // dd($programKerjas);
-        return view('dashboard.project-dashboard', compact('programKerjas', 'divisiPelaksanas', 'periode', 'kode_ormawa'));
+        return view('dashboard.project-dashboard', compact('programKerjas', 'divisiPelaksanas', 'periode', 'kode_ormawa', 'strukturOrmawa'));
     }
 
-    protected function validateRequest(Request $request)
+    public function create(Request $request, $kode_ormawa)
     {
+        // Validasi input request
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
@@ -113,59 +119,35 @@ class ProgramKerjaController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-    }
 
-    protected function storeProker(Request $request)
-    {
-        // dd($request->all());
-        ProgramKerja::create([
+        // Membuat program kerja baru
+        $programKerja = ProgramKerja::create([
             'nama' => $request->nama,
             'tujuan' => json_encode($request->tujuan),
-            'deskripsi' => $request->deskripsi, // Hash password
+            'deskripsi' => $request->deskripsi,
             'manfaat' => json_encode($request->manfaat),
             'tipe' => $request->tipe,
             'anggaran_dana' => json_encode($request->anggaran),
             'konsep' => $request->konsep,
             'tempat' => $request->tempat,
-            'sasaran_kegiatan' => $request->sasaran, // Hash password
+            'sasaran_kegiatan' => $request->sasaran,
             'indikator_keberhasilan' => $request->indikator,
             'tanggal_mulai' => $request->mulai,
             'tanggal_selesai' => $request->selesai,
-            'ormawas_kode' => 'KSMIF',
+            'ormawas_kode' => $kode_ormawa,
             'periode' => $request->periode,
         ]);
-    }
 
-    protected function storeDivisi(Request $request)
-    {
+        // Menyimpan divisi yang terlibat dalam program kerja
         $divisiValues = $request->divisis;
-
-        // dd($divisiValues);
-
-        // You can now use $anggaranValues as needed
-        // For example, saving to the database or processing further
-        // $anggaranValues will be an array of selected budget values
-
-        // Example of processing anggaran values
         foreach ($divisiValues as $divisi) {
             DivisiProgramKerja::create([
-                'program_kerjas_id' => ProgramKerja::latest()->first()->id,
+                'program_kerjas_id' => $programKerja->id,
                 'divisi_pelaksanas_id' => $divisi,
             ]);
         }
-    }
 
-    public function create(Request $request, $kode_ormawa)
-    {
-        $this->validateRequest($request);
-
-        $this->storeProker($request);
-        $this->storeDivisi($request);
-
-        // Login user setelah registrasi
-        // auth()->login($user);
-
-        return redirect()->route('program-kerja.index', ['kode_ormawa' => $kode_ormawa])->with('success', 'Program kerja berhasil ditambahkan.'); // Ganti dengan route yang sesuai
+        return redirect()->back()->with('success', 'Program kerja berhasil ditambahkan.');
     }
 
     public function edit(Request $request)
@@ -192,26 +174,20 @@ class ProgramKerjaController extends Controller
 
     protected function updateDivisiProgramKerja(Request $request, $programKerjaId)
     {
-        // Data baru dari request
-        $divisiIdsBaru = $request->input('divisis'); // [1, 3]
+        $divisiIdsBaru = $request->input('divisis');
 
-        // Data lama dari database
         $divisiIdsLama = DivisiProgramKerja::where('program_kerjas_id', $programKerjaId)
             ->pluck('divisi_pelaksanas_id')
-            ->toArray(); // Misalnya: [1, 2, 3]
+            ->toArray();
 
-        // Data yang perlu dihapus (lama tapi tidak ada di baru)
         $divisiIdsUntukDihapus = array_diff($divisiIdsLama, $divisiIdsBaru);
 
-        // Data yang perlu ditambahkan (baru tapi tidak ada di lama)
         $divisiIdsUntukDitambahkan = array_diff($divisiIdsBaru, $divisiIdsLama);
 
-        // Hapus data lama yang di-uncheck
         DivisiProgramKerja::where('program_kerjas_id', $programKerjaId)
             ->whereIn('divisi_pelaksanas_id', $divisiIdsUntukDihapus)
             ->delete();
 
-        // Tambahkan data baru yang di-check
         foreach ($divisiIdsUntukDitambahkan as $divisiId) {
             DivisiProgramKerja::create([
                 'program_kerjas_id' => $programKerjaId,
@@ -222,56 +198,63 @@ class ProgramKerjaController extends Controller
 
     public function update(Request $request, $kode_ormawa, $id)
     {
-        // dd($request);
-        $this->validateRequest($request);
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'tujuan' => 'required|array',  // Changed to array
+            'tujuan.*' => 'string|max:255',
+            'deskripsi' => 'required|string|max:255',
+            'manfaat' => 'required|array',  // Changed to array
+            'manfaat.*' => 'string|max:255',
+            'tipe' => 'required|string|max:255',
+            'anggaran' => 'required|array',  // This is correct
+            'anggaran.*' => 'string',
+            'konsep' => 'required|string|max:45',  // This field is missing in your data
+            'tempat' => 'required|string|max:45',
+            'sasaran' => 'required|string|max:255',
+            'indikator' => 'required|string|max:255',
+            'mulai' => 'required|date',
+            'selesai' => 'required|date',
+            'divisis' => 'required|array',
+            'divisis.*' => 'string',
+            'periode' => 'required|string|max:255'
+        ]);
 
-        // dd($request->periode);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
 
-        // Cari data berdasarkan ID
         $programKerja = ProgramKerja::find($id);
 
-        // Update data
         $programKerja->update([
             'nama' => $request->nama,
             'tujuan' => json_encode($request->tujuan),
             'deskripsi' => $request->deskripsi,
             'manfaat' => json_encode($request->manfaat),
             'tipe' => $request->tipe,
-            'anggaran_dana' => json_encode($request->anggaran),
-            'konsep' => $request->konsep,
+            'anggaran_dana' => json_encode($request->anggaran),  // Make sure this field name is correct in the DB
+            'konsep' => $request->konsep,  // This is missing in your data
             'tempat' => $request->tempat,
             'sasaran_kegiatan' => $request->sasaran,
             'indikator_keberhasilan' => $request->indikator,
             'tanggal_mulai' => $request->mulai,
             'tanggal_selesai' => $request->selesai,
-            'ormawas_kode' => 'KSMIF',
+            'ormawas_kode' => $kode_ormawa,
             'periode' => $request->periode,
         ]);
 
-
-
         $this->updateDivisiProgramKerja($request, $id);
 
-        // Redirect atau Response
-        return response()->json(['success', 'Program kerja berhasil diperbaharui.']);
-        // return redirect()->route('dashboard')->with('success', 'Program kerja berhasil diperbaharui.');
+        return redirect()->back()->with('success', 'Program kerja berhasil diperbaharui.');
     }
 
     public function show($kode_ormawa, $id)
     {
-        // dd(Auth::user()->id);
-        // Ambil data program kerja berdasarkan kode ormawa
         $programKerja = ProgramKerja::where('id', $id)->first();
 
-        // Jika program kerja tidak ditemukan, kembalikan error
         if (!$programKerja) {
             return redirect()->back()->with('error', 'Program kerja tidak ditemukan.');
         }
 
-        // Ambil data anggota
-        // $anggota = User::where('status', 'aktif')
-        //     ->orderBy('name', 'ASC')
-        //     ->get();
         $anggota = User::where('status', 'aktif')
             ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
                 $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
@@ -282,14 +265,12 @@ class ProgramKerjaController extends Controller
 
         $jabatans = Jabatan::all();
 
-        // Ambil divisi terkait program kerja
         $divisi = DivisiProgramKerja::with('divisiPelaksana')
             ->where('program_kerjas_id', $programKerja->id)
             ->get()->toArray();
 
         $ids = array_column($divisi, 'id');
 
-        // Format tanggal mulai
         $tanggal_mulai = Carbon::parse($programKerja->tanggal_mulai)->format('d F Y');
 
         $ketua = DB::table('struktur_prokers')
@@ -311,103 +292,75 @@ class ProgramKerjaController extends Controller
             ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
             ->get();
 
-        // dd($anggotaProker);
-
-        // Ambil aktivitas untuk semua divisi pelaksana yang terkait
         $activities = AktivitasDivisiProgramKerja::where('program_kerjas_id', $programKerja->id)->get();
 
-        // Hitung total pemasukan
         $totalPemasukan = RancanganAnggaranBiaya::where('program_kerjas_id', $id)
             ->where('kategori', 'pemasukan')
             ->sum('total');
 
-        // Hitung total pengeluaran
         $totalPengeluaran = RancanganAnggaranBiaya::where('program_kerjas_id', $id)
             ->where('kategori', 'pengeluaran')
             ->sum('total');
 
-        // Hitung selisih anggaran (pemasukan - pengeluaran)
         $selisih = $totalPemasukan - $totalPengeluaran;
 
         $files = Document::where('program_kerja_id', $id)->latest()->paginate(10);
 
-        // dd($activities->first()->personInCharge->name);
-
-        // dd($programKerja);
-
-        // Periksa apakah tanggal selesai berbeda dengan tanggal mulai
         if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {
             $tanggal_selesai = Carbon::parse($programKerja->tanggal_selesai)->format('d F Y');
 
-            // Kembalikan view dengan semua data
             return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
         }
 
-        // Kembalikan view tanpa tanggal selesai
         return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
     }
 
     public function destroy($kode_ormawa, $id)
     {
         try {
-            // Start a database transaction to ensure all related data is deleted properly
             DB::beginTransaction();
 
-            $programKerja = ProgramKerja::findOrFail($id);
+            $programKerja = ProgramKerja::find($id);
 
-            // 1. Delete all related documents
             $documents = Document::where('program_kerja_id', $id)->get();
             foreach ($documents as $document) {
-                // Delete the physical file if it exists
                 if (Storage::exists($document->storage_path)) {
                     Storage::delete($document->storage_path);
                 }
                 $document->delete();
             }
 
-            // 2. Delete all evaluations related to this program
             Evaluasi::where('program_kerjas_id', $id)->delete();
 
-            // 3. Delete all budget plans (RAB)
             RancanganAnggaranBiaya::where('program_kerjas_id', $id)->delete();
 
-            // 4. Delete all activities for this program
             $divisiIds = DivisiProgramKerja::where('program_kerjas_id', $id)->pluck('id')->toArray();
             AktivitasDivisiProgramKerja::where('program_kerjas_id', $id)->delete();
 
-            // 5. Delete all meeting records related to this program
             Rapat::where('program_kerjas_id', $id)->delete();
 
-            // 6. Delete all meeting participants for this program's meetings
             $rapatIds = Rapat::where('program_kerjas_id', $id)->pluck('id')->toArray();
             if (!empty($rapatIds)) {
                 RapatPartisipasi::whereIn('rapat_id', $rapatIds)->delete();
 
-                // Delete meeting permissions/excuses
                 IzinRapat::whereIn('rapat_id', $rapatIds)->delete();
 
-                // Delete meeting notes
                 Notulen::whereIn('rapats_id', $rapatIds)->delete();
             }
 
-            // 7. Delete all structure members (panitia) for this program
             foreach ($divisiIds as $divisiId) {
                 StrukturProker::where('divisi_program_kerjas_id', $divisiId)->delete();
             }
 
-            // 8. Delete all divisions associated with this program
             DivisiProgramKerja::where('program_kerjas_id', $id)->delete();
 
-            // 9. Finally, delete the program itself
             $programKerja->delete();
 
-            // Commit the transaction
             DB::commit();
 
             return redirect()->route('dashboard')
                 ->with('success', 'Program kerja dan semua data terkait berhasil dihapus.');
         } catch (\Exception $e) {
-            // Roll back the transaction if any errors occur
             DB::rollBack();
 
             return redirect()->back()
