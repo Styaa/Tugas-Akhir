@@ -3,6 +3,9 @@
 @section('title', __('Dashboard'))
 
 @section('content')
+    @php
+        $programKerjaSelesai = $programKerja->konfirmasi_penyelesaian == 'Ya';
+    @endphp
     <div id="success-alert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
         <span id="success-message"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -28,15 +31,30 @@
         </div>
     </div>
 
+    @if ($programKerjaSelesai)
+        <div class="alert alert-info mb-3">
+            <div class="d-flex align-items-center">
+                <i class="icofont-info-circle fs-4 me-2"></i>
+                <div>
+                    <strong>Program kerja telah selesai!</strong>
+                    <p class="mb-0">Data aktivitas tidak dapat diubah karena program kerja telah
+                        dikonfirmasi selesai.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="row g-3">
         <!-- Activities Card -->
         <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold">Daftar Aktivitas</h5>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addActivity">
-                        <i class="fas fa-plus-circle me-2"></i>Tambah Aktivitas
-                    </button>
+                    @if (!$programKerjaSelesai)
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addActivity">
+                            <i class="fas fa-plus-circle me-2"></i>Tambah Aktivitas
+                        </button>
+                    @endif
                 </div>
                 <div class="card-body">
                     @if ($activities->isEmpty())
@@ -72,10 +90,11 @@
                                     @foreach ($activities as $activity)
                                         <form
                                             action="{{ route('program-kerja.divisi.aktivitas.update', ['kode_ormawa' => $kode_ormawa, 'id' => $prokerId, 'aktivitas_id' => $activity->id, 'nama_program_kerja' => $prokerNama]) }}"
-                                            method="PATCH">
+                                            method="PATCH" class="{{ $programKerjaSelesai ? 'disabled-form' : '' }}">
                                             @csrf
                                             @method('PATCH')
-                                            <tr data-id="{{ $activity->id }}">
+                                            <tr data-id="{{ $activity->id }}"
+                                                class="{{ $programKerjaSelesai ? 'bg-light text-muted' : '' }}">
                                                 @php
                                                     $activityId = $activity->id;
 
@@ -108,105 +127,195 @@
                                                 @endphp
 
                                                 <td>
-                                                    <input type="text"
-                                                        class="form-control bg-transparent border-0 fw-medium update-field"
-                                                        value="{{ $activity->nama }}" name="nama" />
+                                                    @if ($programKerjaSelesai)
+                                                        <span class="fw-medium">{{ $activity->nama }}</span>
+                                                        <input type="hidden" name="nama"
+                                                            value="{{ $activity->nama }}" />
+                                                    @else
+                                                        <input type="text"
+                                                            class="form-control bg-transparent border-0 fw-medium update-field"
+                                                            value="{{ $activity->nama }}" name="nama" />
+                                                    @endif
                                                 </td>
                                                 <td>
-                                                    <select class="form-select bg-transparent border-0 update-field"
-                                                        name="person_in_charge">
-                                                        <option value="">Assign User</option>
-                                                        @foreach ($anggotaProker as $user)
-                                                            <option value="{{ $user->user_id }}"
-                                                                {{ $activity->person_in_charge == $user->user_id ? 'selected' : '' }}>
-                                                                {{ $user->nama_user }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <div class="position-relative">
-                                                        <input type="date"
-                                                            class="form-control bg-transparent border-0 update-field"
-                                                            value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu : '' }}"
-                                                            name="tenggat_waktu" />
-                                                        @if ($isLate)
-                                                            <span
-                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                <small><i class="fas fa-exclamation-triangle"></i></small>
-                                                            </span>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select bg-transparent border-0 update-field"
-                                                        name="prioritas">
-                                                        <option value="rendah"
-                                                            {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>
-                                                            Low
-                                                        </option>
-                                                        <option value="sedang"
-                                                            {{ $activity->prioritas == 'sedang' ? 'selected' : '' }}>
-                                                            Normal
-                                                        </option>
-                                                        <option value="tinggi"
-                                                            {{ $activity->prioritas == 'tinggi' ? 'selected' : '' }}>
-                                                            High
-                                                        </option>
-                                                        <option value="kritikal"
-                                                            {{ $activity->prioritas == 'kritikal' ? 'selected' : '' }}>
-                                                            Urgent
-                                                        </option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select bg-transparent border-0 update-field"
-                                                        name="status" data-status="{{ $activity->status }}">
-                                                        <option value="belum_mulai"
-                                                            {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>
-                                                            Not Started
-                                                        </option>
-                                                        <option value="sedang_berjalan"
-                                                            {{ $activity->status == 'sedang_berjalan' ? 'selected' : '' }}>
-                                                            In Progress
-                                                        </option>
-                                                        <option value="selesai"
-                                                            {{ $activity->status == 'selesai' ? 'selected' : '' }}>
-                                                            Completed
-                                                        </option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select bg-transparent border-0 update-field"
-                                                        name="dependency_id">
-                                                        <option value="">No Dependency</option>
-                                                        @foreach ($activities as $depActivity)
-                                                            @if ($depActivity->id != $activity->id)
-                                                                <option value="{{ $depActivity->id }}"
-                                                                    {{ $depActivity->id == $activity->dependency_id ? 'selected' : '' }}>
-                                                                    {{ $depActivity->nama }}
+                                                    @if ($programKerjaSelesai)
+                                                        <span>
+                                                            @foreach ($anggotaProker as $user)
+                                                                @if ($activity->person_in_charge == $user->user_id)
+                                                                    {{ $user->nama_user }}
+                                                                    <input type="hidden" name="person_in_charge"
+                                                                        value="{{ $user->user_id }}" />
+                                                                @endif
+                                                            @endforeach
+                                                        </span>
+                                                    @else
+                                                        <select class="form-select bg-transparent border-0 update-field"
+                                                            name="person_in_charge">
+                                                            <option value="">Assign User</option>
+                                                            @foreach ($anggotaProker as $user)
+                                                                <option value="{{ $user->user_id }}"
+                                                                    {{ $activity->person_in_charge == $user->user_id ? 'selected' : '' }}>
+                                                                    {{ $user->nama_user }}
                                                                 </option>
+                                                            @endforeach
+                                                        </select>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($programKerjaSelesai)
+                                                        <div class="position-relative">
+                                                            {{ $deadline }}
+                                                            <input type="hidden" name="tenggat_waktu"
+                                                                value="{{ $activity->tenggat_waktu }}" />
+                                                            @if ($isLate)
+                                                                <span
+                                                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                                    <small><i
+                                                                            class="fas fa-exclamation-triangle"></i></small>
+                                                                </span>
                                                             @endif
-                                                        @endforeach
-                                                    </select>
+                                                        </div>
+                                                    @else
+                                                        <div class="position-relative">
+                                                            <input type="date"
+                                                                class="form-control bg-transparent border-0 update-field"
+                                                                value="{{ $activity->tenggat_waktu ? $activity->tenggat_waktu : '' }}"
+                                                                name="tenggat_waktu" />
+                                                            @if ($isLate)
+                                                                <span
+                                                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                                    <small><i
+                                                                            class="fas fa-exclamation-triangle"></i></small>
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($programKerjaSelesai)
+                                                        <span class="badge {{ $priorityClass }}">
+                                                            @if ($activity->prioritas == 'rendah')
+                                                                Low
+                                                            @elseif ($activity->prioritas == 'sedang')
+                                                                Normal
+                                                            @elseif ($activity->prioritas == 'tinggi')
+                                                                High
+                                                            @elseif ($activity->prioritas == 'kritikal')
+                                                                Urgent
+                                                            @endif
+                                                        </span>
+                                                        <input type="hidden" name="prioritas"
+                                                            value="{{ $activity->prioritas }}" />
+                                                    @else
+                                                        <select class="form-select bg-transparent border-0 update-field"
+                                                            name="prioritas">
+                                                            <option value="rendah"
+                                                                {{ $activity->prioritas == 'rendah' ? 'selected' : '' }}>
+                                                                Low
+                                                            </option>
+                                                            <option value="sedang"
+                                                                {{ $activity->prioritas == 'sedang' ? 'selected' : '' }}>
+                                                                Normal
+                                                            </option>
+                                                            <option value="tinggi"
+                                                                {{ $activity->prioritas == 'tinggi' ? 'selected' : '' }}>
+                                                                High
+                                                            </option>
+                                                            <option value="kritikal"
+                                                                {{ $activity->prioritas == 'kritikal' ? 'selected' : '' }}>
+                                                                Urgent
+                                                            </option>
+                                                        </select>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($programKerjaSelesai)
+                                                        <span class="badge {{ $statusClass }}">
+                                                            @if ($activity->status == 'belum_mulai')
+                                                                Not Started
+                                                            @elseif ($activity->status == 'sedang_berjalan')
+                                                                In Progress
+                                                            @elseif ($activity->status == 'selesai')
+                                                                Completed
+                                                            @endif
+                                                        </span>
+                                                        <input type="hidden" name="status"
+                                                            value="{{ $activity->status }}" />
+                                                    @else
+                                                        <select class="form-select bg-transparent border-0 update-field"
+                                                            name="status" data-status="{{ $activity->status }}">
+                                                            <option value="belum_mulai"
+                                                                {{ $activity->status == 'belum_mulai' ? 'selected' : '' }}>
+                                                                Not Started
+                                                            </option>
+                                                            <option value="sedang_berjalan"
+                                                                {{ $activity->status == 'sedang_berjalan' ? 'selected' : '' }}>
+                                                                In Progress
+                                                            </option>
+                                                            <option value="selesai"
+                                                                {{ $activity->status == 'selesai' ? 'selected' : '' }}>
+                                                                Completed
+                                                            </option>
+                                                        </select>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($programKerjaSelesai)
+                                                        <span>
+                                                            @foreach ($activities as $depActivity)
+                                                                @if ($depActivity->id == $activity->dependency_id)
+                                                                    {{ $depActivity->nama }}
+                                                                    <input type="hidden" name="dependency_id"
+                                                                        value="{{ $depActivity->id }}" />
+                                                                @endif
+                                                            @endforeach
+                                                            @if (!$activity->dependency_id)
+                                                                No Dependency
+                                                                <input type="hidden" name="dependency_id"
+                                                                    value="" />
+                                                            @endif
+                                                        </span>
+                                                    @else
+                                                        <select class="form-select bg-transparent border-0 update-field"
+                                                            name="dependency_id">
+                                                            <option value="">No Dependency</option>
+                                                            @foreach ($activities as $depActivity)
+                                                                @if ($depActivity->id != $activity->id)
+                                                                    <option value="{{ $depActivity->id }}"
+                                                                        {{ $depActivity->id == $activity->dependency_id ? 'selected' : '' }}>
+                                                                        {{ $depActivity->nama }}
+                                                                    </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                    @endif
                                                 </td>
                                                 @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
                                                     <td>
-                                                        <select class="form-select bg-transparent border-0 update-field"
-                                                            name="nilai" id="nilai">
-                                                            <option value="">Nilai</option>
-                                                            @for ($i = 1; $i <= 5; $i++)
-                                                                <option value="{{ $i }}"
-                                                                    {{ $activity->nilai == $i ? 'selected' : '' }}>
-                                                                    {{ $i }}
-                                                                </option>
-                                                            @endfor
-                                                        </select>
+                                                        @if ($programKerjaSelesai)
+                                                            <span
+                                                                class="badge bg-dark">{{ $activity->nilai ?: 'N/A' }}</span>
+                                                            <input type="hidden" name="nilai"
+                                                                value="{{ $activity->nilai }}" />
+                                                        @else
+                                                            <select
+                                                                class="form-select bg-transparent border-0 update-field"
+                                                                name="nilai" id="nilai">
+                                                                <option value="">Nilai</option>
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    <option value="{{ $i }}"
+                                                                        {{ $activity->nilai == $i ? 'selected' : '' }}>
+                                                                        {{ $i }}
+                                                                    </option>
+                                                                @endfor
+                                                            </select>
+                                                        @endif
                                                     </td>
                                                 @endif
                                                 <td>
                                                     <div class="dropdown">
-                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                        <button
+                                                            class="btn btn-sm btn-outline-secondary dropdown-toggle {{ $programKerjaSelesai ? 'disabled' : '' }}"
                                                             type="button" id="dropdownMenuButton{{ $activity->id }}"
                                                             data-bs-toggle="dropdown" aria-expanded="false">
                                                             <i class="fas fa-ellipsis-v"></i>
@@ -220,23 +329,25 @@
                                                                     <i class="fas fa-eye me-2"></i>Detail
                                                                 </a>
                                                             </li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="#"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#editActivityModal{{ $activity->id }}">
-                                                                    <i class="fas fa-edit me-2"></i>Edit
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <hr class="dropdown-divider">
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item text-danger" href="#"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#deleteActivityModal{{ $activity->id }}">
-                                                                    <i class="fas fa-trash-alt me-2"></i>Hapus
-                                                                </a>
-                                                            </li>
+                                                            @if (!$programKerjaSelesai)
+                                                                <li>
+                                                                    <a class="dropdown-item" href="#"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#editActivityModal{{ $activity->id }}">
+                                                                        <i class="fas fa-edit me-2"></i>Edit
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider">
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item text-danger" href="#"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#deleteActivityModal{{ $activity->id }}">
+                                                                        <i class="fas fa-trash-alt me-2"></i>Hapus
+                                                                    </a>
+                                                                </li>
+                                                            @endif
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -339,22 +450,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Member Modal Placeholder -->
-    <div class="modal fade" id="addMemberModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Anggota Divisi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form content would go here -->
-                    <p class="text-center text-muted">Form untuk menambahkan anggota divisi akan ditampilkan di sini.</p>
                 </div>
             </div>
         </div>
@@ -481,6 +576,27 @@
     <script src="{{ asset('js/template.js') }}"></script>
     <script src="{{ asset('assets/custom/aktivitas/update-field.js') }}"></script>
 
+    @if ($programKerjaSelesai)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Prevent form submission for disabled forms
+                document.querySelectorAll('form.disabled-form').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        return false;
+                    });
+                });
+
+                // Disable any add activity buttons
+                document.querySelectorAll('.add-activity-btn').forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                });
+            });
+        </script>
+    @endif
+
     <script>
         // project data table
         $(document).ready(function() {
@@ -525,11 +641,4 @@
             });
         });
     </script>
-
-    {{-- <script>
-        // const activityId = row.getAttribute('data-id');
-
-        var updateField =
-            `{{ route('program-kerja.divisi.aktivitas.update', ['kode_ormawa' => $kode_ormawa, 'nama_program_kerja' => $prokerNama, 'id' => $namaDivisi->id_divisi, 'aktivitas_id' => $activityId]) }}?periode=$periode`;
-    </script> --}}
 @endsection

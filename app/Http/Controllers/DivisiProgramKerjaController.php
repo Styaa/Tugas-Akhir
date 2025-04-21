@@ -16,6 +16,8 @@ class DivisiProgramKerjaController extends Controller
 
         $prokerId = ProgramKerja::where('nama', $prokerNama)->value('id');
 
+        $programKerja = ProgramKerja::find($prokerId);
+
         // dd($id);
 
         $namaDivisi = DB::table('divisi_program_kerjas')
@@ -59,6 +61,6 @@ class DivisiProgramKerjaController extends Controller
 
 
         // dd($anggotaProker[0]->nama_program_kerja);
-        return view('program-kerja.divisi.show', compact('anggotaProker', 'namaDivisi', 'activities', 'prokerNama', 'prokerId'));
+        return view('program-kerja.divisi.show', compact('anggotaProker', 'namaDivisi', 'activities', 'prokerNama', 'prokerId', 'programKerja'));
     }
 }

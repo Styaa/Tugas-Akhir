@@ -26,6 +26,12 @@
         </div>
     @endif
     <!-- Body: Body -->
+    @php
+        $tanggalSelesaiLewat = $programKerja->tanggal_selesai && now() > $programKerja->tanggal_selesai;
+        $isKetuaProker = isset($ketua[0]) && Auth::user()->id == $ketua[0]->id;
+        $programKerjaSelesai = $programKerja->konfirmasi_penyelesaian == 'Ya';
+    @endphp
+
     <div class="body d-flex py-lg-3 py-md-2">
         <div class="container-xxl">
             <div class="row clearfix">
@@ -49,16 +55,16 @@
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center">
                                         <span class="me-2 fw-bold">Ketua Program Kerja:</span>
-                                        <div class="dropdown">
+                                        <div class="dropdown" disabled>
                                             <a href="#" class="dropdown-toggle text-decoration-none"
-                                                id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false" ena>
                                                 {{ isset($ketua[0]) ? $ketua[0]->name : 'Pilih Ketua Program Kerja' }}
                                             </a>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                                 @foreach ($anggota as $nama)
                                                     <li
-                                                        class="{{ Auth::user()->jabatanOrmawa->id == 13 ? 'disabled' : '' }}">
-                                                        <a class="dropdown-item pilih-ketua {{ isset($ketua[0]) && $ketua[0]->name === $nama->name ? 'active' : '' }}"
+                                                        class="{{ Auth::user()->jabatanOrmawa->nama == 'Anggota' ? 'disabled' : '' }}">
+                                                        <a class="dropdown-item pilih-ketua {{ isset($ketua[0]) && $ketua[0]->name === $nama->name ? 'active' : '' }} {{ !$programKerjaSelesai ? '' : 'disabled' }}"
                                                             data-id="{{ $nama->id }}"
                                                             data-name="{{ $nama->name }}">{{ $nama->name }}</a>
                                                     </li>
@@ -83,27 +89,68 @@
                     </div>
                     {{-- Card Info End --}}
 
-                    @php
-                        $tanggalSelesaiLewat = $programKerja->tanggal_selesai && now() > $programKerja->tanggal_selesai;
-                        $isKetuaProker = isset($ketua[0]) && Auth::user()->id == $ketua[0]->id;
-                        $programKerjaBelumSelesai = $programKerja->disetujui != 'Ya';
-                    @endphp
-
-                    @if ($tanggalSelesaiLewat && $isKetuaProker && $programKerjaBelumSelesai)
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="icofont-check-circled me-2"></i>
-                                    <strong>Program kerja telah melewati tanggal selesai.</strong> Silakan konfirmasi
-                                    penyelesaian program kerja untuk melakukan evaluasi kinerja panitia.
-                                </div>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#konfirmasiSelesaiModal">
-                                    <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
-                                </button>
+                    <div class="card mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
+                            <h5 class="fw-bold mb-0">Status Program Kerja</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                @if ($programKerjaSelesai)
+                                    <!-- Program Telah Selesai -->
+                                    <div class="alert alert-success mb-0 w-100">
+                                        <div class="d-flex align-items-center">
+                                            <i class="icofont-check-circled fs-4 me-2"></i>
+                                            <div>
+                                                <strong>Program kerja telah selesai!</strong>
+                                                <p class="mb-0">Program kerja ini telah dikonfirmasi selesai dan siap
+                                                    untuk evaluasi.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @elseif ($tanggalSelesaiLewat && $isKetuaProker)
+                                    <!-- Program Belum Selesai dan Tanggal Telah Lewat -->
+                                    <div class="alert alert-warning mb-0 w-100">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="icofont-warning-alt me-2"></i>
+                                                <strong>Program kerja telah melewati tanggal selesai.</strong> Silakan
+                                                konfirmasi
+                                                penyelesaian program kerja untuk melakukan evaluasi kinerja panitia.
+                                            </div>
+                                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                                data-bs-target="#konfirmasiSelesaiModal">
+                                                <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
+                                            </button>
+                                        </div>
+                                    </div>
+                                @elseif ($tanggalSelesaiLewat)
+                                    <!-- Program Belum Selesai, Tanggal Lewat, Bukan Ketua -->
+                                    <div class="alert alert-warning mb-0 w-100">
+                                        <div class="d-flex align-items-center">
+                                            <i class="icofont-warning-alt fs-4 me-2"></i>
+                                            <div>
+                                                <strong>Program kerja telah melewati tanggal selesai.</strong>
+                                                <p class="mb-0">Menunggu konfirmasi penyelesaian dari ketua program kerja.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- Program Masih Berjalan -->
+                                    <div class="alert alert-info mb-0 w-100">
+                                        <div class="d-flex align-items-center">
+                                            <i class="icofont-clock-time fs-4 me-2"></i>
+                                            <div>
+                                                <strong>Program kerja sedang berjalan.</strong>
+                                                <p class="mb-0">Program kerja akan berakhir pada tanggal
+                                                    {{ $tanggal_selesai ?? 'yang belum ditentukan' }}.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
-                    @endif
+                    </div>
 
                     {{-- Anggaran Program Kerja --}}
                     @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
@@ -158,10 +205,12 @@
                             <div class="card mb-4">
                                 <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
                                     <h5 class="fw-bold mb-0">Dokumen Program Kerja</h5>
-                                    <a href="{{ route('program-kerja.files.upload', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
-                                        class="btn btn-primary btn-sm">
-                                        <i class="icofont-upload-alt me-2"></i>Upload File Baru
-                                    </a>
+                                    @if (!$programKerjaSelesai)
+                                        <a href="{{ route('program-kerja.files.upload', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                            class="btn btn-primary btn-sm">
+                                            <i class="icofont-upload-alt me-2"></i>Upload File Baru
+                                        </a>
+                                    @endif
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -239,11 +288,13 @@
                                                             <div class="d-flex flex-column align-items-center">
                                                                 <i class="icofont-file-document fs-1 text-muted mb-3"></i>
                                                                 <p class="mb-3">Belum ada file yang diupload</p>
-                                                                <a href="{{ route('program-kerja.files.upload', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
-                                                                    class="btn btn-primary">
-                                                                    <i class="icofont-upload-alt me-1"></i>Upload File
-                                                                    Sekarang
-                                                                </a>
+                                                                @if (!$programKerjaSelesai)
+                                                                    <a href="{{ route('program-kerja.files.upload', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                                        class="btn btn-primary">
+                                                                        <i class="icofont-upload-alt me-1"></i>Upload File
+                                                                        Sekarang
+                                                                    </a>
+                                                                @endif
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -375,11 +426,13 @@
                                         <div
                                             class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
                                             <h6 class="mb-0 fw-bold">Anggota Program Kerja</h6>
-                                            @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
-                                                <button type="button" class="btn btn-primary btn-sm"
-                                                    data-bs-toggle="modal" data-bs-target="#addmember">
-                                                    <i class="icofont-plus-circle me-1"></i>Tambah
-                                                </button>
+                                            @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
+                                                @if (!$programKerjaSelesai)
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        data-bs-toggle="modal" data-bs-target="#addmember">
+                                                        <i class="icofont-plus-circle me-1"></i>Tambah
+                                                    </button>
+                                                @endif
                                             @endif
                                         </div>
                                         <div class="card-body">

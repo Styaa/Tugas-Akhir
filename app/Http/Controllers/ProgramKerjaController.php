@@ -277,7 +277,7 @@ class ProgramKerjaController extends Controller
         $ketua = DB::table('struktur_prokers')
             ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
             ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
-            ->where('struktur_prokers.jabatans_id', 1)
+            ->where('struktur_prokers.jabatans_id', 2)
             ->where('divisi_program_kerjas.program_kerjas_id', $id)
             ->select('users.name', 'users.id')
             ->get();
@@ -373,7 +373,7 @@ class ProgramKerjaController extends Controller
     {
         // Cari ID divisi_program_kerja berdasarkan divisi_pelaksanas_id dan program_kerjas_id
         $id = DB::table('divisi_program_kerjas')
-            ->where('divisi_pelaksanas_id', 4)
+            ->where('divisi_pelaksanas_id', 1)
             ->where('program_kerjas_id', $prokerId)
             ->value('id');
 
@@ -387,7 +387,7 @@ class ProgramKerjaController extends Controller
 
         // Periksa apakah ada user yang sudah menjabat sebagai ketua (jabatans_id = 1) pada divisi_program_kerjas_id yang sama
         $existingKetua = StrukturProker::where('divisi_program_kerjas_id', $id)
-            ->where('jabatans_id', 1)
+            ->where('jabatans_id', 2)
             ->first();
 
         // dd($existingKetua);
@@ -419,7 +419,7 @@ class ProgramKerjaController extends Controller
         $strukturProker = StrukturProker::create([
             'users_id' => $userId,
             'divisi_program_kerjas_id' => $id,
-            'jabatans_id' => 1,
+            'jabatans_id' => 2,
         ]);
 
         // Kembalikan respons JSON jika berhasil

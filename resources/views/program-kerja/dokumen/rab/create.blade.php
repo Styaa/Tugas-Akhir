@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $programKerjaSelesai = $programKerja->konfirmasi_penyelesaian == 'Ya';
+    @endphp
     <div class="container mb-4">
         <h3 class="text-center fw-bold">Rancangan Anggaran Biaya</h3>
         <p class="text-center">{{ $programKerja->nama }} - Periode: {{ $periode }}</p>
@@ -57,7 +60,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-primary" id="add-pemasukan">Tambah Pemasukan</button>
+                <button type="button" class="btn btn-primary add-pemasukan" id="add-pemasukan">Tambah Pemasukan</button>
             </div>
 
 

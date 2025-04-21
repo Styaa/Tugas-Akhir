@@ -1,5 +1,30 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    const formInputs = document.querySelectorAll('input, select, textarea, button[type="submit"], button[type="button"].add-pemasukan, button[type="button"].add-pengeluaran, button[type="button"].remove-row');
+
+    formInputs.forEach(function (input) {
+        // Skip the back button
+        if (input.classList.contains('btn-dark')) return;
+
+        // Disable the input
+        input.disabled = true;
+
+        // Add visual indicator for disabled state
+        if (input.classList.contains('btn')) {
+            input.classList.remove('btn-primary', 'btn-success', 'btn-danger');
+            input.classList.add('btn-secondary');
+        }
+    });
+
+    // Add read-only mode message
+    const form = document.querySelector('form');
+    if (form) {
+        const readOnlyBanner = document.createElement('div');
+        readOnlyBanner.className = 'text-center mb-3 fw-bold text-muted';
+        readOnlyBanner.innerHTML = 'Mode lihat saja: Program kerja telah selesai';
+        form.prepend(readOnlyBanner);
+    }
+
     function initializeCalculations() {
         // Hitung total pemasukan
         updateTotalPemasukan();
