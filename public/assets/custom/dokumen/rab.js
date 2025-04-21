@@ -1,10 +1,31 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Check if program is completed (read-only mode)
+    const isReadOnly = document.querySelector('.alert-info') &&
+        document.querySelector('.alert-info').textContent.includes('Program kerja telah selesai');
 
+    if (isReadOnly) {
+        setupReadOnlyMode();
+    } else {
+        setupEditMode();
+    }
+
+    // Setup number input restrictions for both modes
+    setupNumberInputs();
+
+    // Setup Excel export functionality for both modes
+    setupExcelExport();
+});
+
+/**
+ * Configure read-only mode
+ */
+function setupReadOnlyMode() {
+    // Disable all form inputs
     const formInputs = document.querySelectorAll('input, select, textarea, button[type="submit"], button[type="button"].add-pemasukan, button[type="button"].add-pengeluaran, button[type="button"].remove-row');
 
     formInputs.forEach(function (input) {
-        // Skip the back button
-        if (input.classList.contains('btn-dark')) return;
+        // Skip the back button and download button
+        if (input.classList.contains('btn-dark') || input.id === 'download-excel-btn') return;
 
         // Disable the input
         input.disabled = true;
@@ -16,249 +37,369 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Add read-only mode message
+    // Add read-only mode message if not already present
     const form = document.querySelector('form');
-    if (form) {
+    if (form && !document.querySelector('.read-only-banner')) {
         const readOnlyBanner = document.createElement('div');
-        readOnlyBanner.className = 'text-center mb-3 fw-bold text-muted';
-        readOnlyBanner.innerHTML = 'Mode lihat saja: Program kerja telah selesai';
+        readOnlyBanner.className = 'alert alert-info mb-3 read-only-banner';
+        readOnlyBanner.innerHTML = '<div class="d-flex align-items-center"><i class="icofont-info-circle fs-4 me-2"></i><div><strong>Mode hanya lihat:</strong> Program kerja telah selesai dan tidak dapat diedit.</div></div>';
         form.prepend(readOnlyBanner);
     }
 
-    function initializeCalculations() {
-        // Hitung total pemasukan
-        updateTotalPemasukan();
-
-        // Hitung total pengeluaran untuk setiap divisi
-        document.querySelectorAll('[id^="pengeluaran-body-"]').forEach(tbody => {
-            updateTotalPengeluaranPerDivisi(tbody.id);
-        });
-
-        // Hitung total pengeluaran keseluruhan dan selisih
-        updateTotalPengeluaran();
-    }
-
-    // Fungsi untuk menghitung total pengeluaran keseluruhan
-    function updateTotalPengeluaran() {
-        let totalPengeluaran = 0;
-
-        document.querySelectorAll('[id^="total-pengeluaran-divisi-"]').forEach(span => {
-            // Hapus format ribuan dan konversi ke angka
-            const value = span.textContent.replace(/\./g, '').replace(/,/g, '.');
-            totalPengeluaran += parseFloat(value) || 0;
-        });
-
-        document.getElementById('total-pengeluaran').textContent = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
-
-        // Hitung selisih
-        const totalPemasukan = parseFloat(document.getElementById('total-pemasukan').textContent.replace(/[^\d,-]/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-        const selisih = totalPemasukan - totalPengeluaran;
-        document.getElementById('selisih').textContent = `Rp ${selisih.toLocaleString('id-ID')}`;
-    }
-
-    // Fungsi untuk menghitung total pemasukan
-    function updateTotalPemasukan() {
-        let totalPemasukan = 0;
-
-        document.querySelectorAll('#pemasukan-body .total').forEach(input => {
-            totalPemasukan += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById('total-pemasukan').textContent = `Rp ${totalPemasukan.toLocaleString('id-ID')}`;
-
-        // Update selisih setiap kali total pemasukan berubah
-        updateTotalPengeluaran();
-    }
-
-    // Fungsi untuk memperbarui total pengeluaran per divisi
-    function updateTotalPengeluaranPerDivisi(tbodyId) {
-        const tbody = document.getElementById(tbodyId);
-        const divisiId = tbodyId.split('-')[2]; // Extract divisi ID
-        let totalPengeluaran = 0;
-
-        tbody.querySelectorAll('.total').forEach(input => {
-            totalPengeluaran += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById(`total-pengeluaran-divisi-${divisiId}`).textContent = totalPengeluaran.toLocaleString('id-ID');
-
-        // Update total pengeluaran keseluruhan
-        updateTotalPengeluaran();
-    }
-
-    // Inisialisasi perhitungan saat halaman dimuat
-    initializeCalculations();
-
-    // Fungsi untuk menambahkan baris baru ke tabel pemasukan
-    document.getElementById('add-pemasukan').addEventListener('click', function () {
-        const tbody = document.getElementById('pemasukan-body');
-        const rowCount = tbody.rows.length + 1;
-
-        const row = `<tr>
-            <td>${rowCount}</td>
-            <td><input type="text" class="form-control" name="pemasukan[komponen][]" placeholder="Komponen Biaya"></td>
-            <td><input type="number" class="form-control biaya" name="pemasukan[biaya][]" placeholder="Biaya"></td>
-            <td><input type="number" class="form-control jumlah" name="pemasukan[jumlah][]" placeholder="Jumlah"></td>
-            <td><input type="text" class="form-control satuan" name="pemasukan[satuan][]" placeholder="Satuan"></td>
-            <td><input type="number" class="form-control total" name="pemasukan[total][]" placeholder="Total" readonly></td>
-            <td><button type="button" class="btn btn-danger remove-row">Hapus</button></td>
-        </tr>`;
-        tbody.insertAdjacentHTML('beforeend', row);
+    // Prevent form submission
+    document.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        alert('Program kerja telah selesai dan tidak dapat diedit lagi.');
+        return false;
     });
 
-    // Fungsi untuk menambahkan baris baru ke tabel pengeluaran per divisi
+    // Initialize calculations for read-only mode
+    calculateAllTotals();
+}
+
+/**
+ * Configure edit mode
+ */
+function setupEditMode() {
+    // Initialize calculations
+    calculateAllTotals();
+
+    // Setup event listeners for input changes
+    setupEventListeners();
+
+    // Setup add/remove row functionality
+    setupRowControls();
+}
+
+/**
+ * Set up input event listeners for calculating totals
+ */
+function setupEventListeners() {
+    // Add event listeners to all biaya and jumlah inputs
+    document.querySelectorAll('.biaya, .jumlah').forEach(input => {
+        input.addEventListener('input', function () {
+            calculateRowTotal(this);
+        });
+    });
+}
+
+/**
+ * Calculate the total for a single row
+ */
+function calculateRowTotal(inputElement) {
+    const row = inputElement.closest('tr');
+    const biayaInput = row.querySelector('.biaya');
+    const jumlahInput = row.querySelector('.jumlah');
+    const totalInput = row.querySelector('.total');
+
+    if (biayaInput && jumlahInput && totalInput) {
+        const biaya = Number(biayaInput.value) || 0;
+        const jumlah = Number(jumlahInput.value) || 0;
+        totalInput.value = biaya * jumlah;
+
+        // Recalculate all totals
+        calculateAllTotals();
+    }
+}
+
+/**
+ * Calculate all totals (used in both modes)
+ */
+function calculateAllTotals() {
+    // Calculate totals for each division
+    const divisiElements = document.querySelectorAll('[id^="total-pengeluaran-divisi-"]');
+    divisiElements.forEach(divisiElement => {
+        const divisiId = divisiElement.id.replace('total-pengeluaran-divisi-', '');
+        let totalDivisi = 0;
+
+        // Check if we're in read-only mode
+        if (document.querySelector('.alert-info') && document.querySelector('.alert-info').textContent.includes('Program kerja telah selesai')) {
+            // Read from hidden inputs in read-only mode
+            document.querySelectorAll(`#pengeluaran-body-${divisiId} input[name^="pengeluaran[${divisiId}][total]"]`).forEach(input => {
+                totalDivisi += Number(input.value) || 0;
+            });
+        } else {
+            // Read from regular inputs in edit mode
+            document.querySelectorAll(`#pengeluaran-body-${divisiId} .total`).forEach(input => {
+                totalDivisi += Number(input.value) || 0;
+            });
+        }
+
+        divisiElement.textContent = totalDivisi.toLocaleString('id-ID');
+    });
+
+    // Calculate total income
+    let totalPemasukan = 0;
+    if (document.querySelector('.alert-info') && document.querySelector('.alert-info').textContent.includes('Program kerja telah selesai')) {
+        // Read from hidden inputs in read-only mode
+        document.querySelectorAll('input[name^="pemasukan[total]"]').forEach(input => {
+            totalPemasukan += Number(input.value) || 0;
+        });
+    } else {
+        // Read from regular inputs in edit mode
+        document.querySelectorAll('#pemasukan-body .total').forEach(input => {
+            totalPemasukan += Number(input.value) || 0;
+        });
+    }
+
+    const totalPemasukanElement = document.getElementById('total-pemasukan');
+    if (totalPemasukanElement) {
+        totalPemasukanElement.textContent = totalPemasukan.toLocaleString('id-ID');
+    }
+
+    // Calculate total expense
+    let totalPengeluaran = 0;
+    divisiElements.forEach(divisiElement => {
+        totalPengeluaran += Number(divisiElement.textContent.replace(/\./g, '').replace(/,/g, '.')) || 0;
+    });
+
+    const totalPengeluaranElement = document.getElementById('total-pengeluaran');
+    if (totalPengeluaranElement) {
+        totalPengeluaranElement.textContent = totalPengeluaran.toLocaleString('id-ID');
+    }
+
+    // Calculate difference
+    let selisih = totalPemasukan - totalPengeluaran;
+    const selisihElement = document.getElementById('selisih');
+    if (selisihElement) {
+        selisihElement.textContent = selisih.toLocaleString('id-ID');
+
+        // Set color based on value
+        const selisihParent = selisihElement.parentElement;
+        if (selisihParent) {
+            selisihParent.classList.remove('text-success', 'text-danger');
+            selisihParent.classList.add(selisih >= 0 ? 'text-success' : 'text-danger');
+        }
+    }
+}
+
+/**
+ * Set up row controls (add/remove) functionality
+ */
+function setupRowControls() {
+    // Add pemasukan row
+    const addPemasukanBtn = document.getElementById('add-pemasukan');
+    if (addPemasukanBtn) {
+        addPemasukanBtn.addEventListener('click', function () {
+            const tbody = document.getElementById('pemasukan-body');
+            const rowCount = tbody.getElementsByTagName('tr').length;
+            const newRow = `
+                <tr>
+                    <td>${rowCount + 1}</td>
+                    <td>
+                        <input type="text" class="form-control" name="pemasukan[komponen][]" placeholder="Komponen Biaya">
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control biaya" name="pemasukan[biaya][]" placeholder="Biaya">
+                        </div>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control jumlah" name="pemasukan[jumlah][]" placeholder="Jumlah">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control satuan" name="pemasukan[satuan][]" placeholder="Satuan">
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control total" name="pemasukan[total][]" placeholder="Total" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-row">
+                            <i class="icofont-trash me-1"></i>Hapus
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', newRow);
+            setupEventListeners();
+            setupNumberInputs(); // Setup restrictions for new inputs
+        });
+    }
+
+    // Add pengeluaran row
     document.querySelectorAll('.add-pengeluaran').forEach(button => {
         button.addEventListener('click', function () {
             const divisiId = this.getAttribute('data-divisi-id');
             const tbody = document.getElementById(`pengeluaran-body-${divisiId}`);
-            const rowCount = tbody.rows.length + 1;
-
-            const row = `<tr>
-                <td>${rowCount}</td>
-                <td><input type="text" class="form-control" name="pengeluaran[${divisiId}][komponen][]" placeholder="Komponen Biaya"></td>
-                <td><input type="number" class="form-control biaya" name="pengeluaran[${divisiId}][biaya][]" placeholder="Biaya"></td>
-                <td><input type="number" class="form-control jumlah" name="pengeluaran[${divisiId}][jumlah][]" placeholder="Jumlah"></td>
-                <td><input type="text" class="form-control satuan" name="pengeluaran[${divisiId}][satuan][]" placeholder="Satuan"></td>
-                <td><input type="number" class="form-control total" name="pengeluaran[${divisiId}][total][]" placeholder="Total" readonly></td>
-                <td><button type="button" class="btn btn-danger remove-row">Hapus</button></td>
-            </tr>`;
-            tbody.insertAdjacentHTML('beforeend', row);
+            const rowCount = tbody.getElementsByTagName('tr').length;
+            const newRow = `
+                <tr>
+                    <td>${rowCount + 1}</td>
+                    <td>
+                        <input type="text" class="form-control" name="pengeluaran[${divisiId}][komponen][]"
+                            placeholder="Komponen Biaya">
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control biaya" name="pengeluaran[${divisiId}][biaya][]"
+                                placeholder="Biaya">
+                        </div>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control jumlah" name="pengeluaran[${divisiId}][jumlah][]"
+                            placeholder="Jumlah">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control satuan" name="pengeluaran[${divisiId}][satuan][]"
+                            placeholder="Satuan">
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control total" name="pengeluaran[${divisiId}][total][]"
+                                placeholder="Total" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-row">
+                            <i class="icofont-trash me-1"></i>Hapus
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', newRow);
+            setupEventListeners();
+            setupNumberInputs(); // Setup restrictions for new inputs
         });
     });
 
-    // Fungsi untuk menghitung total pemasukan secara otomatis
-    document.addEventListener('input', function (e) {
-        if (e.target.closest('#pemasukan-body')) {
-            console.log(document.querySelectorAll('#pemasukan-body .total').value);
-            updateTotalPemasukan();
-        }
-    });
-
-    // Fungsi untuk menghitung total pengeluaran per divisi
-    document.addEventListener('input', function (e) {
-        if (e.target.classList.contains('biaya') || e.target.classList.contains('jumlah')) {
-            const row = e.target.closest('tr');
-            const biaya = row.querySelector('.biaya').value || 0;
-            const jumlah = row.querySelector('.jumlah').value || 0;
-            const total = row.querySelector('.total');
-            total.value = biaya * jumlah;
-
-            if (e.target.closest('[id^="pengeluaran-body-"]')) {
-                const tbodyId = e.target.closest('tbody').id;
-                updateTotalPengeluaranPerDivisi(tbodyId);
-            }
-        }
-    });
-
-    document.addEventListener('input', function (e) {
-        if (e.target.classList.contains('biaya') || e.target.classList.contains('jumlah')) {
-            const row = e.target.closest('tr');
-            const biaya = row.querySelector('.biaya').value || 0;
-            const jumlah = row.querySelector('.jumlah').value || 0;
-            const total = row.querySelector('.total');
-            total.value = biaya * jumlah;
-
-            if (e.target.closest('#pemasukan-body')) {
-                updateTotalPemasukan();
-            } else if (e.target.closest('[id^="pengeluaran-body-"]')) {
-                const tbodyId = e.target.closest('tbody').id;
-                updateTotalPengeluaranPerDivisi(tbodyId);
-            }
-        }
-    });
-
-    // Fungsi untuk menghapus baris
+    // Remove row
     document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-row')) {
-            const tbody = e.target.closest('tbody');
-            e.target.closest('tr').remove();
+        if (e.target.classList.contains('remove-row') || e.target.closest('.remove-row')) {
+            const button = e.target.classList.contains('remove-row') ? e.target : e.target.closest('.remove-row');
+            const row = button.closest('tr');
+            const tbody = row.closest('tbody');
 
-            // Update total untuk tabel yang sesuai
-            if (tbody.id === 'pemasukan-body') {
-                updateTotalPemasukan();
-            } else if (tbody.id.startsWith('pengeluaran-body-')) {
-                updateTotalPengeluaranPerDivisi(tbody.id);
+            // Don't remove if it's the last row
+            if (tbody.rows.length > 1) {
+                row.remove();
+
+                // Update row numbers
+                Array.from(tbody.rows).forEach((row, index) => {
+                    row.cells[0].textContent = index + 1;
+                });
+
+                // Recalculate totals
+                calculateAllTotals();
+            } else {
+                // Clear values instead of removing the last row
+                row.querySelectorAll('input:not([readonly])').forEach(input => {
+                    input.value = '';
+                });
+                row.querySelector('.total').value = '';
+                calculateAllTotals();
             }
-
-            // Perbarui nomor urut
-            updateRowNumbers(tbody);
         }
     });
+}
 
-    // Fungsi untuk memperbarui total pemasukan
-    function updateTotalPemasukan() {
-        let totalPemasukan = 0;
-
-        document.querySelectorAll('#pemasukan-body .total').forEach(input => {
-            totalPemasukan += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById('total-pemasukan').textContent = totalPemasukan.toLocaleString('id-ID');
-    }
-
-    // Fungsi untuk memperbarui total pengeluaran per divisi
-    function updateTotalPengeluaranPerDivisi(tbodyId) {
-        const tbody = document.getElementById(tbodyId);
-        const divisiId = tbodyId.split('-')[2]; // Extract divisi ID
-        let totalPengeluaran = 0;
-
-        tbody.querySelectorAll('.total').forEach(input => {
-            totalPengeluaran += parseFloat(input.value) || 0;
-        });
-
-        document.getElementById(`total-pengeluaran-divisi-${divisiId}`).textContent = totalPengeluaran.toLocaleString('id-ID');
-    }
-
-    // Fungsi untuk memperbarui nomor urut pada tabel
-    function updateRowNumbers(tbody) {
-        Array.from(tbody.rows).forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
-        });
-    }
-});
-
-document.querySelectorAll('input[type="number"]').forEach(function (input) {
-    input.addEventListener('keydown', function (e) {
-        // Cegah karakter 'e' atau 'E'
-        if (e.key === 'e' || e.key === 'E') {
-            e.preventDefault();
-        }
-    });
-});
-
-document.getElementById('rab-download-form').addEventListener('submit', function (e) {
-    const pemasukanData = [];
-    document.querySelectorAll('#pemasukan-body tr').forEach((row, index) => {
-        const cells = row.querySelectorAll('input');
-        pemasukanData.push({
-            komponen: cells[0].value,
-            biaya: cells[1].value,
-            jumlah: cells[2].value,
-            satuan: cells[3].value,
-            total: cells[4].value,
+/**
+ * Set up number input restrictions
+ */
+function setupNumberInputs() {
+    document.querySelectorAll('input[type="number"]').forEach(function (input) {
+        input.addEventListener('keydown', function (e) {
+            // Prevent 'e' or 'E' characters
+            if (e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+            }
         });
     });
+}
 
-    const pengeluaranData = [];
-    document.querySelectorAll('[id^="pengeluaran-body-"]').forEach((tbody) => {
-        tbody.querySelectorAll('tr').forEach((row) => {
-            const cells = row.querySelectorAll('input');
-            pengeluaranData.push({
-                komponen: cells[0].value,
-                biaya: cells[1].value,
-                jumlah: cells[2].value,
-                satuan: cells[3].value,
-                total: cells[4].value,
-                divisi: tbody.id.split('-')[2], // Ambil ID divisi dari ID tbody
+/**
+ * Set up Excel export functionality
+ */
+function setupExcelExport() {
+    const downloadExcelBtn = document.getElementById('download-excel-btn');
+    if (downloadExcelBtn) {
+        downloadExcelBtn.addEventListener('click', function () {
+            // Collect form data
+            const formData = new FormData(document.querySelector('form'));
+
+            // Create form for Excel download
+            const downloadForm = document.createElement('form');
+            downloadForm.method = 'POST';
+            downloadForm.action = window.location.href.replace(/\/create|\/edit/, '/export');
+
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('input[name="_token"]').value;
+            downloadForm.appendChild(csrfToken);
+
+            // Add form data as JSON
+            const rabData = document.createElement('input');
+            rabData.type = 'hidden';
+            rabData.name = 'rab_data';
+
+            // Prepare the data object
+            const data = {
+                pemasukan: [],
+                pengeluaran: {}
+            };
+
+            // Get pemasukan data
+            const pemasukanRows = document.querySelectorAll('#pemasukan-body tr');
+            pemasukanRows.forEach(row => {
+                const komponenInput = row.querySelector('input[name="pemasukan[komponen][]"]');
+                if (komponenInput) {
+                    const biayaInput = row.querySelector('input[name="pemasukan[biaya][]"]');
+                    const jumlahInput = row.querySelector('input[name="pemasukan[jumlah][]"]');
+                    const satuanInput = row.querySelector('input[name="pemasukan[satuan][]"]');
+                    const totalInput = row.querySelector('input[name="pemasukan[total][]"]');
+
+                    const item = {
+                        komponen: komponenInput.value,
+                        biaya: biayaInput ? biayaInput.value : 0,
+                        jumlah: jumlahInput ? jumlahInput.value : 0,
+                        satuan: satuanInput ? satuanInput.value : '',
+                        total: totalInput ? totalInput.value : 0
+                    };
+                    data.pemasukan.push(item);
+                }
             });
+
+            // Get pengeluaran data for each division
+            const divisiContainers = document.querySelectorAll('[id^="pengeluaran-body-"]');
+            divisiContainers.forEach(container => {
+                const divisiId = container.id.replace('pengeluaran-body-', '');
+                data.pengeluaran[divisiId] = [];
+
+                const pengeluaranRows = container.querySelectorAll('tr');
+                pengeluaranRows.forEach(row => {
+                    const komponenInput = row.querySelector(`input[name^="pengeluaran[${divisiId}][komponen]"]`);
+                    if (komponenInput) {
+                        const biayaInput = row.querySelector(`input[name^="pengeluaran[${divisiId}][biaya]"]`);
+                        const jumlahInput = row.querySelector(`input[name^="pengeluaran[${divisiId}][jumlah]"]`);
+                        const satuanInput = row.querySelector(`input[name^="pengeluaran[${divisiId}][satuan]"]`);
+                        const totalInput = row.querySelector(`input[name^="pengeluaran[${divisiId}][total]"]`);
+
+                        const item = {
+                            komponen: komponenInput.value,
+                            biaya: biayaInput ? biayaInput.value : 0,
+                            jumlah: jumlahInput ? jumlahInput.value : 0,
+                            satuan: satuanInput ? satuanInput.value : '',
+                            total: totalInput ? totalInput.value : 0
+                        };
+                        data.pengeluaran[divisiId].push(item);
+                    }
+                });
+            });
+
+            rabData.value = JSON.stringify(data);
+            downloadForm.appendChild(rabData);
+
+            // Submit the form
+            document.body.appendChild(downloadForm);
+            downloadForm.submit();
+            document.body.removeChild(downloadForm);
         });
-    });
-
-    const rabData = {
-        pemasukan: pemasukanData,
-        pengeluaran: pengeluaranData
-    };
-
-    console.log(rabData);
-    document.getElementById('rab-data').value = JSON.stringify(rabData);
-});
+    }
+}
