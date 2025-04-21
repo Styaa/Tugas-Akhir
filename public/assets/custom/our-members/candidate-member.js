@@ -25,7 +25,7 @@ $(document).on('click', '.accept-button', function () {
     } else if (divisi1_id) {
         // Jika hanya ada 1 divisi, tampilkan konfirmasi langsung
         singleDivisiConfirmation.classList.remove("d-none");
-        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_id}`;
+        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_name}`;
     }
 
     // Update modal content
