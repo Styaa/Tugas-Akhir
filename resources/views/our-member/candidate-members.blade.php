@@ -107,18 +107,6 @@
     <script>
         var acceptCandidateUrl =
             "{{ route('our-member.candidate-accept', ['kode_ormawa' => $kode_ormawa]) }}?periode=$periode";
-        // project data table
-        // $(document).ready(function() {
-        //     $('#myProjectTable')
-        //         .addClass('nowrap')
-        //         .dataTable({
-        //             responsive: true,
-        //             columnDefs: [{
-        //                 targets: [-1, -3],
-        //                 className: 'dt-body-right'
-        //             }]
-        //         });
-        // });
     </script>
 
 @endsection

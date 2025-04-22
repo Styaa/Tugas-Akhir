@@ -38,7 +38,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($izinRapat as $izin)
+                                    @foreach ($daftarIzin as $izin)
                                         <tr>
                                             <td>
                                                 <a href="" class="fw-bold text-secondary">#{{ $izin->id }}</a>
@@ -56,24 +56,56 @@
                                                 {{ $izin->rapat->nama_penyelenggara }}
                                             </td>
                                             <td>
-                                                {{ $izin->alasan }}
+                                                {{ Str::limit($izin->alasan, 50) }}
+                                                @if (strlen($izin->alasan) > 50)
+                                                    <a href="#" data-bs-toggle="tooltip" title="{{ $izin->alasan }}">
+                                                        <i class="icofont-info-circle ms-1"></i>
+                                                    </a>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge {{ $izin->status == 'disetujui' ? 'bg-success' : ($izin->status == 'ditolak' ? 'bg-danger' : ($izin->status == 'ditolak_hadir' ? 'bg-info' : 'bg-warning text-dark')) }}">
+                                                    {{ $izin->status == 'disetujui'
+                                                        ? 'Disetujui'
+                                                        : ($izin->status == 'ditolak'
+                                                            ? 'Ditolak'
+                                                            : ($izin->status == 'ditolak_hadir'
+                                                                ? 'Ditolak (Hadir)'
+                                                                : 'Menunggu')) }}
+                                                </span>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group" aria-label="Basic outlined example">
-                                                    {{-- <button type="button" class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="{{ $user->id }}"
-                                                        data-user-name="{{ $user->name }}"><i
-                                                            class="icofont-check-circled text-success"></i></button>
-                                                    <button type="button" class="btn btn-outline-secondary reject-button"
-                                                        data-user-id="{{ $user->id }}" data-bs-toggle="modal"
-                                                        data-user-name="{{ $user->name }}"><i
-                                                            class="icofont-close-circled text-danger"></i></button> --}}
-                                                    <button type="button" class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="1" data-user-name="Satya"><i
-                                                            class="icofont-check-circled text-success"></i></button>
-                                                    <button type="button" class="btn btn-outline-secondary reject-button"
-                                                        data-user-id="1" data-bs-toggle="modal" data-user-name="Satya"><i
-                                                            class="icofont-close-circled text-danger"></i></button>
+                                                    @if ($izin->status == 'pending')
+                                                        <!-- Buttons for pending izin -->
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary accept-button"
+                                                            data-izin-id="{{ $izin->id }}"
+                                                            data-user-name="{{ $izin->user->name }}">
+                                                            <i class="icofont-check-circled text-success"></i>
+                                                        </button>
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary reject-button"
+                                                            data-izin-id="{{ $izin->id }}"
+                                                            data-user-name="{{ $izin->user->name }}">
+                                                            <i class="icofont-close-circled text-danger"></i>
+                                                        </button>
+                                                    @elseif($izin->status == 'ditolak')
+                                                        <!-- Button for rejected izin - allow marking attendance -->
+                                                        <a href="{{ route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id]) }}"
+                                                            class="btn btn-outline-primary btn-sm" title="Tandai Kehadiran">
+                                                            <i class="icofont-user-alt-3"></i> Absensi
+                                                        </a>
+                                                    @elseif($izin->status == 'ditolak_hadir')
+                                                        <!-- Info for rejected but attended -->
+                                                        <span class="badge bg-info">
+                                                            <i class="icofont-check-circled me-1"></i>Hadir
+                                                        </span>
+                                                    @else
+                                                        <!-- No actions for approved izin -->
+                                                        <span class="text-muted">-</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

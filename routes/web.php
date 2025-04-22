@@ -79,6 +79,10 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [RapatController::class, 'store'])->name('store');
             Route::get('/perizinan', [RapatController::class, 'perizinan'])->name('perizinan');
 
+            Route::post('/absensi', [RapatController::class, 'absensi'])->name('absensi');
+            Route::post('/izin/{id_rapat}', [RapatController::class, 'storeIzin'])->name('izin.store');
+            Route::patch('/izin/{id_izin}/update', [RapatController::class, 'updateIzin'])->name('izin.update');
+
             Route::get('/tulis/notulensi', [RapatController::class, 'tulisNotulensi'])->name('tulis_notulensi');
 
             route::prefix('notulen')->name('notulen.')->group(function () {

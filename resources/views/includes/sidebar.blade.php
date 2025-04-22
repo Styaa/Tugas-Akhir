@@ -108,7 +108,7 @@
                         </li>
                         @if (Auth::user()->jabatanOrmawa->id !== 13)
                             <li>
-                                <a class="ms-link {{ Request::segment(3) == 'Daftar Izin' ? 'active' : '' }}"
+                                <a class="ms-link {{ Request::segment(3) == 'perizinan' ? 'active' : '' }}"
                                     href="{{ route('rapat.perizinan', ['kode_ormawa' => $kode_ormawa]) }}">
                                     <span>Daftar Izin</span>
                                 </a>

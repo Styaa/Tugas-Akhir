@@ -1188,80 +1188,94 @@ $date = \Carbon\Carbon::now();
 
 <!-- Modal Daftar Izin -->
 @if (isset($daftarIzin))
-    <div class="modal fade" id="daftarIzinModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+    <div class="modal fade" id="daftarIzinModal" tabindex="-1" aria-labelledby="daftarIzinModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Daftar Peserta yang Izin</h5>
+                    <h5 class="modal-title" id="daftarIzinModalLabel">Daftar Izin Rapat</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if ($daftarIzin->isEmpty())
-                        <p class="text-center">Belum ada peserta yang mengajukan izin.</p>
-                    @else
-                        <div class="card-body">
-                            <table id="myProjectTable" class="table table-hover align-middle mb-0"
-                                style="width:100%">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="25%">Nama</th>
+                                    <th width="35%">Alasan</th>
+                                    <th width="15%">Status</th>
+                                    <th width="20%">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($daftarIzin as $index => $izin)
                                     <tr>
-                                        <th>Id Izin</th>
-                                        <th>Nama Anggota</th>
-                                        <th>Rapat</th>
-                                        <th>Kegiatan</th>
-                                        <th>Alasan</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($daftarIzin as $izin)
-                                        <tr>
-                                            <td>
-                                                <a href=""
-                                                    class="fw-bold text-secondary">#{{ $izin->id }}</a>
-                                            </td>
-                                            <td>
-                                                <img class="avatar rounded-circle"
-                                                    src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
-                                                <span class="fw-bold ms-1">{{ $izin->user->name }}</span>
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('rapat.show', ['kode_ormawa' => $kode_ormawa, 'id_rapat' => $izin->rapat->id]) }}"
-                                                    class="underline">{{ $izin->rapat->nama }}</a>
-                                            </td>
-                                            <td>
-                                                {{ $izin->rapat->tipe_penyelenggara }}
-                                            </td>
-                                            <td>
-                                                {{ $izin->alasan }}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group"
-                                                    aria-label="Basic outlined example">
-                                                    {{-- <button type="button" class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="{{ $user->id }}"
-                                                        data-user-name="{{ $user->name }}"><i
-                                                            class="icofont-check-circled text-success"></i></button>
-                                                    <button type="button" class="btn btn-outline-secondary reject-button"
-                                                        data-user-id="{{ $user->id }}" data-bs-toggle="modal"
-                                                        data-user-name="{{ $user->name }}"><i
-                                                            class="icofont-close-circled text-danger"></i></button> --}}
-                                                    <button type="button"
-                                                        class="btn btn-outline-secondary accept-button"
-                                                        data-user-id="1" data-user-name="Satya"><i
-                                                            class="icofont-check-circled text-success"></i></button>
-                                                    <button type="button"
-                                                        class="btn btn-outline-secondary reject-button"
-                                                        data-user-id="1" data-bs-toggle="modal"
-                                                        data-user-name="Satya"><i
-                                                            class="icofont-close-circled text-danger"></i></button>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ asset('storage/profile/' . $izin->user->foto ?? 'default.jpg') }}"
+                                                    class="rounded-circle me-2" width="32" height="32"
+                                                    alt="Foto Peserta">
+                                                <div>
+                                                    <strong>{{ $izin->user->name }}</strong>
+                                                    <div class="text-muted small">{{ $izin->user->email }}</div>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                                            </div>
+                                        </td>
+                                        <td>{{ Str::limit($izin->alasan, 80) }}</td>
+                                        <td>
+                                            @if ($izin->status == 'ditolak_hadir')
+                                                <span class="badge bg-info">
+                                                    Ditolak (Hadir)
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="badge {{ $izin->status == 'disetujui' ? 'bg-success' : ($izin->status == 'ditolak' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                                                    {{ ucfirst($izin->status) }}
+                                                </span>
+                                            @endif
+
+                                            @if ($izin->tanggal_verifikasi)
+                                                <div class="text-muted small mt-1">
+                                                    {{ \Carbon\Carbon::parse($izin->tanggal_verifikasi)->format('d/m/Y H:i') }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($izin->status == 'pending')
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-success accept-button"
+                                                        data-izin-id="{{ $izin->id }}"
+                                                        data-user-name="{{ $izin->user->name }}">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger reject-button"
+                                                        data-izin-id="{{ $izin->id }}"
+                                                        data-user-name="{{ $izin->user->name }}">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            @elseif($izin->status == 'ditolak')
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    data-bs-toggle="modal" data-bs-target="#absensiRapatModal">
+                                                    <i class="fas fa-user-check me-1"></i>Absensi
+                                                </button>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center py-3">
+                                            Belum ada pengajuan izin untuk rapat ini
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
