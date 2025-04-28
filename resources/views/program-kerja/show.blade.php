@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 @endsection
 
 @section('content')
@@ -114,13 +115,24 @@
                                             <div>
                                                 <i class="icofont-warning-alt me-2"></i>
                                                 <strong>Program kerja telah melewati tanggal selesai.</strong> Silakan
-                                                konfirmasi
-                                                penyelesaian program kerja untuk melakukan evaluasi kinerja panitia.
+                                                lakukan penilaian anggota secara bertahap.
                                             </div>
-                                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                                data-bs-target="#konfirmasiSelesaiModal">
-                                                <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
-                                            </button>
+                                            @if ($notifikasiTerkirim == 'false')
+                                                <button type="button" class="btn btn-info" id="sendNotification"
+                                                    data-url="{{ route('program-kerja.kirim-notifikasi', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}">
+                                                    <i class="icofont-mail me-2"></i>Kirim Notifikasi Penilaian
+                                                </button>
+                                            @elseif($allMembersRated == false)
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#penilaianAnggotaModal">
+                                                    <i class="icofont-rating me-2"></i>Buka Penilaian Anggota
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                                    data-bs-target="#konfirmasiSelesaiModal">
+                                                    <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
                                 @elseif ($tanggalSelesaiLewat)
@@ -426,14 +438,20 @@
                                         <div
                                             class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
                                             <h6 class="mb-0 fw-bold">Anggota Program Kerja</h6>
-                                            @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
-                                                @if (!$programKerjaSelesai)
-                                                    <button type="button" class="btn btn-primary btn-sm"
-                                                        data-bs-toggle="modal" data-bs-target="#addmember">
-                                                        <i class="icofont-plus-circle me-1"></i>Tambah
-                                                    </button>
+                                            <div>
+                                                @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
+                                                    @if (!$programKerjaSelesai)
+                                                        <a href="{{ route('program-kerja.anggota.manage', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id]) }}"
+                                                            class="btn btn-info btn-sm me-2">
+                                                            <i class="icofont-edit me-1"></i>Kelola Anggota
+                                                        </a>
+                                                        <button type="button" class="btn btn-primary btn-sm"
+                                                            data-bs-toggle="modal" data-bs-target="#addmember">
+                                                            <i class="icofont-plus-circle me-1"></i>Tambah
+                                                        </button>
+                                                    @endif
                                                 @endif
-                                            @endif
+                                            </div>
                                         </div>
                                         <div class="card-body">
                                             <div class="flex-grow-1">
@@ -452,17 +470,96 @@
                                                                         class="text-muted small">{{ $item->nama_jabatan }}</span>
                                                                 </div>
                                                             </div>
-                                                            <div class="badge bg-light text-dark ms-2">
-                                                                {{ $item->nama_divisi }}
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="badge bg-light text-dark me-2">
+                                                                    {{ $item->nama_divisi }}
+                                                                </div>
+                                                                @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
+                                                                    @if (!$programKerjaSelesai)
+                                                                        <button type="button"
+                                                                            class="btn btn-sm btn-outline-secondary ms-1"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#editMember{{ $item->id_user }}">
+                                                                            <i class="icofont-edit"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Modal Edit Anggota -->
+                                                        <div class="modal fade" id="editMember{{ $item->id_user }}"
+                                                            tabindex="-1" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Edit Jabatan/Divisi Anggota
+                                                                        </h5>
+                                                                        <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close"></button>
+                                                                    </div>
+                                                                    <form
+                                                                        action="{{ route('program-kerja.anggota.update', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id, 'anggotaId' => $item->id_user]) }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        @method('PUT')
+                                                                        <div class="modal-body">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Nama
+                                                                                    Anggota</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    value="{{ $item->nama_user }}"
+                                                                                    disabled>
+                                                                            </div>
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Jabatan</label>
+                                                                                <select class="form-select"
+                                                                                    name="jabatan_id">
+                                                                                    @foreach ($jabatans as $jabatan)
+                                                                                        <option
+                                                                                            value="{{ $jabatan->id }}"
+                                                                                            {{ $item->id_jabatan == $jabatan->id ? 'selected' : '' }}>
+                                                                                            {{ $jabatan->nama }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Divisi</label>
+                                                                                <select class="form-select"
+                                                                                    name="divisi_id">
+                                                                                    @foreach ($divisi as $divisi_item)
+                                                                                        <option
+                                                                                            value="{{ $divisi_item['divisi_pelaksana']['id'] }}"
+                                                                                            {{ $item->divisi_id == $divisi_item['divisi_pelaksana']['id'] ? 'selected' : '' }}>
+                                                                                            {{ $divisi_item['divisi_pelaksana']['nama'] }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button"
+                                                                                class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Batal</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-primary">Simpan
+                                                                                Perubahan</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     @endforeach
                                                 </div>
 
+                                                <!-- Kode untuk anggota yang tersembunyi (skip 10) -->
                                                 <div id="expandedMembers" style="display: none;">
                                                     @foreach ($anggotaProker->skip(10) as $item)
                                                         <div
                                                             class="py-2 d-flex align-items-center border-bottom flex-wrap">
+                                                            <!-- Konten yang sama seperti di atas, termasuk tombol edit dan modal -->
                                                             <div class="d-flex align-items-center flex-fill">
                                                                 <img class="avatar rounded-circle img-thumbnail"
                                                                     src="{{ url('/') . '/images/lg/avatar2.jpg' }}"
@@ -474,9 +571,27 @@
                                                                         class="text-muted small text-truncate">{{ $item->nama_jabatan }}</span>
                                                                 </div>
                                                             </div>
-                                                            <div class="badge bg-light text-dark ms-2">
-                                                                {{ $item->nama_divisi }}
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="badge bg-light text-dark me-2">
+                                                                    {{ $item->nama_divisi }}
+                                                                </div>
+                                                                @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
+                                                                    @if (!$programKerjaSelesai)
+                                                                        <button type="button"
+                                                                            class="btn btn-sm btn-outline-secondary ms-1"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#editMember{{ $item->id }}">
+                                                                            <i class="icofont-edit"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                @endif
                                                             </div>
+                                                        </div>
+
+                                                        <!-- Modal Edit Anggota -->
+                                                        <div class="modal fade" id="editMember{{ $item->id }}"
+                                                            tabindex="-1" aria-hidden="true">
+                                                            <!-- Isi modal sama seperti di atas -->
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -591,6 +706,182 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="modal fade" id="penilaianAnggotaModal" tabindex="-1"
+                    aria-labelledby="penilaianAnggotaModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="penilaianAnggotaModalLabel">Penilaian Anggota Program Kerja
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Silakan nilai kinerja anggota program kerja <strong>{{ $programKerja->nama }}</strong>.
+                                </p>
+                                <p>Penilaian Anda akan mempengaruhi 15% dari total evaluasi kinerja anggota.</p>
+
+                                <form id="penilaianForm"
+                                    action="{{ route('program-kerja.nilai-anggota', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                    method="POST">
+                                    @csrf
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th width="5%">No</th>
+                                                    <th width="25%">Nama Anggota</th>
+                                                    <th width="20%">Divisi</th>
+                                                    <th width="15%">Jabatan</th>
+                                                    <th width="20%">Nilai (1-5)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php $counter = 1; @endphp
+                                                @foreach ($anggotaUntukDinilai as $index => $anggota)
+                                                    <tr>
+                                                        <td>{{ $counter++ }}</td>
+                                                        <td>{{ $anggota->nama_user }}</td>
+                                                        <td>{{ $anggota->nama_divisi }}</td>
+                                                        <td>{{ $anggota->nama_jabatan }}</td>
+                                                        <td>
+                                                            <input type="hidden" name="struktur_id[]"
+                                                                value="{{ $anggota->id }}">
+                                                            <select class="form-select" name="nilai[]" required>
+                                                                <option value="" disabled
+                                                                    {{ !$anggota->nilai_atasan ? 'selected' : '' }}>Pilih
+                                                                    nilai
+                                                                </option>
+                                                                <option value="1"
+                                                                    {{ $anggota->nilai_atasan == 1 ? 'selected' : '' }}>1 -
+                                                                    Sangat
+                                                                    Kurang</option>
+                                                                <option value="2"
+                                                                    {{ $anggota->nilai_atasan == 2 ? 'selected' : '' }}>2 -
+                                                                    Kurang
+                                                                </option>
+                                                                <option value="3"
+                                                                    {{ $anggota->nilai_atasan == 3 ? 'selected' : '' }}>3 -
+                                                                    Cukup
+                                                                </option>
+                                                                <option value="4"
+                                                                    {{ $anggota->nilai_atasan == 4 ? 'selected' : '' }}>4 -
+                                                                    Baik
+                                                                </option>
+                                                                <option value="5"
+                                                                    {{ $anggota->nilai_atasan == 5 ? 'selected' : '' }}>5 -
+                                                                    Sangat Baik
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="icofont-save me-1"></i>Simpan Penilaian
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="addmember" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold" id="addmemberLabel">Tambah Anggota Program Kerja</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form
+                                    action="{{ route('program-kerja.pilih-anggota', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'periode' => $periode]) }}"
+                                    method="post">
+                                    @csrf
+                                    {{-- <input type="hidden" name="anggota" value="">
+                                    <input type="hidden" name="divisi" value="">
+                                    <input type="hidden" name="jabatan" value=""> --}}
+                                    <div class="mb-3">
+                                        <label for="anggota" class="form-label">Pilih Anggota</label>
+                                        <div class="d-flex align-items-center">
+                                            <select class="form-select z-10" id="multiple-select-field"
+                                                data-placeholder="Choose anything" name="anggotas[]" multiple>
+                                                @if (isset($anggota) && is_iterable($anggota))
+                                                    @forelse ($anggota as $anggotas)
+                                                        <option value="{{ $anggotas->id ?? '' }}">
+                                                            {{ $anggotas->name ?? 'Nama tidak tersedia' }}
+                                                        </option>
+                                                    @empty
+                                                        <option value="" disabled>Tidak ada anggota tersedia</option>
+                                                    @endforelse
+                                                @else
+                                                    <option value="" disabled>Data anggota tidak ditemukan</option>
+                                                @endif
+                                            </select>
+                                        </div>
+                                        @if (!isset($anggota) || !is_iterable($anggota))
+                                            <div class="text-danger mt-2 small">
+                                                <i class="icofont-info-circle"></i> Terjadi kesalahan saat memuat data
+                                                anggota
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="divisi" class="form-label">Pilih Jabatan</label>
+                                        <div class="d-flex align-items-center">
+                                            <select class="form-select" id="single-select-field1" name="divisi"
+                                                data-placeholder="Choose one thing">
+                                                @if (@isset($divisi))
+                                                    @foreach ($divisi as $item)
+                                                        <option value="{{ $item['id'] }}">
+                                                            {{-- <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
+                                                                data-id="{{ $item['id'] }}"
+                                                                data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a> --}}
+                                                            {{ $item['divisi_pelaksana']['nama'] }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="jabatan" class="form-label">Pilih Jabatan</label>
+                                        <div class="d-flex align-items-center">
+                                            <select class="form-select" id="single-select-field2" name="jabatan"
+                                                data-placeholder="Choose one thing">
+                                                @if (@isset($jabatans))
+                                                    @foreach ($jabatans as $jabatan)
+                                                        <option value="{{ $jabatan->id }}">
+                                                            {{-- <a class="dropdown-item pilih-jabatan {{ isset($selectedJabatan) && $selectedJabatan->id === $jabatan->id ? 'active' : '' }}"
+                                                                data-id="{{ $jabatan->id }}"
+                                                                data-name="{{ $jabatan->nama }}">{{ $jabatan->nama }}</a> --}}
+                                                            {{ $jabatan->nama }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Tambah Anggota</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div><!-- Row End -->
         </div>
     </div>
@@ -602,8 +893,8 @@
     <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.min.js"></script>
-    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -685,6 +976,44 @@
                     showLessBtn.style.display = 'none';
                 });
             }
+        });
+
+        $(document).ready(function() {
+            $('#sendNotification').on('click', function() {
+                const button = $(this);
+                const url = button.data('url');
+
+                button.prop('disabled', true).html(
+                    '<i class="spinner-border spinner-border-sm"></i> Mengirim...');
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message);
+                            button.prop('disabled', false).html(
+                                '<i class="icofont-mail me-2"></i>Kirim Notifikasi Penilaian'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        toastr.error(response.message ||
+                            'Terjadi kesalahan saat mengirim notifikasi');
+                        button.prop('disabled', false).html(
+                            '<i class="icofont-mail me-2"></i>Kirim Notifikasi Penilaian');
+                    }
+                });
+            });
         });
     </script>
 

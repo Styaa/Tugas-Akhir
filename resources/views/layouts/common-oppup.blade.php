@@ -319,104 +319,6 @@ $date = \Carbon\Carbon::now();
 
 <!-- Add Member to Program Kerja -->
 @isset($programKerja)
-    <div class="modal fade" id="addmember" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="addmemberLabel">Tambah Anggota Program Kerja</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form
-                        action="{{ route('program-kerja.pilih-anggota', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'periode' => $periode]) }}"
-                        method="post">
-                        @csrf
-                        {{-- <input type="hidden" name="anggota" value="">
-                        <input type="hidden" name="divisi" value="">
-                        <input type="hidden" name="jabatan" value=""> --}}
-                        <div class="mb-3">
-                            <label for="anggota" class="form-label">Pilih Anggota</label>
-                            <div class="d-flex align-items-center">
-                                <select class="form-select z-10" id="multiple-select-field"
-                                    data-placeholder="Choose anything" name="anggotas[]" multiple>
-                                    @if (@isset($anggota))
-                                        @foreach ($anggota as $anggotas)
-                                            <option value="{{ $anggotas->id }}">
-                                                {{-- <a class="pilih-anggota {{ isset($selectedAnggota) && $selectedAnggota->id === $anggotas->id ? 'active' : '' }}"
-                                                    data-id="{{ $anggotas->id }}"
-                                                    data-name="{{ $anggotas->name }}">{{ $anggotas->name }}</a> --}}
-                                                {{ $anggotas->name }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- <div class="mb-3">
-                            <label for="divisi" class="form-label">Pilih Divisi Pelaksana</label>
-                            <div class="d-flex align-items-center">
-                                <select class="form-select" id="single-select-field" data-placeholder="Choose one thing">
-                                    @if (@isset($divisi))
-                                        @foreach ($divisi as $item)
-                                            <option>
-                                                <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
-                                                    data-id="{{ $item['id'] }}"
-                                                    data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a>
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div> --}}
-
-                        <div class="mb-3">
-                            <label for="divisi" class="form-label">Pilih Jabatan</label>
-                            <div class="d-flex align-items-center">
-                                <select class="form-select" id="single-select-field1" name="divisi"
-                                    data-placeholder="Choose one thing">
-                                    @if (@isset($divisi))
-                                        @foreach ($divisi as $item)
-                                            <option value="{{ $item['id'] }}">
-                                                {{-- <a class="dropdown-item pilih-divisi {{ isset($selectedDivisi) && $selectedDivisi->id === $item['id'] ? 'active' : '' }}"
-                                                    data-id="{{ $item['id'] }}"
-                                                    data-name="{{ $item['divisi_pelaksana']['nama'] }}">{{ $item['divisi_pelaksana']['nama'] }}</a> --}}
-                                                {{ $item['divisi_pelaksana']['nama'] }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="jabatan" class="form-label">Pilih Jabatan</label>
-                            <div class="d-flex align-items-center">
-                                <select class="form-select" id="single-select-field2" name="jabatan"
-                                    data-placeholder="Choose one thing">
-                                    @if (@isset($jabatans))
-                                        @foreach ($jabatans as $jabatan)
-                                            <option value="{{ $jabatan->id }}">
-                                                {{-- <a class="dropdown-item pilih-jabatan {{ isset($selectedJabatan) && $selectedJabatan->id === $jabatan->id ? 'active' : '' }}"
-                                                    data-id="{{ $jabatan->id }}"
-                                                    data-name="{{ $jabatan->nama }}">{{ $jabatan->nama }}</a> --}}
-                                                {{ $jabatan->nama }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Tambah Anggota</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Konfirmasi Penyelesaian Program Kerja -->
     <div class="modal fade" id="konfirmasiSelesaiModal" tabindex="-1" aria-labelledby="konfirmasiSelesaiModalLabel"
         aria-hidden="true">
@@ -1171,7 +1073,8 @@ $date = \Carbon\Carbon::now();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus file <span id="file-name-to-delete" class="fw-bold"></span>?</p>
+                <p>Apakah Anda yakin ingin menghapus file <span id="file-name-to-delete" class="fw-bold"></span>?
+                </p>
                 <p class="text-danger small">Tindakan ini tidak dapat dibatalkan.</p>
             </div>
             <div class="modal-footer">

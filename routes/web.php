@@ -44,6 +44,8 @@ Route::prefix('auth')->group(function () {
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/api/notulens/save', [NotulenController::class, 'apiSave'])->name('api.notulens.save');
+Route::post('/proposal', [LaporanDokumenController::class, 'apiSaveProposal']);
+Route::post('/lpj', [LaporanDokumenController::class, 'apiSaveLPJ']);
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard Route
@@ -107,6 +109,22 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('{id}/destroy', [ProgramKerjaController::class, 'destroy'])->name('destroy');
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
+
+            Route::post('{id}/nilai-anggota', [ProgramKerjaController::class, 'nilaiAnggota'])
+                ->name('nilai-anggota');
+            Route::post('{id}/kirim-notifikasi', [ProgramKerjaController::class, 'kirimNotifikasiPenilaian'])
+                ->name('kirim-notifikasi');
+
+            Route::get('{prokerId}/anggota/manage', [MemberController::class, 'manage'])
+                ->name('anggota.manage');
+
+            // Route untuk mengupdate jabatan/divisi anggota
+            Route::put('{prokerId}/anggota/{anggotaId}/update', [MemberController::class, 'update'])
+                ->name('anggota.update');
+
+            // Route untuk menghapus anggota dari program kerja (opsional)
+            Route::delete('{prokerId}/anggota/{anggotaId}/delete', [MemberController::class, 'destroy'])
+                ->name('anggota.destroy');
 
             Route::resource('rancanganAnggaranDana', RancanganAnggaranDanaController::class);
             Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');

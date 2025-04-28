@@ -251,28 +251,22 @@ class SimpleAdditiveWeightingService
      */
     protected function hitungNilaiPenilaianAtasan($user_id, $proker_id)
     {
-        // Untuk sementara, gunakan nilai default
-        // Nantinya bisa ditambahkan tabel baru untuk penilaian dari atasan
-        // atau bisa diambil dari nilai yang diberikan oleh ketua proker
-
-        // Dapatkan atasan (ketua proker)
-        $ketua = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($proker_id) {
+        // Dapatkan nilai atasan dari struktur_prokers
+        $penilaian = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($proker_id) {
             $query->select('id')
                 ->from('divisi_program_kerjas')
                 ->where('program_kerjas_id', $proker_id);
-        })->where('jabatans_id', 2) // ID untuk ketua
+        })
+            ->where('users_id', $user_id)
             ->first();
 
-        // Jika tidak ada ketua, gunakan nilai default
-        if (!$ketua) {
-            return 60; // Nilai default 60 dari 100
+        // Jika sudah ada penilaian atasan, konversikan dari skala 100 menjadi skala 5
+        if ($penilaian && $penilaian->nilai_atasan) {
+            return ($penilaian->nilai_atasan / 100) * 5; // Konversi dari skala 100 ke skala 5
         }
 
-        // Di sini bisa ditambahkan logika untuk mengambil penilaian dari ketua
-        // Untuk sementara bisa menggunakan nilai random antara 60-100
-        $nilai_atasan = rand(60, 100);
-
-        return $nilai_atasan;
+        // Jika tidak ada nilai atasan, gunakan nilai default
+        return 3; // Nilai default dalam skala 5
     }
 
     /**

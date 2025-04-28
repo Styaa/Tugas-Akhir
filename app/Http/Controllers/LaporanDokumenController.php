@@ -247,4 +247,167 @@ class LaporanDokumenController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Save new proposal via API
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiSaveProposal(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'content' => 'required',
+            'program_kerjas_id' => 'required|exists:program_kerjas,id',
+            'type' => 'required|string|in:proposal', // Ensure type is proposal
+            'status' => 'nullable|string|in:draft,submitted,approved,rejected',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Optional file upload (10MB max)
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Get program_kerja to fill in related data
+            $programKerja = ProgramKerja::findOrFail($request->program_kerjas_id);
+
+            $proposal = new LaporanDokumen();
+            $proposal->title = $request->title;
+            $proposal->content = $request->content;
+            $proposal->users_id = Auth::id();
+            $proposal->program_kerjas_id = $request->program_kerjas_id;
+            $proposal->ormawas_id = $programKerja->ormawa_id;
+            $proposal->type = 'proposal';
+            $proposal->status = $request->status ?? 'draft';
+
+            // Set optional foreign keys if they exist in the request or program kerja
+            $proposal->divisi_ormawas_id = $request->divisi_ormawas_id ?? $programKerja->divisi_ormawas_id;
+            $proposal->divisi_program_kerjas_id = $request->divisi_program_kerjas_id ?? null;
+
+            // Handle file upload if present
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = 'proposal_' . time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('proposals', $fileName, 'public');
+                $proposal->file_path = $filePath;
+            }
+
+            $proposal->save();
+
+            // Update program_kerja status if needed
+            if ($request->status === 'submitted' && $programKerja->status === 'planning') {
+                $programKerja->status = 'proposal_submitted';
+                $programKerja->save();
+            }
+
+            return response()->json([
+                'message' => 'Proposal saved successfully',
+                'id' => $proposal->id,
+                'ormawa_id' => $proposal->ormawas_id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to save proposal',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save new laporan pertanggungjawaban (LPJ) via API
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function apiSaveLPJ(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'content' => 'required',
+            'program_kerjas_id' => 'required|exists:program_kerjas,id',
+            'type' => 'required|string|in:lpj', // Ensure type is lpj
+            'status' => 'nullable|string|in:draft,submitted,approved,rejected',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Optional file upload (10MB max)
+            'implementation_date' => 'nullable|date',
+            'budget_spent' => 'nullable|numeric',
+            'participant_count' => 'nullable|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Get program_kerja to fill in related data
+            $programKerja = ProgramKerja::findOrFail($request->program_kerjas_id);
+
+            // Check if program is completed - only completed programs should have LPJs
+            if ($programKerja->status !== 'completed' && $request->status === 'submitted') {
+                return response()->json([
+                    'message' => 'Cannot submit LPJ for a program that is not marked as completed',
+                ], 422);
+            }
+
+            $lpj = new LaporanDokumen();
+            $lpj->title = $request->title;
+            $lpj->content = $request->content;
+            $lpj->users_id = Auth::id();
+            $lpj->program_kerjas_id = $request->program_kerjas_id;
+            $lpj->ormawas_id = $programKerja->ormawa_id;
+            $lpj->type = 'lpj';
+            $lpj->status = $request->status ?? 'draft';
+
+            // Set optional foreign keys if they exist in the request or program kerja
+            $lpj->divisi_ormawas_id = $request->divisi_ormawas_id ?? $programKerja->divisi_ormawas_id;
+            $lpj->divisi_program_kerjas_id = $request->divisi_program_kerjas_id ?? null;
+
+            // Add LPJ specific data
+            if ($request->has('implementation_date')) {
+                $lpj->implementation_date = $request->implementation_date;
+            }
+
+            if ($request->has('budget_spent')) {
+                $lpj->budget_spent = $request->budget_spent;
+            }
+
+            if ($request->has('participant_count')) {
+                $lpj->participant_count = $request->participant_count;
+            }
+
+            // Handle file upload if present
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = 'lpj_' . time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('lpj', $fileName, 'public');
+                $lpj->file_path = $filePath;
+            }
+
+            $lpj->save();
+
+            // Update program_kerja status if needed
+            if ($request->status === 'submitted' && $programKerja->status === 'completed') {
+                $programKerja->status = 'lpj_submitted';
+                $programKerja->save();
+            }
+
+            return response()->json([
+                'message' => 'Laporan Pertanggungjawaban saved successfully',
+                'id' => $lpj->id,
+                'ormawa_id' => $lpj->ormawas_id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to save Laporan Pertanggungjawaban',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

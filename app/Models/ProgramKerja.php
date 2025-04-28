@@ -20,6 +20,8 @@ class ProgramKerja extends Model
         'indikator_keberhasilan',
         'tanggal_mulai',
         'tanggal_selesai',
+        'notifikasi_penilaian_terkirim',
+        'penilaian_selesai',
         'konfirmasi_penyelesaian',
         'pengkonfirmasi',
         'ormawas_kode',

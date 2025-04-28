@@ -18,6 +18,7 @@ use App\Models\StrukturOrmawa;
 use App\Models\StrukturProker;
 use App\Models\User;
 use App\Notifications\EvaluasiSelesaiNotification;
+use App\Notifications\PenilaianAnggotaNotification;
 use App\Services\SimpleAdditiveWeightingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -288,7 +289,7 @@ class ProgramKerjaController extends Controller
             ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
             ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
             ->where('divisi_program_kerjas.program_kerjas_id', $id)
-            ->select('divisi_pelaksanas.nama AS nama_divisi', 'users.name AS nama_user', 'jabatans.nama AS nama_jabatan')
+            ->select('divisi_pelaksanas.nama AS nama_divisi', 'divisi_pelaksanas.id AS divisi_id', 'users.name AS nama_user', 'jabatans.nama AS nama_jabatan', 'users.id AS id_user', 'jabatans.id AS id_jabatan')
             ->orderBy('divisi_pelaksanas.nama')
             ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
             ->get();
@@ -307,13 +308,140 @@ class ProgramKerjaController extends Controller
 
         $files = Document::where('program_kerja_id', $id)->latest()->paginate(10);
 
-        if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {
-            $tanggal_selesai = Carbon::parse($programKerja->tanggal_selesai)->format('d F Y');
+        // Dapatkan jabatan user yang sedang login
+        $currentUser = Auth::user();
+        $jabatanPenilai = DB::table('struktur_prokers')
+            ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+            ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+            ->where('struktur_prokers.users_id', $currentUser->id)
+            ->where('divisi_program_kerjas.program_kerjas_id', $id)
+            ->select('jabatans.id as jabatan_id', 'jabatans.nama as jabatan_nama')
+            ->first();
 
-            return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'tanggal_selesai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
+        // Daftar anggota yang dapat dinilai berdasarkan jabatan penilai
+        $anggotaUntukDinilai = collect();
+
+        if ($jabatanPenilai) {
+            // Jika steering committee (ID: 1) - hanya nilai ketua dan wakil ketua
+            if ($jabatanPenilai->jabatan_id == 1) {
+                $anggotaUntukDinilai = DB::table('struktur_prokers')
+                    ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+                    ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                    ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
+                    ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+                    ->whereIn('struktur_prokers.jabatans_id', [2, 3, 4]) // Ketua, Wakil Ketua, Wakil Ketua II
+                    ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                    ->select(
+                        'struktur_prokers.id',
+                        'struktur_prokers.users_id',
+                        'struktur_prokers.nilai_atasan',
+                        'struktur_prokers.keterangan_nilai',
+                        'divisi_pelaksanas.nama AS nama_divisi',
+                        'users.name AS nama_user',
+                        'jabatans.nama AS nama_jabatan'
+                    )
+                    ->get();
+            }
+            // Jika ketua atau wakil ketua (ID: 2, 3, 4) - nilai sekretaris, bendahara, sekretaris & bendahara, koordinator, wakil koordinator
+            elseif (in_array($jabatanPenilai->jabatan_id, [2, 3, 4])) {
+                $anggotaUntukDinilai = DB::table('struktur_prokers')
+                    ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+                    ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                    ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
+                    ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+                    ->whereIn('struktur_prokers.jabatans_id', [5, 6, 7, 8, 9, 10, 11, 12, 13]) // Sekretaris, Bendahara, dan variasinya, Koordinator/Wakil
+                    ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                    ->select(
+                        'struktur_prokers.id',
+                        'struktur_prokers.users_id',
+                        'struktur_prokers.nilai_atasan',
+                        'struktur_prokers.keterangan_nilai',
+                        'divisi_pelaksanas.nama AS nama_divisi',
+                        'users.name AS nama_user',
+                        'jabatans.nama AS nama_jabatan'
+                    )
+                    ->get();
+            }
+            // Jika koordinator atau wakil koordinator (ID: 11, 12, 13) - hanya nilai anggota (ID: 14)
+            elseif (in_array($jabatanPenilai->jabatan_id, [11, 12, 13])) {
+                // Ambil ID divisi yang dikoordinatori
+                $divisiYangDikoordinatori = DB::table('struktur_prokers')
+                    ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                    ->where('struktur_prokers.users_id', $currentUser->id)
+                    ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                    ->select('divisi_program_kerjas.id')
+                    ->pluck('id');
+
+                // Ambil anggota dari divisi yang dikoordinatori
+                $anggotaUntukDinilai = DB::table('struktur_prokers')
+                    ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+                    ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                    ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
+                    ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+                    ->where('struktur_prokers.jabatans_id', 14) // Hanya Anggota
+                    ->whereIn('struktur_prokers.divisi_program_kerjas_id', $divisiYangDikoordinatori)
+                    ->select(
+                        'struktur_prokers.id',
+                        'struktur_prokers.users_id',
+                        'struktur_prokers.nilai_atasan',
+                        'struktur_prokers.keterangan_nilai',
+                        'divisi_pelaksanas.nama AS nama_divisi',
+                        'users.name AS nama_user',
+                        'jabatans.nama AS nama_jabatan'
+                    )
+                    ->get();
+            }
         }
 
-        return view('program-kerja.show', compact('programKerja', 'files', 'anggota', 'divisi', 'tanggal_mulai', 'ketua', 'anggotaProker', 'jabatans', 'activities', 'ids', 'totalPemasukan', 'totalPengeluaran', 'selisih'));
+        // Cek apakah semua anggota sudah dinilai (total vs yang sudah dinilai)
+
+        // 1. Ambil semua anggota yang harus dinilai berdasarkan semua jabatan
+        $allAnggotaYangHarusDinilai = DB::table('struktur_prokers')
+            ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+            ->where('divisi_program_kerjas.program_kerjas_id', $id)
+            ->whereIn('struktur_prokers.jabatans_id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) // Semua kecuali steering committee
+            ->count();
+
+        // 2. Ambil semua anggota yang sudah dinilai
+        $allAnggotaYangSudahDinilai = DB::table('struktur_prokers')
+            ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+            ->where('divisi_program_kerjas.program_kerjas_id', $id)
+            ->whereNotNull('struktur_prokers.nilai_atasan')
+            ->count();
+
+        // 3. Tentukan apakah semua anggota sudah dinilai
+        $allMembersRated = ($allAnggotaYangHarusDinilai > 0 && $allAnggotaYangSudahDinilai == $allAnggotaYangHarusDinilai);
+
+        // 4. Cek apakah notifikasi sudah terkirim
+        $notifikasiTerkirim = $programKerja->notifikasi_penilaian_terkirim ?? false;
+
+        // Buat array untuk view dengan compact
+        $viewVariables = compact(
+            'programKerja',
+            'files',
+            'anggota',
+            'divisi',
+            'tanggal_mulai',
+            'ketua',
+            'anggotaProker',
+            'jabatans',
+            'activities',
+            'ids',
+            'totalPemasukan',
+            'totalPengeluaran',
+            'selisih',
+            'anggotaUntukDinilai',
+            'allMembersRated',
+            'notifikasiTerkirim',
+            'kode_ormawa'
+        );
+
+        if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {
+            $tanggal_selesai = Carbon::parse($programKerja->tanggal_selesai)->format('d F Y');
+            $viewVariables['tanggal_selesai'] = $tanggal_selesai;
+        }
+
+        return view('program-kerja.show', $viewVariables);
     }
 
     public function destroy($kode_ormawa, $id)
@@ -432,12 +560,6 @@ class ProgramKerjaController extends Controller
 
     public function pilihAnggota(Request $request, $kode_ormawa, $prokerId, $periode)
     {
-        // dd($request->anggotas);
-        // $id = DB::table('divisi_program_kerjas')
-        //     ->where('divisi_pelaksanas_id', $request->input('divisi'))
-        //     ->where('program_kerjas_id', $prokerId)
-        //     ->value('id');
-
         foreach ($request->anggotas as $anggota) {
             StrukturProker::create([
                 'users_id' => $anggota,
@@ -718,11 +840,30 @@ class ProgramKerjaController extends Controller
     public function selesaikan(Request $request, $kode_ormawa, $id)
     {
         try {
-            // Wrap in a transaction to ensure all operations complete
-            DB::beginTransaction();
+            // Ambil program kerja
+            $programKerja = ProgramKerja::findOrFail($id);
 
-            // Get the program kerja
-            $programKerja = ProgramKerja::find($id);
+            // Periksa apakah semua anggota sudah dinilai
+            $allAnggotaYangHarusDinilai = DB::table('struktur_prokers')
+                ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                ->whereIn('struktur_prokers.jabatans_id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) // Semua kecuali steering committee
+                ->count();
+
+            $allAnggotaYangSudahDinilai = DB::table('struktur_prokers')
+                ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                ->whereNotNull('struktur_prokers.nilai_atasan')
+                ->count();
+
+            if ($allAnggotaYangHarusDinilai != $allAnggotaYangSudahDinilai) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Tidak semua anggota sudah dinilai. Harap pastikan semua anggota sudah mendapatkan penilaian.');
+            }
+
+            // Mulai transaksi
+            DB::beginTransaction();
 
             // Update status program kerja
             $programKerja->update([
@@ -730,7 +871,24 @@ class ProgramKerjaController extends Controller
                 'konfirmasi_penyelesaian' => 'Ya',
                 'disetujui' => 'Ya', // Mark as approved
                 'pengkonfirmasi' => Auth::user()->id,
+                'tanggal_selesai' => $request->tanggal_selesai,
+                'catatan_penyelesaian' => $request->deskripsi,
+                'penilaian_selesai' => true,
             ]);
+
+            // Ambil data penilaian dari struktur_prokers
+            $anggotaProgram = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($id) {
+                $query->select('id')
+                    ->from('divisi_program_kerjas')
+                    ->where('program_kerjas_id', $id);
+            })->get();
+
+            $penilaianAnggota = $anggotaProgram->mapWithKeys(function ($item) {
+                return [$item->users_id => $item->nilai_atasan];
+            });
+
+            // Sisipkan data penilaian ke service SAW
+            $this->sawService->setPenilaianAtasan($penilaianAnggota);
 
             // Calculate evaluation for all committee members
             $this->sawService->hitungEvaluasiProker($id);
@@ -740,21 +898,12 @@ class ProgramKerjaController extends Controller
                 ->with('user')
                 ->get();
 
-            // Get all users who were part of this program
-            $users = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($id) {
-                $query->select('id')
-                    ->from('divisi_program_kerjas')
-                    ->where('program_kerjas_id', $id);
-            })->with('user')->get()->pluck('user');
-
             // Send notification to each user with their evaluation result
-            foreach ($users as $user) {
-                $userEvaluation = $evaluations->where('user_id', $user->id)->first();
-
-                // dd($user);
+            foreach ($anggotaProgram as $anggota) {
+                $userEvaluation = $evaluations->where('user_id', $anggota->users_id)->first();
 
                 if ($userEvaluation) {
-                    // dd($userEvaluation);
+                    $user = User::find($anggota->users_id);
                     // Create and send notification
                     Notification::send($user, new EvaluasiSelesaiNotification($programKerja, $userEvaluation));
                 }
@@ -784,5 +933,94 @@ class ProgramKerjaController extends Controller
             ->get();
 
         return view('program-kerja.evaluasi', compact('programKerja', 'evaluasi'));
+    }
+
+    public function nilaiAnggota(Request $request, $kode_ormawa, $id)
+    {
+        try {
+            // Validasi input
+            $request->validate([
+                'struktur_id' => 'required|array',
+                'nilai' => 'required|array',
+                'nilai.*' => 'required|numeric|min:1|max:100',
+                'keterangan' => 'required|array',
+            ]);
+
+            // Mulai transaksi
+            DB::beginTransaction();
+
+            // Simpan penilaian untuk setiap anggota
+            foreach ($request->struktur_id as $index => $strukturId) {
+                // Update nilai di struktur_prokers
+                StrukturProker::where('id', $strukturId)
+                    ->update([
+                        'nilai_atasan' => $request->nilai[$index],
+                        'keterangan_nilai' => $request->keterangan[$index],
+                        'penilai_id' => Auth::user()->id,
+                    ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $id])
+                ->with('success', 'Penilaian anggota berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan saat menyimpan penilaian: ' . $e->getMessage());
+        }
+    }
+
+    public function kirimNotifikasiPenilaian($kode_ormawa, $id)
+    {
+        try {
+            // Ambil program kerja
+            $programKerja = ProgramKerja::findOrFail($id);
+
+            // Cek apakah notifikasi sudah pernah dikirim
+            if ($programKerja->notifikasi_penilaian_terkirim == 'true') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Notifikasi penilaian sudah pernah dikirim sebelumnya.'
+                ]);
+            }
+
+            // Ambil semua koordinator dan wakil koordinator di program kerja ini
+            $koordinatorUsers = DB::table('struktur_prokers')
+                ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+                ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+                ->whereIn('struktur_prokers.jabatans_id', [11, 12, 13]) // ID untuk Koordinator, Wakil Koordinator, Wakil Koordinator II
+                ->where('divisi_program_kerjas.program_kerjas_id', $id)
+                ->select('users.*')
+                ->distinct()
+                ->get();
+
+            // URL untuk halaman penilaian
+            $url = route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $id]);
+
+            // Kirim notifikasi ke setiap koordinator/wakil koordinator
+            foreach ($koordinatorUsers as $user) {
+                $userObj = User::find($user->id);
+                Notification::send($userObj, new PenilaianAnggotaNotification($programKerja, $url));
+            }
+
+            // Update status notifikasi terkirim
+            $programKerja->update([
+                'notifikasi_penilaian_terkirim' => 'true'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi penilaian telah dikirim ke ' . $koordinatorUsers->count() . ' koordinator/wakil koordinator.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengirim notifikasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
