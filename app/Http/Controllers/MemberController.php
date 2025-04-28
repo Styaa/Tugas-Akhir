@@ -77,6 +77,31 @@ class MemberController extends Controller
         ]);
     }
 
+    public function rejectCandidate(Request $request, $kode_ormawa)
+    {
+        // Validasi input
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $userId = $request->input('user_id');
+
+        // Update status registrasi_ormawas menjadi rejected untuk ormawa_kode yang sesuai
+        RegistrasiOrmawas::where('users_id', $userId)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->update([
+                'status' => 'rejected'
+            ]);
+
+        // Jika ingin menyimpan alasan penolakan, pastikan tabel registrasi_ormawas memiliki kolom rejection_reason
+
+        // Kembalikan respons
+        return response()->json([
+            'success' => true,
+            'message' => 'Candidate has been rejected successfully.',
+        ]);
+    }
+
     public function allMembers($kode_ormawa)
     {
         $anggotas = User::whereHas('strukturOrmawas.divisiOrmawas.ormawa', function ($query) use ($kode_ormawa) {

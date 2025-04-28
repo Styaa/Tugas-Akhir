@@ -26,6 +26,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        // dd($request->all());
         // Validate request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -41,57 +42,66 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            dd($validator->errors());
+            return back()->withErrors($validator)
+                        ->withInput()
+                        ->with('error', 'Registrasi gagal! Silakan periksa kembali data yang Anda masukkan.');
         }
 
         // Double-check password match
         if ($request->password !== $request->password_confirmation) {
-            return back()->withErrors(['password' => 'Password dan Konfirmasi Password harus sama.'])->withInput();
+            return back()->withErrors(['password' => 'Password dan Konfirmasi Password harus sama.'])
+                        ->withInput()
+                        ->with('error', 'Password dan Konfirmasi Password tidak sama!');
         }
 
-        // Create user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'nrp' => $request->nrp,
-            'jurusan' => $request->jurusan,
-            'id_line' => $request->id_line,
-            'no_hp' => $request->no_hp,
-        ]);
-
-        // Save organization registration for first choice
-        if ($request->filled('pilihan_ormawa_1')) {
-            RegistrasiOrmawas::create([
-                'users_id' => $user->id,
-                'ormawas_kode' => $request->pilihan_ormawa_1,
-                'pilihan_divisi_1' => $request['divisi_divisi-container1_1'],
-                'pilihan_divisi_2' => $request['divisi_divisi-container1_2'],
-                'status' => 'waiting',
+        try {
+            // Create user
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'nrp' => $request->nrp,
+                'jurusan' => $request->jurusan,
+                'id_line' => $request->id_line,
+                'no_hp' => $request->no_hp,
             ]);
-        }
 
-        // Save organization registration for second choice (if provided)
-        if ($request->filled('pilihan_ormawa_2')) {
-            RegistrasiOrmawas::create([
-                'users_id' => $user->id,
-                'ormawas_kode' => $request->pilihan_ormawa_2,
-                'pilihan_divisi_1' => $request['divisi_divisi-container2_1'],
-                'pilihan_divisi_2' => $request['divisi_divisi-container2_2'],
-                'status' => 'waiting',
-            ]);
-        }
+            // Save organization registration for first choice
+            if ($request->filled('pilihan_ormawa_1')) {
+                RegistrasiOrmawas::create([
+                    'users_id' => $user->id,
+                    'ormawas_kode' => $request->pilihan_ormawa_1,
+                    'pilihan_divisi_1' => $request['divisi_divisi-container1_1'],
+                    'pilihan_divisi_2' => $request['divisi_divisi-container1_2'],
+                    'status' => 'waiting',
+                ]);
+            }
 
-        // Process uploaded files (CV and portfolio)
-        if ($request->filled('cv_files')) {
-            $this->processCVFiles($user, $request->cv_files);
-        }
+            // Save organization registration for second choice (if provided)
+            if ($request->filled('pilihan_ormawa_2')) {
+                RegistrasiOrmawas::create([
+                    'users_id' => $user->id,
+                    'ormawas_kode' => $request->pilihan_ormawa_2,
+                    'pilihan_divisi_1' => $request['divisi_divisi-container2_1'],
+                    'pilihan_divisi_2' => $request['divisi_divisi-container2_2'],
+                    'status' => 'waiting',
+                ]);
+            }
 
-        if ($request->filled('porto_files')) {
-            $this->processPortfolioFiles($user, $request->porto_files);
-        }
+            // Process uploaded files (CV and portfolio)
+            if ($request->filled('cv_files')) {
+                $this->processCVFiles($user, $request->cv_files);
+            }
 
-        return redirect()->route('login')->with('success', 'Pendaftaran berhasil. Silakan login.');
+            if ($request->filled('porto_files')) {
+                $this->processPortfolioFiles($user, $request->porto_files);
+            }
+
+            return redirect()->route('login')->with('success', 'Registrasi berhasil! Akun Anda sedang dalam proses verifikasi. Silakan cek email untuk informasi lebih lanjut.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Terjadi kesalahan saat mendaftar. Silakan coba lagi nanti.');
+        }
     }
 
     private function processCVFiles($user, $cvFiles)

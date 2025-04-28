@@ -213,6 +213,42 @@
         </div>
     </div>
 
+      <!-- Modal Error -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalLabel">Registrasi Gagal!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage">{{ session('error') }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Validasi -->
+  <div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title" id="validationModalLabel">Form Tidak Lengkap</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="validationMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
@@ -221,6 +257,28 @@
     <script src="{{ asset('assets/filepond/filepond.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Periksa apakah ada pesan error
+            @if(session('error'))
+                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            @endif
+
+            // Form submission handling with validation
+            document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                if (!validateAllSteps()) {
+                    e.preventDefault();
+                    var validationModal = new bootstrap.Modal(document.getElementById('validationModal'));
+                    validationModal.show();
+                }
+            });
+
+            // Function to validate all steps before final submission
+            function validateAllSteps() {
+                return validateStep(1) && validateStep(2) && validateStep(3);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             // Verifikasi elemen ada sebelum inisialisasi
             const cvInput = document.getElementById('cv-input');
@@ -482,18 +540,6 @@
                     if (validateStep(currentStep)) {
                         console.log("Step", currentStep, "validated successfully");
 
-                        // Khusus Step 2: Validasi Password dan Confirm Password
-                        if (currentStep === 2) {
-                            let password = document.querySelector("input[name='password']").value;
-                            let confirmPassword = document.querySelector(
-                                "input[name='password_confirmation']").value;
-
-                            if (password !== confirmPassword) {
-                                alert("Password dan Konfirmasi Password harus sama!");
-                                return; // Hentikan proses jika tidak sama
-                            }
-                        }
-
                         document.getElementById("step-" + currentStep).classList.add("d-none");
                         currentStep++;
                         document.getElementById("step-" + currentStep).classList.remove("d-none");
@@ -501,9 +547,15 @@
                         console.log("Moved to step", currentStep);
                     } else {
                         console.log("Validation failed for step", currentStep);
+                        // Error messages are now shown by the validateStep function via modal
                     }
                 } catch (error) {
                     console.error("Error in next-step handler:", error);
+
+                    // Tampilkan error pada modal
+                    document.getElementById('errorMessage').textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+                    var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
                 }
             });
         });
@@ -525,6 +577,7 @@
 
         function validateStep(step) {
             let isValid = true;
+            let errorMessage = "";
 
             // Seleksi input dan select yang perlu divalidasi, kecuali FilePond input
             const inputs = document.querySelectorAll("#step-" + step + " input:not(.filepond), #step-" + step + " select");
@@ -545,6 +598,13 @@
                 if (input.hasAttribute('required') && !input.value) {
                     isValid = false;
                     input.classList.add("is-invalid");
+
+                    // Menambahkan label field ke pesan error
+                    let fieldLabel = input.previousElementSibling ?
+                        input.previousElementSibling.textContent :
+                        input.getAttribute('placeholder');
+
+                    errorMessage += "Field " + fieldLabel + " harus diisi.<br>";
                 } else {
                     input.classList.remove("is-invalid");
                 }
@@ -555,17 +615,37 @@
                 let password = document.querySelector("input[name='password']").value;
                 let confirmPassword = document.querySelector("input[name='password_confirmation']").value;
 
-                if (password !== confirmPassword) {
-                    alert("Password dan Konfirmasi Password harus sama!");
+                if (password && confirmPassword && password !== confirmPassword) {
                     isValid = false;
+                    errorMessage += "Password dan Konfirmasi Password harus sama!<br>";
+
+                    document.querySelector("input[name='password']").classList.add("is-invalid");
+                    document.querySelector("input[name='password_confirmation']").classList.add("is-invalid");
                 }
 
                 // Validasi CV upload jika diperlukan
                 if (document.querySelector('input[name="cv"]').hasAttribute('required') &&
                     window.uploadedCVFiles && window.uploadedCVFiles.length === 0) {
-                    alert("Silakan upload CV Anda");
                     isValid = false;
+                    errorMessage += "Silakan upload CV Anda<br>";
                 }
+            }
+
+            // Khusus untuk step 3, validasi Terms & Conditions
+            if (step === 3) {
+                const termsCheck = document.getElementById('termsCheck');
+                if (termsCheck && !termsCheck.checked) {
+                    isValid = false;
+                    errorMessage += "Anda harus menyetujui Syarat & Ketentuan<br>";
+                    termsCheck.classList.add("is-invalid");
+                }
+            }
+
+            // Tampilkan pesan error jika ada
+            if (!isValid && errorMessage) {
+                document.getElementById('validationMessage').innerHTML = errorMessage;
+                var validationModal = new bootstrap.Modal(document.getElementById('validationModal'));
+                validationModal.show();
             }
 
             return isValid;

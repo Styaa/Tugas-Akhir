@@ -180,6 +180,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('member-profile', [MemberController::class, 'show'])->name('member-profile');
             Route::get('candidate-member', [MemberController::class, 'candidateMembers'])->name('candidate');
             Route::post('candidate-accept', [MemberController::class, 'acceptCandidate'])->name('candidate-accept');
+            Route::post('candidate-reject', [MemberController::class, 'rejectCandidate'])->name('candidate-reject');
         });
     });
 });

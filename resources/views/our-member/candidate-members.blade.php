@@ -107,6 +107,9 @@
     <script>
         var acceptCandidateUrl =
             "{{ route('our-member.candidate-accept', ['kode_ormawa' => $kode_ormawa]) }}?periode=$periode";
+
+        var rejectCandidateUrl =
+            "{{ route('our-member.candidate-reject', ['kode_ormawa' => $kode_ormawa]) }}?periode=$periode";
     </script>
 
 @endsection

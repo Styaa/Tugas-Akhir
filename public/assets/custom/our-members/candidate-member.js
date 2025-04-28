@@ -87,30 +87,35 @@ document.querySelector('.confirm-accept').addEventListener('click', function () 
 
 // Confirm Reject User
 document.querySelector('.confirm-reject').addEventListener('click', function () {
+    // Dapatkan alasan penolakan jika ada elemen untuk input alasan
+    let rejectionReason = document.getElementById("rejectionReason") ?
+                         document.getElementById("rejectionReason").value : "";
+
     if (selectedUserId) {
-        fetch("{{ route('candidates.reject ') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({
-                    user_id: selectedUserId
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
+        // Lakukan AJAX request
+        $.ajax({
+            url: rejectCandidateUrl, // Route ke controller
+            type: "POST",
+            data: {
+                "user_id": selectedUserId,
+                "_token": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "rejection_reason": rejectionReason
+            },
+            success: function (response) {
+                console.log(response);
+                if (response.success) {
+                    alert(response.message);
+                    location.reload(); // Reload halaman setelah sukses
                 } else {
                     alert('Failed to reject user.');
                 }
-            })
-            .catch(error => {
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
                 console.error('Error:', error);
                 alert('An error occurred while processing the request.');
-            });
+            }
+        });
     }
 });
 
