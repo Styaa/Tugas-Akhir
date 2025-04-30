@@ -280,8 +280,7 @@
                                                                     title="Preview">
                                                                     <i class="icofont-eye-alt"></i>
                                                                 </a>
-                                                                @if (Auth::check() && Auth::user()->id == $file->uploaded_by ||
-                                                                        Auth::user()->jabatanOrmawa->id <= 3 ||
+                                                                @if (Auth::user()->jabatanOrmawa->id <= 3 ||
                                                                         Auth::user()->jabatanProker->id <= 3)
                                                                     <button type="button"
                                                                         class="btn btn-sm btn-outline-danger delete-file"
