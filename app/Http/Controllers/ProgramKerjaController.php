@@ -33,10 +33,16 @@ class ProgramKerjaController extends Controller
 {
     //
     protected $sawService;
+    protected $penilaianAtasan;
 
     public function __construct(SimpleAdditiveWeightingService $sawService)
     {
         $this->sawService = $sawService;
+    }
+
+    public function setPenilaianAtasan($penilaian)
+    {
+        $this->penilaianAtasan = $penilaian;
     }
 
     public function index()
