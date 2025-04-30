@@ -58,7 +58,7 @@
                                 <span>Daftar Anggota</span>
                             </a>
                         </li>
-                        @if (Auth::user()->jabatanOrmawa->id !== 13)
+                        @if (Auth::user()->jabatanOrmawa->nama !== "Anggota")
                             <li>
                                 <a class="ms-link {{ Request::segment(3) == 'candidate-member' ? 'active' : '' }}"
                                     href="{{ route('our-member.candidate', ['kode_ormawa' => $kode_ormawa]) }}">
