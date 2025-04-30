@@ -29,14 +29,13 @@
                                     </h5>
                                 </div>
                                 <div class="d-flex align-items-center mt-3 mt-md-0">
-                                    {{-- @if (Auth::user()->jabatanOrmawa->nama === 'Ketua' || Auth::user()->jabatanOrmawa->nama === ' Wakil Ketua')
-
-                                    @endif --}}
-                                    <button type="button" class="btn btn-primary px-4 d-flex align-items-center"
+                                    @if (Auth::user()->jabatanOrmawa->nama === 'Ketua' || Auth::user()->jabatanOrmawa->nama === 'Wakil Ketua')
+                                        <button type="button" class="btn btn-primary px-4 d-flex align-items-center"
                                             data-bs-toggle="modal" data-bs-target="#createproject">
                                             <i class="icofont-plus-circle me-2 fs-5"></i>
                                             <span>Create Project</span>
                                         </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>

@@ -33,16 +33,10 @@ class ProgramKerjaController extends Controller
 {
     //
     protected $sawService;
-    protected $penilaianAtasan;
 
     public function __construct(SimpleAdditiveWeightingService $sawService)
     {
         $this->sawService = $sawService;
-    }
-
-    public function setPenilaianAtasan($penilaian)
-    {
-        $this->penilaianAtasan = $penilaian;
     }
 
     public function index()
@@ -949,7 +943,6 @@ class ProgramKerjaController extends Controller
                 'struktur_id' => 'required|array',
                 'nilai' => 'required|array',
                 'nilai.*' => 'required|numeric|min:1|max:100',
-                'keterangan' => 'required|array',
             ]);
 
             // Mulai transaksi
@@ -961,7 +954,6 @@ class ProgramKerjaController extends Controller
                 StrukturProker::where('id', $strukturId)
                     ->update([
                         'nilai_atasan' => $request->nilai[$index],
-                        'keterangan_nilai' => $request->keterangan[$index],
                         'penilai_id' => Auth::user()->id,
                     ]);
             }
