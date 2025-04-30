@@ -39,10 +39,6 @@
                                 @csrf
                                 <div class="col-12 text-center mb-4">
                                     <h1>Sign in</h1>
-                                    <span>Free access to our dashboard.</span>
-                                    <span class="d-flex justify-content-center text-secondary">Email :
-                                        john.doe@student.ubaya.ac.id</span>
-                                    <span class="d-flex justify-content-center text-secondary">Password : password</span>
                                 </div>
                                 <div class="col-12 text-center mb-4">
                                     <a class="btn btn-lg btn-outline-secondary btn-block" href="#">
@@ -120,13 +116,37 @@
         </div>
       </div>
 
+    <!-- Tambahkan ini setelah modal sukses yang sudah ada -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalLabel">Login Gagal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage">{{ session('error') ?? $errors->first('login_gagal') }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Periksa apakah ada pesan sukses
-            @if(session('success'))
-                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                successModal.show();
-            @endif
-        });
+        // Periksa apakah ada pesan sukses
+        @if(session('success'))
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        @endif
+
+        // Periksa apakah ada pesan error
+        @if(session('error') || $errors->has('login_gagal'))
+            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        @endif
+    });
     </script>
 @endsection

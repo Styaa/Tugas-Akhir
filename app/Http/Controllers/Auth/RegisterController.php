@@ -26,12 +26,11 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        // dd($request->all());
         // Validate request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|confirmed',
             'password_confirmation' => 'required|same:password',
             'nrp' => 'required|string|max:20',
             'jurusan' => 'required|string|max:100',
@@ -42,7 +41,6 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()) {
-            dd($validator->errors());
             return back()->withErrors($validator)
                         ->withInput()
                         ->with('error', 'Registrasi gagal! Silakan periksa kembali data yang Anda masukkan.');

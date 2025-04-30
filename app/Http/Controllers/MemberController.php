@@ -22,10 +22,15 @@ class MemberController extends Controller
     {
         $candidate = User::whereHas('registrations', function ($query) use ($kode_ormawa) {
             $query->where('ormawas_kode', $kode_ormawa)
-                ->where('status', 'waiting'); // Hanya ambil yang statusnya "waiting"
+                  ->where('status', 'waiting');
         })
-            ->with(['registrations.divisi1', 'registrations.divisi2']) // Ambil data registrasi_ormawas juga
-            ->get();
+        ->with(['registrations' => function($query) use ($kode_ormawa) {
+            $query->where('ormawas_kode', $kode_ormawa)
+                  ->where('status', 'waiting');
+        }, 'registrations.divisi1', 'registrations.divisi2'])
+        ->get();
+
+        // dd($candidate);
 
 
         // dd($candidate);
