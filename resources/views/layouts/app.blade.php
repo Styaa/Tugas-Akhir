@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Responsive Bootstrap 5 admin template and web Application ui kit.">
+    <meta name="description" content="Sistem Kelola Ormawa adalah platform manajemen organisasi mahasiswa berbasis web yang komprehensif dan responsif, dirancang untuk memudahkan pengelolaan keanggotaan, divisi, dan aktivitas organisasi kemahasiswaan.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kelola Ormawa</title>
     <link rel="icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon"> <!-- Favicon-->
