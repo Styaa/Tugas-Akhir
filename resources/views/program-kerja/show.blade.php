@@ -280,7 +280,7 @@
                                                                     title="Preview">
                                                                     <i class="icofont-eye-alt"></i>
                                                                 </a>
-                                                                @if (Auth::user()->id == $file->uploaded_by ||
+                                                                @if (Auth::check() && Auth::user()->id == $file->uploaded_by ||
                                                                         Auth::user()->jabatanOrmawa->id <= 3 ||
                                                                         Auth::user()->jabatanProker->id <= 3)
                                                                     <button type="button"
