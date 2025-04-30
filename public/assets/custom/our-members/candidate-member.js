@@ -25,7 +25,7 @@ $(document).on('click', '.accept-button', function () {
     } else if (divisi1_id) {
         // Jika hanya ada 1 divisi, tampilkan konfirmasi langsung
         singleDivisiConfirmation.classList.remove("d-none");
-        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_id}`;
+        singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_name}`;
     }
 
     // Update modal content
@@ -42,7 +42,7 @@ $(document).on('click', '.reject-button', function () {
     let divisi2 = this.getAttribute("data-divisi2");
 
     // Update modal content
-    document.getElementById('rejectUserName').textContent = userName;
+    document.getElementById('rejectUserName').textContent = selectedUserId;
 
     // Show modal
     $('#candidatereject').modal('show');
