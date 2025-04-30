@@ -942,7 +942,7 @@ class ProgramKerjaController extends Controller
             $request->validate([
                 'struktur_id' => 'required|array',
                 'nilai' => 'required|array',
-                'nilai.*' => 'required|numeric|min:1|max:100',
+                'nilai.*' => 'required|numeric|min:1|max:100'
             ]);
 
             // Mulai transaksi

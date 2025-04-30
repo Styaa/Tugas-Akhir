@@ -19,6 +19,12 @@ class SimpleAdditiveWeightingService
     protected $bobotTanggungJawab = 0.20;
     protected $bobotKualitas = 0.20;
     protected $bobotPenilaianAtasan = 0.15;
+    protected $penilaianAtasan;
+
+    public function setPenilaianAtasan($penilaian)
+    {
+        $this->penilaianAtasan = $penilaian;
+    }
 
     /**
      * Menghitung evaluasi untuk semua panitia dalam program kerja
