@@ -26,6 +26,7 @@ $(document).on('click', '.accept-button', function () {
         // Jika hanya ada 1 divisi, tampilkan konfirmasi langsung
         singleDivisiConfirmation.classList.remove("d-none");
         singleDivisiConfirmation.textContent = `User will be assigned to: ${divisi1_name}`;
+        divisiSelect.innerHTML += `<option value="${divisi1_id}">${divisi1_name}</option>`;
     }
 
     // Update modal content
@@ -42,7 +43,7 @@ $(document).on('click', '.reject-button', function () {
     let divisi2 = this.getAttribute("data-divisi2");
 
     // Update modal content
-    document.getElementById('rejectUserName').textContent = selectedUserId;
+    document.getElementById('rejectUserName').textContent = userName;
 
     // Show modal
     $('#candidatereject').modal('show');
