@@ -415,7 +415,7 @@ class ProgramKerjaController extends Controller
         // 4. Cek apakah notifikasi sudah terkirim
         $notifikasiTerkirim = $programKerja->notifikasi_penilaian_terkirim ?? false;
 
-        dd(Auth::user()->id);
+        // dd(Auth::user()->id);
 
         // Buat array untuk view dengan compact
         $viewVariables = compact(
