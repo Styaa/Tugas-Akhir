@@ -138,7 +138,7 @@
                                                         <div class="icon-circle bg-light rounded-circle p-1 me-2">
                                                             <i class="icofont-sand-clock text-primary small"></i>
                                                         </div>
-                                                        <span class="text-muted small">{{ $program->hari_tersisa }}
+                                                        <span class="text-muted small">{{ $program->daysLeft }}
                                                             Days Left</span>
                                                     </div>
                                                 </div>
@@ -154,7 +154,7 @@
                                             </div>
 
                                             <!-- Progress -->
-                                            <div>
+                                            {{-- <div>
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <h6 class="mb-0">Progress</h6>
                                                     <span
@@ -169,7 +169,7 @@
                                                         aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                 </div>
