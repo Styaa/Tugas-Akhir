@@ -19,7 +19,7 @@
                         class="bg-light rounded-top p-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
                         <div>
                             <h2 class="fw-bold mb-0">{{ $namaDivisi->nama_divisi }}</h2>
-                            <p class="text-muted mb-0">Daftar aktivitas & tugas divisi</p>
+                            <p class="text-muted mb-0">Daftar tugas & tugas divisi</p>
                         </div>
                         <a href="{{ route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $prokerId]) }}"
                             class="btn btn-outline-secondary mt-3 mt-md-0">
@@ -37,7 +37,7 @@
                 <i class="icofont-info-circle fs-4 me-2"></i>
                 <div>
                     <strong>Program kerja telah selesai!</strong>
-                    <p class="mb-0">Data aktivitas tidak dapat diubah karena program kerja telah
+                    <p class="mb-0">Data tugas tidak dapat diubah karena program kerja telah
                         dikonfirmasi selesai.</p>
                 </div>
             </div>
@@ -49,10 +49,10 @@
         <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">Daftar Aktivitas</h5>
+                    <h5 class="mb-0 fw-bold">Daftar Tugas</h5>
                     @if (!$programKerjaSelesai)
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addActivity">
-                            <i class="fas fa-plus-circle me-2"></i>Tambah Aktivitas
+                            <i class="fas fa-plus-circle me-2"></i>Tambah Tugas
                         </button>
                     @endif
                 </div>
@@ -62,11 +62,11 @@
                             <div class="mb-3">
                                 <i class="fas fa-tasks fa-3x text-muted"></i>
                             </div>
-                            <h5>Belum ada aktivitas</h5>
-                            <p class="text-muted">Mulai dengan menambahkan aktivitas baru untuk divisi ini</p>
+                            <h5>Belum ada tugas</h5>
+                            <p class="text-muted">Mulai dengan menambahkan tugas baru untuk divisi ini</p>
                             <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal"
                                 data-bs-target="#addActivity">
-                                <i class="fas fa-plus-circle me-2"></i>Tambah Aktivitas Pertama
+                                <i class="fas fa-plus-circle me-2"></i>Tambah Tugas Pertama
                             </button>
                         </div>
                     @else
@@ -74,7 +74,7 @@
                             <table id="myProjectTable" class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Aktivitas</th>
+                                        <th>Tugas</th>
                                         <th>PIC</th>
                                         <th>Deadline</th>
                                         <th>Prioritas</th>
@@ -461,7 +461,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Detail Aktivitas</h5>
+                        <h5 class="modal-title">Detail Tugas</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">

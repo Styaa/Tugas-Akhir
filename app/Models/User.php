@@ -26,6 +26,7 @@ class User extends Authenticatable
         'fakultas',
         'id_line',
         'no_hp',
+        'google_id'
     ];
 
     public function registrations()

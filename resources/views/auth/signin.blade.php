@@ -41,7 +41,7 @@
                                     <h1>Sign in</h1>
                                 </div>
                                 <div class="col-12 text-center mb-4">
-                                    <a class="btn btn-lg btn-outline-secondary btn-block" href="#">
+                                    <a class="btn btn-lg btn-outline-secondary btn-block" href="{{ route('auth.google') }}">
                                         <span class="d-flex justify-content-center align-items-center">
                                             <img class="avatar xs me-2" src="{{ url('/') . '/images/google.svg' }}"
                                                 alt="Image Description">

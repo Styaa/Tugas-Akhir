@@ -98,7 +98,7 @@
                         <p class="mb-0 text-end line-height-sm "><span
                                 class="font-weight-bold">{{ Auth::user()->name }}</span>
                         </p>
-                        <small>Admin Profile</small>
+                        <small>{{ Auth::user()->jabatanOrmawa->nama }}</small>
                     </div>
                     <a class="nav-link dropdown-toggle pulse p-0" href="#" role="button"
                         data-bs-toggle="dropdown" data-bs-display="static">

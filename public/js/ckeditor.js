@@ -677,6 +677,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
 
                 // Get information from URL parameters
                 const urlParams = new URLSearchParams(window.location.search);
+                alert(urlParams);
                 const rapatId = urlParams.get('id_rapat');
 
                 // Periksa dan ambil parameter yang ada (selain ormawa_id yang selalu ada)

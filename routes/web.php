@@ -8,6 +8,7 @@ use App\Http\Controllers\DivisiOrmawaController;
 use App\Http\Controllers\DivisiProgramKerjaController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LaporanDokumenController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotulenController;
@@ -26,6 +27,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
+Route::controller(GoogleController::class)->group(function(){
+    Route::get('auth/google', 'redirectToGoogle')->name('auth.google');
+    Route::get('auth/google/callback', 'handleGoogleCallback');
+});
+
 Route::prefix('auth')->group(function () {
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('post-login');
@@ -33,7 +39,6 @@ Route::prefix('auth')->group(function () {
 
     Route::get('/get-divisi/{ormawa}', [DivisiOrmawaController::class, 'getDivisi'])->name('get-divisi');
     Route::get('/get-ormawa/{fakultas}', [OrmawaController::class, 'getOrmawa'])->name('get-ormawa');
-
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register'])->name('post-regist');
@@ -44,7 +49,7 @@ Route::prefix('auth')->group(function () {
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/api/notulens/save', [NotulenController::class, 'apiSave'])->name('api.notulens.save');
-Route::post('/proposal', [LaporanDokumenController::class, 'apiSaveProposal']);
+Route::post('/api/proposals/save', [LaporanDokumenController::class, 'apiSaveProposal'])->name('save-proposal');
 Route::post('/lpj', [LaporanDokumenController::class, 'apiSaveLPJ']);
 
 Route::middleware(['auth'])->group(function () {
@@ -109,6 +114,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('{id}/destroy', [ProgramKerjaController::class, 'destroy'])->name('destroy');
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
+
+            Route::get('/{id}/evaluasi', [ProgramKerjaController::class, 'evaluasi'])->name('evaluasi');
 
             Route::post('{id}/nilai-anggota', [ProgramKerjaController::class, 'nilaiAnggota'])
                 ->name('nilai-anggota');

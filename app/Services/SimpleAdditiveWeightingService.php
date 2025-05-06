@@ -104,9 +104,7 @@ class SimpleAdditiveWeightingService
     protected function hitungNilaiKehadiran($user_id, $proker_id)
     {
         // Dapatkan semua rapat terkait proker ini
-        $rapat = Rapat::where('program_kerjas_id', $proker_id)
-            ->where('status', 'selesai')
-            ->get();
+        $rapat = Rapat::where('program_kerjas_id', $proker_id)->get();
 
         if ($rapat->isEmpty()) {
             return 0;

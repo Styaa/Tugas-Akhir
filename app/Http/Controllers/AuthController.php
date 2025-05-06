@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DivisiOrmawa;
+use App\Models\StrukturOrmawa;
 use App\Models\User;
 use App\Notifications\DeadlineReminder;
 use Illuminate\Http\Request;
@@ -51,10 +52,12 @@ class AuthController extends Controller
                 ->pluck('divisiOrmawas.ormawa.kode')
                 ->first();
 
-            $periode = date('Y');
+            $periode = StrukturOrmawa::where('users_id', $user->id)->get()->pluck('periodes_periode');
 
             return redirect()->route('dashboard', ['kode_ormawa' => $kodeOrmawa]) . "?periode=$periode";
         }
+
+        // dd(Hash::make('123456789'));
 
 
         return back()->withErrors([

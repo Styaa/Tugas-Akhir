@@ -7,6 +7,7 @@ use App\Models\ProgramKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class LaporanDokumenController extends Controller
 {
@@ -257,12 +258,10 @@ class LaporanDokumenController extends Controller
     public function apiSaveProposal(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'program_kerjas_id' => 'required|exists:program_kerjas,id',
-            'type' => 'required|string|in:proposal', // Ensure type is proposal
+            'isi_dokumen' => 'required',
+            'program_kerja_id' => 'required|exists:program_kerjas,id', // Changed to match DB column
+            'tipe' => 'required|string|in:proposal', // Changed from 'type' to 'tipe'
             'status' => 'nullable|string|in:draft,submitted,approved,rejected',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Optional file upload (10MB max)
         ]);
 
         if ($validator->fails()) {
@@ -274,41 +273,36 @@ class LaporanDokumenController extends Controller
 
         try {
             // Get program_kerja to fill in related data
-            $programKerja = ProgramKerja::findOrFail($request->program_kerjas_id);
+            $programKerja = ProgramKerja::findOrFail($request->program_kerja_id);
 
             $proposal = new LaporanDokumen();
-            $proposal->title = $request->title;
-            $proposal->content = $request->content;
-            $proposal->users_id = Auth::id();
-            $proposal->program_kerjas_id = $request->program_kerjas_id;
-            $proposal->ormawas_id = $programKerja->ormawa_id;
-            $proposal->type = 'proposal';
+            $proposal->isi_dokumen = $request->isi_dokumen; // Changed to match DB column
+            $proposal->created_by = Auth::id(); // Assuming users_id exists
+            $proposal->program_kerja_id = $request->program_kerja_id; // Changed to match DB column
+            $proposal->ormawas_kode = $programKerja->ormawas_kode; // Changed to match DB column
+            $proposal->tipe = $request->tipe; // Changed from 'type' to 'tipe'
             $proposal->status = $request->status ?? 'draft';
+            $proposal->tanggal_pengajuan = now();
 
-            // Set optional foreign keys if they exist in the request or program kerja
-            $proposal->divisi_ormawas_id = $request->divisi_ormawas_id ?? $programKerja->divisi_ormawas_id;
-            $proposal->divisi_program_kerjas_id = $request->divisi_program_kerjas_id ?? null;
+            // Set other database columns with defaults
+            $proposal->step = $request->step ?? 1;
 
-            // Handle file upload if present
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = 'proposal_' . time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('proposals', $fileName, 'public');
-                $proposal->file_path = $filePath;
-            }
+            // if ($request->has('tanggal_peninjauan')) {
+            //     $proposal->tanggal_peninjauan = $request->tanggal_peninjauan;
+            // }
 
             $proposal->save();
 
             // Update program_kerja status if needed
-            if ($request->status === 'submitted' && $programKerja->status === 'planning') {
-                $programKerja->status = 'proposal_submitted';
-                $programKerja->save();
-            }
+            // if ($request->status === 'submitted' && $programKerja->status === 'planning') {
+            //     $programKerja->status = 'proposal_submitted';
+            //     $programKerja->save();
+            // }
 
             return response()->json([
                 'message' => 'Proposal saved successfully',
                 'id' => $proposal->id,
-                'ormawa_id' => $proposal->ormawas_id
+                'ormawa_kode' => $proposal->ormawas_kode // Changed to match DB column
             ]);
         } catch (\Exception $e) {
             return response()->json([

@@ -618,21 +618,21 @@ $date = \Carbon\Carbon::now();
                                 <li>
                                     <div class="form-check">
                                         <input id ="dana" type="checkbox" name="anggaran[]"
-                                            class="form-check-input" value="Dana Fakultas">
+                                            class="form-check-input" value="Dana Kemahasiswaan">
                                         <label for="dana-fakultas" class="form-check-label">Dana Kemahasiswaan</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="form-check">
                                         <input id ="dana" type="checkbox" name="anggaran[]"
-                                            class="form-check-input" value="Dana Fakultas">
+                                            class="form-check-input" value="Dana Sponsor">
                                         <label for="dana-fakultas" class="form-check-label">Dana Sponsor</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="form-check">
                                         <input id ="dana" type="checkbox" name="anggaran[]"
-                                            class="form-check-input" value="Dana Fakultas">
+                                            class="form-check-input" value="Dana Pendaftaran">
                                         <label for="dana-fakultas" class="form-check-label">Dana Pendaftaran</label>
                                     </div>
                                 </li>
@@ -798,6 +798,30 @@ $date = \Carbon\Carbon::now();
                                                     value="Dana Fakultas">
                                                 <label for="dana-fakultas" class="form-check-label">Dana
                                                     Fakultas</label>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="anggaran[]" class="form-check-input"
+                                                    value="Dana Kemahasiswaan">
+                                                <label for="dana-kemahasiswaan" class="form-check-label">Dana
+                                                    Kemahasiswaan</label>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="anggaran[]" class="form-check-input"
+                                                    value="Dana Sponsor">
+                                                <label for="dana-sponsor" class="form-check-label">Dana
+                                                    Sponsor</label>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="form-check">
+                                                <input type="checkbox" name="anggaran[]" class="form-check-input"
+                                                    value="Dana Pendaftaran">
+                                                <label for="dana-pendaftaran" class="form-check-label">Dana
+                                                    Pendaftaran</label>
                                             </div>
                                         </li>
                                     </ul>

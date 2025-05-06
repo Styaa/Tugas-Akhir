@@ -99,13 +99,18 @@
                                 @if ($programKerjaSelesai)
                                     <!-- Program Telah Selesai -->
                                     <div class="alert alert-success mb-0 w-100">
-                                        <div class="d-flex align-items-center">
-                                            <i class="icofont-check-circled fs-4 me-2"></i>
-                                            <div>
-                                                <strong>Program kerja telah selesai!</strong>
-                                                <p class="mb-0">Program kerja ini telah dikonfirmasi selesai dan siap
-                                                    untuk evaluasi.</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <i class="icofont-check-circled fs-4 me-2"></i>
+                                                <div>
+                                                    <strong>Program kerja telah selesai!</strong>
+                                                    <p class="mb-0">Program kerja ini telah dikonfirmasi selesai dan siap untuk evaluasi.</p>
+                                                </div>
                                             </div>
+                                            <a href="{{ route('program-kerja.evaluasi', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                               class="btn btn-primary">
+                                                <i class="icofont-chart-bar-graph me-2"></i>Lihat Evaluasi Kinerja
+                                            </a>
                                         </div>
                                     </div>
                                 @elseif ($tanggalSelesaiLewat && $isKetuaProker)
@@ -165,7 +170,7 @@
                     </div>
 
                     {{-- Anggaran Program Kerja --}}
-                    @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                    @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
                         <div class="card mb-4">
                             <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
                                 <h5 class="fw-bold mb-0">Anggaran Program Kerja</h5>
@@ -328,7 +333,7 @@
                         <div class="col-lg-8 col-md-12">
                             <div class="card mb-4">
                                 <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
-                                    <h5 class="fw-bold mb-0">Divisi & Aktivitas</h5>
+                                    <h5 class="fw-bold mb-0">Divisi & Tugas</h5>
                                 </div>
                                 <div class="card-body">
                                     <ul class="nav nav-tabs mb-3" id="divisiTabs" role="tablist">
@@ -352,7 +357,7 @@
                                                 aria-labelledby="divisi-{{ $item['id'] }}-tab">
 
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                                    <h6 class="mb-0">Aktivitas Divisi
+                                                    <h6 class="mb-0">Tugas Divisi
                                                         {{ $item['divisi_pelaksana']['nama'] }}</h6>
                                                     <a href="{{ route('program-kerja.divisi.show', ['id' => $item['id'], 'kode_ormawa' => Request::segment(1), 'nama_program_kerja' => $programKerja->nama]) }}"
                                                         class="btn btn-dark btn-sm">Lihat Detail Divisi</a>
@@ -368,14 +373,14 @@
                                                 @if ($activitiesForDivisi->isEmpty())
                                                     <div class="text-center py-4">
                                                         <i class="icofont-tasks-alt fs-1 text-muted mb-2"></i>
-                                                        <p class="mb-0">Belum ada aktivitas untuk divisi ini</p>
+                                                        <p class="mb-0">Belum ada tugas untuk divisi ini</p>
                                                     </div>
                                                 @else
                                                     <div class="table-responsive">
                                                         <table class="table table-hover align-middle">
                                                             <thead class="table-light">
                                                                 <tr>
-                                                                    <th>Nama Aktivitas</th>
+                                                                    <th>Nama Tugas</th>
                                                                     <th>Person In Charge</th>
                                                                     <th>Tenggat Waktu</th>
                                                                     <th>Prioritas</th>
@@ -579,7 +584,7 @@
                                                                         <button type="button"
                                                                             class="btn btn-sm btn-outline-secondary ms-1"
                                                                             data-bs-toggle="modal"
-                                                                            data-bs-target="#editMember{{ $item->id }}">
+                                                                            data-bs-target="#editMember{{ $item->id_user }}">
                                                                             <i class="icofont-edit"></i>
                                                                         </button>
                                                                     @endif
@@ -588,9 +593,68 @@
                                                         </div>
 
                                                         <!-- Modal Edit Anggota -->
-                                                        <div class="modal fade" id="editMember{{ $item->id }}"
+                                                        <div class="modal fade" id="editMember{{ $item->id_user }}"
                                                             tabindex="-1" aria-hidden="true">
-                                                            <!-- Isi modal sama seperti di atas -->
+                                                            <div class="modal-dialog modal-dialog-centered">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Edit Jabatan/Divisi Anggota
+                                                                        </h5>
+                                                                        <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close"></button>
+                                                                    </div>
+                                                                    <form
+                                                                        action="{{ route('program-kerja.anggota.update', ['kode_ormawa' => $kode_ormawa, 'prokerId' => $programKerja->id, 'anggotaId' => $item->id_user]) }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        @method('PUT')
+                                                                        <div class="modal-body">
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Nama
+                                                                                    Anggota</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    value="{{ $item->nama_user }}"
+                                                                                    disabled>
+                                                                            </div>
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Jabatan</label>
+                                                                                <select class="form-select"
+                                                                                    name="jabatan_id">
+                                                                                    @foreach ($jabatans as $jabatan)
+                                                                                        <option
+                                                                                            value="{{ $jabatan->id }}"
+                                                                                            {{ $item->id_jabatan == $jabatan->id ? 'selected' : '' }}>
+                                                                                            {{ $jabatan->nama }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label">Divisi</label>
+                                                                                <select class="form-select"
+                                                                                    name="divisi_id">
+                                                                                    @foreach ($divisi as $divisi_item)
+                                                                                        <option
+                                                                                            value="{{ $divisi_item['divisi_pelaksana']['id'] }}"
+                                                                                            {{ $item->divisi_id == $divisi_item['divisi_pelaksana']['id'] ? 'selected' : '' }}>
+                                                                                            {{ $divisi_item['divisi_pelaksana']['nama'] }}
+                                                                                        </option>
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button"
+                                                                                class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Batal</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-primary">Simpan
+                                                                                Perubahan</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -610,7 +674,7 @@
                                 </div>
 
                                 {{-- Dokumen Wajib Program Kerja --}}
-                                @if (Auth::user()->jabatanOrmawa->id !== 13 || Auth::user()->jabatanProker->id !== 13)
+                                @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
                                     <div class="col-12">
                                         <div class="card mb-4">
                                             <div
@@ -814,10 +878,10 @@
                                         <div class="d-flex align-items-center">
                                             <select class="form-select z-10" id="multiple-select-field"
                                                 data-placeholder="Choose anything" name="anggotas[]" multiple>
-                                                @if (isset($anggota) && is_iterable($anggota))
-                                                    @forelse ($anggota as $anggotas)
-                                                        <option value="{{ $anggotas->id ?? '' }}">
-                                                            {{ $anggotas->name ?? 'Nama tidak tersedia' }}
+                                                @if (isset($availableAnggota) && is_iterable($availableAnggota))
+                                                    @forelse ($availableAnggota as $availableAnggotas)
+                                                        <option value="{{ $availableAnggotas->id ?? '' }}">
+                                                            {{ $availableAnggotas->name ?? 'Nama tidak tersedia' }}
                                                         </option>
                                                     @empty
                                                         <option value="" disabled>Tidak ada anggota tersedia</option>
@@ -827,7 +891,7 @@
                                                 @endif
                                             </select>
                                         </div>
-                                        @if (!isset($anggota) || !is_iterable($anggota))
+                                        @if (!isset($availableAnggota) || !is_iterable($availableAnggota))
                                             <div class="text-danger mt-2 small">
                                                 <i class="icofont-info-circle"></i> Terjadi kesalahan saat memuat data
                                                 anggota
@@ -836,7 +900,7 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="divisi" class="form-label">Pilih Jabatan</label>
+                                        <label for="divisi" class="form-label">Pilih Divisi</label>
                                         <div class="d-flex align-items-center">
                                             <select class="form-select" id="single-select-field1" name="divisi"
                                                 data-placeholder="Choose one thing">

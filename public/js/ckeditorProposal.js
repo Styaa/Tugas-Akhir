@@ -865,59 +865,48 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
         buttonSave.className = 'ck ck-button save-button';
         buttonSave.style.marginLeft = '10px';
         buttonSave.addEventListener('click', async () => {
-            // Kode event listener yang sama seperti sebelumnya
             const content = editor.getData();
             const title = document.querySelector('h2') ? document.querySelector('h2').textContent.trim() : 'Notulen Rapat';
-
             try {
                 // Show loading indicator
                 buttonSave.textContent = 'Saving...';
                 buttonSave.disabled = true;
 
                 // Get information from URL parameters
-                const urlParams = new URLSearchParams(window.location.search);
-                const rapatId = urlParams.get('id_rapat');
+                const urlParams = window.location.pathname.split('/');
+                const programKerjaIndex = urlParams.indexOf('program-kerja');
 
-                // Periksa dan ambil parameter yang ada (selain ormawa_id yang selalu ada)
-                const programKerjaId = urlParams.get('program_kerjas_id');
-                const divisiOrmawaId = urlParams.get('divisi_ormawas_id');
-                const divisiProgramKerjaId = urlParams.get('divisi_program_kerjas_id');
+                // Extract parameters matching the database structure
+                const programKerjaId = urlParams[programKerjaIndex+1]; // Matches database column name
+                const ormawaKode = urlParams[1]; // Matches database column name
+                const tipe = urlParams[4] || 'proposal'; // Default value for document type
 
-                // Log for debugging
-                console.log('Rapat ID:', rapatId);
-                console.log('Params:', {
-                    program_kerjas_id: programKerjaId,
-                    divisi_ormawas_id: divisiOrmawaId,
-                    divisi_program_kerjas_id: divisiProgramKerjaId
-                });
+                // Set status based on document state or parameter
+                const status = 'draft';
 
-                // Buat object data dasar
+                // Prepare data structure that matches database fields
                 const postData = {
-                    title: title,
-                    content: content,
-                    rapat_id: rapatId
+                    isi_dokumen: content, // The actual document content
+                    program_kerja_id: programKerjaId,
+                    ormawas_kode: ormawaKode,
+                    tipe: tipe,
+                    status: status,
+                    catatan: '',
+                    revisi: 0,
+                    step: 1,
+                    peninjau_id: 0
                 };
 
-                // Tambahkan parameter lain jika ada
-                if (programKerjaId) {
-                    postData.program_kerjas_id = programKerjaId;
-                } else if (divisiOrmawaId) {
-                    postData.divisi_ormawas_id = divisiOrmawaId;
-                } else if (divisiProgramKerjaId) {
-                    postData.divisi_program_kerjas_id = divisiProgramKerjaId;
-                } else {
+                // If ormawas_kode is not provided in URL params, extract it from path
+                if (!postData.ormawas_kode) {
                     const pathSegments = window.location.pathname.split('/');
-                    const ormawaCode = pathSegments[1];
-
-                    postData.ormawa_id = ormawaCode;
+                    postData.ormawas_kode = pathSegments[1]; // Assuming URL format is /{KODE_ORMAWA}/...
                 }
 
-                // Dapatkan kode ormawa dari URL
-                const pathSegments = window.location.pathname.split('/');
-                const ormawaCode = pathSegments[1]; // Asumsikan format URL adalah /{KODE_ORMAWA}/rapat/...
+                console.log('Saving document with data:', postData);
 
                 // Send the content to the server
-                const response = await fetch('/api/notulens/save', {
+                const response = await fetch(`/api/proposals/save`, {  // Updated endpoint to match table name
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -928,21 +917,22 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert('Notulen berhasil disimpan!');
+                    alert('Dokumen berhasil disimpan!');
 
-                    // Redirect ke halaman yang sesuai
+                    // Redirect to appropriate page
+                    const ormawaCode = postData.ormawas_kode;
                     if (result.id) {
-                        window.location.href = `/${ormawaCode}/notulens/${result.id}`;
+                        window.location.href = `/${ormawaCode}/dokumen/${result.id}`;
                     } else {
-                        window.location.href = `/${ormawaCode}/notulens`;
+                        window.location.href = `/${ormawaCode}/dokumen`;
                     }
                 } else {
                     const error = await response.json();
-                    alert(`Error menyimpan notulen: ${error.message || 'Unknown error'}`);
+                    alert(`Error menyimpan dokumen: ${error.message || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error saving document:', error);
-                alert('Gagal menyimpan notulen. Silakan coba lagi.');
+                alert('Gagal menyimpan dokumen. Silakan coba lagi.');
             } finally {
                 // Reset button state
                 buttonSave.textContent = 'Save to Database';

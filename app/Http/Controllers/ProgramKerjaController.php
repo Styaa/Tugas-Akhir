@@ -258,12 +258,22 @@ class ProgramKerjaController extends Controller
         }
 
         $anggota = User::where('status', 'aktif')
-            ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
-                $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
-                    $subQuery->where('program_kerjas_id', $id);
-                });
-            })
-            ->get();
+        ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
+            $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
+                $subQuery->where('program_kerjas_id', $id);
+            });
+        })
+        ->get();
+
+        $availableAnggota = User::where('status', 'aktif')
+        ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
+            $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
+                $subQuery->where('program_kerjas_id', $id);
+            });
+        })
+        ->get();
+
+        // dd($anggota);
 
         $jabatans = Jabatan::all();
 
@@ -293,6 +303,8 @@ class ProgramKerjaController extends Controller
             ->orderBy('divisi_pelaksanas.nama')
             ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
             ->get();
+
+        // dd($anggotaProker);
 
         $activities = AktivitasDivisiProgramKerja::where('program_kerjas_id', $programKerja->id)->get();
 
@@ -422,6 +434,7 @@ class ProgramKerjaController extends Controller
             'programKerja',
             'files',
             'anggota',
+            'availableAnggota',
             'divisi',
             'tanggal_mulai',
             'ketua',
@@ -901,15 +914,15 @@ class ProgramKerjaController extends Controller
                 ->get();
 
             // Send notification to each user with their evaluation result
-            foreach ($anggotaProgram as $anggota) {
-                $userEvaluation = $evaluations->where('user_id', $anggota->users_id)->first();
+            // foreach ($anggotaProgram as $anggota) {
+            //     $userEvaluation = $evaluations->where('user_id', $anggota->users_id)->first();
 
-                if ($userEvaluation) {
-                    $user = User::find($anggota->users_id);
-                    // Create and send notification
-                    Notification::send($user, new EvaluasiSelesaiNotification($programKerja, $userEvaluation));
-                }
-            }
+            //     if ($userEvaluation) {
+            //         $user = User::find($anggota->users_id);
+            //         // Create and send notification
+            //         Notification::send($user, new EvaluasiSelesaiNotification($programKerja, $userEvaluation));
+            //     }
+            // }
 
             DB::commit();
 
@@ -926,15 +939,73 @@ class ProgramKerjaController extends Controller
         }
     }
 
-    public function evaluasi($id)
+    public function evaluasi($kode_ormawa, $id)
     {
+        // Get the program kerja
         $programKerja = ProgramKerja::findOrFail($id);
-        $evaluasi = Evaluasi::where('program_kerjas_id', $id)
-            ->with('user')
-            ->orderByDesc('score')
+
+        // Ensure program is completed
+        if ($programKerja->konfirmasi_penyelesaian != 'Ya') {
+            return redirect()->route('program-kerja.show', ['kode_ormawa' => $kode_ormawa, 'id' => $id])
+                ->with('error', 'Program kerja belum selesai, tidak dapat melihat evaluasi.');
+        }
+
+        // Get evaluations from the evaluasis table
+        $anggotaEvaluasi = DB::table('users as u')
+            ->select([
+                'u.id as user_id',
+                'u.name as nama_anggota',
+                'dp.nama as nama_divisi',
+                'j.nama as jabatan',
+                'p.nama as nama_program_kerja',
+                'e.kehadiran',
+                'e.kontribusi',
+                'e.tanggung_jawab',
+                'e.kualitas',
+                'e.penilaian_atasan',
+                'e.kehadiran_normalized',
+                'e.kontribusi_normalized',
+                'e.tanggung_jawab_normalized',
+                'e.kualitas_normalized',
+                'e.score as nilai_akhir',
+                'sp.keterangan_nilai'
+            ])
+            ->join('evaluasis as e', 'e.user_id', '=', 'u.id')
+            ->join('struktur_prokers as sp', 'sp.users_id', '=', 'u.id')
+            ->join('divisi_program_kerjas as dpk', 'sp.divisi_program_kerjas_id', '=', 'dpk.id')
+            ->join('divisi_pelaksanas as dp', 'dpk.divisi_pelaksanas_id', '=', 'dp.id')
+            ->join('jabatans as j', 'sp.jabatans_id', '=', 'j.id')
+            ->join('program_kerjas as p', 'dpk.program_kerjas_id', '=', 'p.id')
+            ->where('e.program_kerjas_id', $id)
+            ->where('dpk.program_kerjas_id', $id)
+            ->groupBy([
+                'u.id', 'u.name', 'dp.nama', 'j.nama', 'e.kehadiran', 'e.kontribusi',
+                'e.tanggung_jawab', 'e.kualitas', 'e.penilaian_atasan',
+                'e.kehadiran_normalized', 'e.kontribusi_normalized',
+                'e.tanggung_jawab_normalized', 'e.kualitas_normalized',
+                'sp.keterangan_nilai', 'p.nama', 'e.score'
+            ])
+            ->orderBy('nilai_akhir', 'desc')
             ->get();
 
-        return view('program-kerja.evaluasi', compact('programKerja', 'evaluasi'));
+        // dd($anggotaEvaluasi);
+
+        // Get ketua (leader) information
+        $ketua = DB::table('struktur_prokers as sp')
+            ->join('users as u', 'sp.users_id', '=', 'u.id')
+            ->join('divisi_program_kerjas as dpk', 'sp.divisi_program_kerjas_id', '=', 'dpk.id')
+            ->join('jabatans as j', 'sp.jabatans_id', '=', 'j.id')
+            ->where('dpk.program_kerjas_id', $id)
+            ->where('j.nama', 'Ketua')
+            ->select('u.name', 'u.id')
+            ->first();
+
+        return view('program-kerja.evaluasi', [
+            'programKerja' => $programKerja,
+            'anggotaEvaluasi' => $anggotaEvaluasi,
+            'ketua' => $ketua,
+            'kode_ormawa' => $kode_ormawa
+        ]);
     }
 
     public function nilaiAnggota(Request $request, $kode_ormawa, $id)
