@@ -119,7 +119,11 @@ class ProgramKerjaController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            // Return with errors and set a flash message for the JavaScript to show the modal
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('validation_errors', $validator->errors()->all());
         }
 
         // Membuat program kerja baru
