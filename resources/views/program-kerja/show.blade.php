@@ -736,7 +736,7 @@
                                                                 <p class="text-muted small mb-0">Dokumen perencanaan
                                                                     kegiatan program kerja</p>
                                                             </div>
-                                                            <a href="{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                            <a href="{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $proposalId]) }}"
                                                                 class="btn btn-outline-primary btn-sm">
                                                                 <i class="icofont-edit me-1"></i>Edit
                                                             </a>

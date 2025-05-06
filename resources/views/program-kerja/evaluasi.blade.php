@@ -92,19 +92,19 @@
                         <div class="alert alert-info mb-4">
                             <h6 class="fw-bold mb-2">Bobot Kriteria Penilaian:</h6>
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col">
                                     <strong>Kehadiran:</strong> 20%
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col">
                                     <strong>Kontribusi:</strong> 25%
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col">
                                     <strong>Tanggung Jawab:</strong> 20%
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col">
                                     <strong>Kualitas:</strong> 20%
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col">
                                     <strong>Penilaian Atasan:</strong> 15%
                                 </div>
                             </div>
@@ -220,6 +220,8 @@
     </div>
 </div>
 
+<script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
+    <script src="{{ asset('js/template.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

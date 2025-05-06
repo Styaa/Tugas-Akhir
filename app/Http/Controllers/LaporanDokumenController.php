@@ -43,6 +43,13 @@ class LaporanDokumenController extends Controller
         }));
         $progressPercentage = $totalSteps > 0 ? ($completedSteps / $totalSteps) * 100 : 0;
 
+        $dokumenId = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'proposal')
+            ->pluck('id')
+            ->first();
+
         return view('program-kerja.dokumen.proposal.progress', compact(
             'programKerja',
             'user',
@@ -53,7 +60,8 @@ class LaporanDokumenController extends Controller
             'completedSteps',
             'inProgressSteps',
             'progressPercentage',
-            'kode_ormawa'
+            'kode_ormawa',
+            'dokumenId'
         ));
     }
 
@@ -255,7 +263,7 @@ class LaporanDokumenController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function apiSaveProposal(Request $request)
+    public function SaveProposal(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'isi_dokumen' => 'required',
@@ -307,6 +315,52 @@ class LaporanDokumenController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to save proposal',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UpdateProposal(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'isi_dokumen' => 'required',
+            'program_kerja_id' => 'required|exists:program_kerjas,id',
+            'tipe' => 'required|string|in:proposal',
+            'status' => 'nullable|string|in:draft,submitted,approved,rejected',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Find existing proposal
+            $proposal = LaporanDokumen::findOrFail($id);
+
+            // Update fields
+            $proposal->isi_dokumen = $request->isi_dokumen;
+            $proposal->status = $request->status ?? $proposal->status;
+            $proposal->updated_by = Auth::id();
+            $proposal->step = $request->step ?? $proposal->step;
+
+            // Update other fields if needed
+            if ($request->status === 'submitted' && $proposal->tanggal_pengajuan === null) {
+                $proposal->tanggal_pengajuan = now();
+            }
+
+            $proposal->save();
+
+            return response()->json([
+                'message' => 'Proposal updated successfully',
+                'id' => $proposal->id,
+                'ormawa_kode' => $proposal->ormawas_kode
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update proposal',
                 'error' => $e->getMessage()
             ], 500);
         }

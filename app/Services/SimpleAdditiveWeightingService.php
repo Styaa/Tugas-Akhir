@@ -103,28 +103,26 @@ class SimpleAdditiveWeightingService
      */
     protected function hitungNilaiKehadiran($user_id, $proker_id)
     {
-        // Dapatkan semua rapat terkait proker ini
+        // Get all meetings related to this project
         $rapat = Rapat::where('program_kerjas_id', $proker_id)->get();
 
         if ($rapat->isEmpty()) {
             return 0;
         }
 
-        // Hitung jumlah kehadiran
         $total_rapat = $rapat->count();
         $hadir = RapatPartisipasi::whereIn('rapat_id', $rapat->pluck('id'))
             ->where('user_id', $user_id)
             ->where('status_kehadiran', 'hadir')
             ->count();
 
-        // Izin dihitung sebagai 0.5 dari hadir
         $izin = RapatPartisipasi::whereIn('rapat_id', $rapat->pluck('id'))
             ->where('user_id', $user_id)
             ->where('status_kehadiran', 'izin')
-            ->count() * 0.5;
+            ->count();
 
-        // Hitung persentase kehadiran
-        $nilai_kehadiran = ($hadir + $izin) / $total_rapat * 100;
+        // Calculate attendance value with formula: ((jumlah hadir / jumlah rapat partisipan) + ((jumlah izin / jumlah rapat partisipan) ** 0.5)) * 100
+        $nilai_kehadiran = (($hadir / $total_rapat) + (($izin / $total_rapat)* 0.5)) * 100;
 
         return $nilai_kehadiran;
     }
@@ -134,7 +132,7 @@ class SimpleAdditiveWeightingService
      */
     protected function hitungNilaiKontribusi($user_id, $proker_id)
     {
-        // Dapatkan semua aktivitas yang ditugaskan pada user
+        // Get all tasks assigned to this user
         $aktivitas = AktivitasDivisiProgramKerja::where('person_in_charge', $user_id)
             ->where('program_kerjas_id', $proker_id)
             ->get();
@@ -143,51 +141,44 @@ class SimpleAdditiveWeightingService
             return 0;
         }
 
-        // Hitung kontribusi berdasarkan jumlah dan prioritas tugas
-        $total_kontribusi = 0;
-        $jumlah_aktivitas = count($aktivitas);
+        // First count all tasks for reference
+        $total_tugas = count($aktivitas);
 
-        foreach ($aktivitas as $aktiviti) {
-            // Berikan nilai berdasarkan prioritas
-            $nilai_prioritas = 0;
-            switch ($aktiviti->prioritas) {
-                case 'rendah':
-                    $nilai_prioritas = 1;
-                    break;
-                case 'sedang':
-                    $nilai_prioritas = 2;
-                    break;
-                case 'tinggi':
-                    $nilai_prioritas = 3;
-                    break;
-                case 'kritikal':
-                    $nilai_prioritas = 4;
-                    break;
-            }
+        // Now filter for only completed tasks
+        $aktivitas_selesai = $aktivitas->filter(function($aktiviti) {
+            return $aktiviti->status == 'selesai';
+        });
 
-            // Berikan nilai berdasarkan status
-            $nilai_status = 0;
-            switch ($aktiviti->status) {
-                case 'belum_mulai':
-                    $nilai_status = 0;
-                    break;
-                case 'sedang_berjalan':
-                    $nilai_status = 0.5;
-                    break;
-                case 'selesai':
-                    $nilai_status = 1;
-                    break;
-                case 'ditunda':
-                    $nilai_status = 0.2;
-                    break;
-            }
-
-            $total_kontribusi += $nilai_prioritas * $nilai_status;
+        // If no completed tasks, return 0
+        if ($aktivitas_selesai->isEmpty()) {
+            return 0;
         }
 
-        // Normalisasi ke skala 0-100
-        $nilai_maksimal = 4 * $jumlah_aktivitas; // Nilai maksimal jika semua tugas kritikal dan selesai
-        $nilai_kontribusi = ($total_kontribusi / $nilai_maksimal) * 100;
+        $total_tugas_selesai = count($aktivitas_selesai);
+        $total_nilai_prioritas = 0;
+        $nilai_prioritas_maksimal = 0;
+
+        foreach ($aktivitas_selesai as $aktiviti) {
+            // Assign value based on priority
+            $nilai_prioritas = 0;
+            switch ($aktiviti->prioritas) {
+                case 'rendah': $nilai_prioritas = 1; break;
+                case 'sedang': $nilai_prioritas = 2; break;
+                case 'tinggi': $nilai_prioritas = 3; break;
+                case 'kritikal': $nilai_prioritas = 4; break;
+            }
+
+            $total_nilai_prioritas += $nilai_prioritas;
+            $nilai_prioritas_maksimal = max($nilai_prioritas_maksimal, $nilai_prioritas);
+        }
+
+        // Avoid division by zero
+        if ($nilai_prioritas_maksimal == 0 || $total_tugas_selesai == 0) {
+            return 0;
+        }
+
+        // Calculate contribution value with formula: [Σ(Jumlah tugas selesai × Nilai prioritas) / (Nilai prioritas maksimal tugas × Total tugas selesai)] × 100
+        $nilai_kontribusi = ($total_nilai_prioritas / ($nilai_prioritas_maksimal * $total_tugas_selesai)) * 100;
 
         return $nilai_kontribusi;
     }
@@ -197,10 +188,9 @@ class SimpleAdditiveWeightingService
      */
     protected function hitungNilaiTanggungJawab($user_id, $proker_id)
     {
-        // Dapatkan semua aktivitas yang ditugaskan pada user dan sudah selesai
+        // Get all tasks assigned to this user with deadlines
         $aktivitas = AktivitasDivisiProgramKerja::where('person_in_charge', $user_id)
             ->where('program_kerjas_id', $proker_id)
-            ->where('status', 'selesai')
             ->whereNotNull('tenggat_waktu')
             ->get();
 
@@ -208,16 +198,18 @@ class SimpleAdditiveWeightingService
             return 0;
         }
 
-        // Hitung berapa banyak tugas yang selesai sebelum deadline
+        $total_tugas = count($aktivitas);
         $selesai_tepat_waktu = 0;
+
         foreach ($aktivitas as $aktiviti) {
-            if ($aktiviti->tanggal_selesai && strtotime($aktiviti->tanggal_selesai) <= strtotime($aktiviti->tenggat_waktu)) {
+            if ($aktiviti->status == 'selesai' && $aktiviti->tanggal_selesai &&
+                strtotime($aktiviti->tanggal_selesai) <= strtotime($aktiviti->tenggat_waktu)) {
                 $selesai_tepat_waktu++;
             }
         }
 
-        // Hitung persentase ketepatan waktu
-        $nilai_tanggung_jawab = ($selesai_tepat_waktu / count($aktivitas)) * 100;
+        // Calculate responsibility value with formula: (Total tugas selesai sebelum deadline / total tugas) * 100
+        $nilai_tanggung_jawab = ($selesai_tepat_waktu / $total_tugas) * 100;
 
         return $nilai_tanggung_jawab;
     }
@@ -255,7 +247,7 @@ class SimpleAdditiveWeightingService
      */
     protected function hitungNilaiPenilaianAtasan($user_id, $proker_id)
     {
-        // Dapatkan nilai atasan dari struktur_prokers
+        // Get supervisor rating from struktur_prokers
         $penilaian = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($proker_id) {
             $query->select('id')
                 ->from('divisi_program_kerjas')
@@ -264,13 +256,13 @@ class SimpleAdditiveWeightingService
             ->where('users_id', $user_id)
             ->first();
 
-        // Jika sudah ada penilaian atasan, konversikan dari skala 100 menjadi skala 5
-        if ($penilaian && $penilaian->nilai_atasan) {
-            return ($penilaian->nilai_atasan / 100) * 5; // Konversi dari skala 100 ke skala 5
+        // Calculate supervisor rating with formula: (Nilai atasan / maksimal nilai atasan) * 100
+        if ($penilaian && $penilaian->nilai_atasan !== null) {
+            $nilai_maksimal_atasan = 5;
+            return ($penilaian->nilai_atasan / $nilai_maksimal_atasan) * 100;
         }
 
-        // Jika tidak ada nilai atasan, gunakan nilai default
-        return 3; // Nilai default dalam skala 5
+        return 60; // Default value (scale 0-100)
     }
 
     /**
@@ -287,13 +279,11 @@ class SimpleAdditiveWeightingService
             return [];
         }
 
-        // Find min and max values
-        $min = min($nilai);
+        // Find max value
         $max = max($nilai);
 
         // Avoid division by zero
-        if ($min == $max) {
-            // If all values are the same, normalize to 1
+        if ($max == 0) {
             $hasil = [];
             foreach ($nilai as $userId => $value) {
                 $hasil[$userId] = 1;
@@ -301,14 +291,14 @@ class SimpleAdditiveWeightingService
             return $hasil;
         }
 
-        // Normalize according to type
+        // Normalize: value / maximum value for benefit criteria
         $hasil = [];
         foreach ($nilai as $userId => $value) {
             if ($tipe == 'benefit') {
-                // For benefit criteria: value / maximum value
                 $hasil[$userId] = $value / $max;
             } else {
-                // For cost criteria: minimum value / value
+                // For cost criteria (not used in this case but kept for completeness)
+                $min = min($nilai);
                 $hasil[$userId] = $min / $value;
             }
         }

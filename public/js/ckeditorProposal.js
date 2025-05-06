@@ -416,12 +416,12 @@ const editorConfig = {
             'resizeImage'
         ]
     },
-    initialData: `
+    initialData: proposalContent || `
         <div class="proposal-template">
             <!-- Header Section -->
             <div class="proposal-header" style="text-align:center;">
                 <h1 style="text-align:center; font-family: 'Cambria', serif; font-size: 16pt; font-weight: bold; margin-bottom: 5px;">PROPOSAL</h1>
-                <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-style: italic; margin-top: 5px; margin-bottom: 15px;">[NAMA KEGIATAN]</h2>
+                <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-style: italic; margin-top: 5px; margin-bottom: 15px;">[NAMAs  KEGIATAN]</h2>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">[NAMA ORGANISASI/UNIT]</h3>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 5px;">[TAHUN]</h3>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold; margin-top: 20px;">FAKULTAS [NAMA FAKULTAS]</h3>
@@ -866,7 +866,6 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
         buttonSave.style.marginLeft = '10px';
         buttonSave.addEventListener('click', async () => {
             const content = editor.getData();
-            const title = document.querySelector('h2') ? document.querySelector('h2').textContent.trim() : 'Notulen Rapat';
             try {
                 // Show loading indicator
                 buttonSave.textContent = 'Saving...';
@@ -877,37 +876,37 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                 const programKerjaIndex = urlParams.indexOf('program-kerja');
 
                 // Extract parameters matching the database structure
-                const programKerjaId = urlParams[programKerjaIndex+1]; // Matches database column name
-                const ormawaKode = urlParams[1]; // Matches database column name
-                const tipe = urlParams[4] || 'proposal'; // Default value for document type
+                const programKerjaId = urlParams[programKerjaIndex+1];
+                const ormawaKode = urlParams[1];
+                const tipe = urlParams[4] || 'proposal';
 
-                // Set status based on document state or parameter
-                const status = 'draft';
+                // Check if we're editing an existing document
+                const dokumenId = urlParams.indexOf('create') > -1 && urlParams[urlParams.indexOf('create')+1] ?
+                    urlParams[urlParams.indexOf('create')+1] : null;
 
                 // Prepare data structure that matches database fields
                 const postData = {
-                    isi_dokumen: content, // The actual document content
+                    isi_dokumen: content,
                     program_kerja_id: programKerjaId,
                     ormawas_kode: ormawaKode,
                     tipe: tipe,
-                    status: status,
+                    status: 'draft',
                     catatan: '',
                     revisi: 0,
                     step: 1,
-                    peninjau_id: 0
+                    peninjau_id: 0,
+                    id: dokumenId // Include the ID if we're updating
                 };
 
-                // If ormawas_kode is not provided in URL params, extract it from path
-                if (!postData.ormawas_kode) {
-                    const pathSegments = window.location.pathname.split('/');
-                    postData.ormawas_kode = pathSegments[1]; // Assuming URL format is /{KODE_ORMAWA}/...
-                }
+                // Send the content to the server - use PUT for updates
+                const endpoint = dokumenId ?
+                    `/api/proposals/update/${dokumenId}` :
+                    `/api/proposals/save`;
 
-                console.log('Saving document with data:', postData);
+                const method = dokumenId ? 'PUT' : 'POST';
 
-                // Send the content to the server
-                const response = await fetch(`/api/proposals/save`, {  // Updated endpoint to match table name
-                    method: 'POST',
+                const response = await fetch(endpoint, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -920,12 +919,8 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                     alert('Dokumen berhasil disimpan!');
 
                     // Redirect to appropriate page
-                    const ormawaCode = postData.ormawas_kode;
-                    if (result.id) {
-                        window.location.href = `/${ormawaCode}/dokumen/${result.id}`;
-                    } else {
-                        window.location.href = `/${ormawaCode}/dokumen`;
-                    }
+                    // const ormawaCode = postData.ormawas_kode;
+                    window.location.href = `/${ormawaKode}/program-kerja/${programKerjaId}/proposal/create/${result.id}`;
                 } else {
                     const error = await response.json();
                     alert(`Error menyimpan dokumen: ${error.message || 'Unknown error'}`);

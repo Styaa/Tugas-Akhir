@@ -49,7 +49,8 @@ Route::prefix('auth')->group(function () {
 
 // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/api/notulens/save', [NotulenController::class, 'apiSave'])->name('api.notulens.save');
-Route::post('/api/proposals/save', [LaporanDokumenController::class, 'apiSaveProposal'])->name('save-proposal');
+Route::post('/api/proposals/save', [LaporanDokumenController::class, 'saveProposal'])->name('save-proposal');
+Route::put('/api/proposals/update/{id}', [LaporanDokumenController::class, 'updateProposal'])->name('save-proposal');
 Route::post('/lpj', [LaporanDokumenController::class, 'apiSaveLPJ']);
 
 Route::middleware(['auth'])->group(function () {
@@ -134,12 +135,10 @@ Route::middleware(['auth'])->group(function () {
                 ->name('anggota.destroy');
 
             Route::resource('rancanganAnggaranDana', RancanganAnggaranDanaController::class);
-            Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
-            Route::get('{id}/proposal/store', [ProgramKerjaController::class, 'storeProposal'])->name('proposal.store');
-            Route::post('{id}/proposal/generate', [ProgramKerjaController::class, 'generateProposal'])->name('proposal.generate');
+            Route::get('{id}/proposal/create/{dokumenId?}', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
             Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
 
-            Route::get('{id}/proposal/progress', [LaporanDokumenController::class, 'progressProposal'])->name('proposal.progress');
+            Route::get('{id}/proposal/progress/{dokumenId?}', [LaporanDokumenController::class, 'progressProposal'])->name('proposal.progress');
             Route::post('{id}/proposal/update-step', [LaporanDokumenController::class, 'updateStep'])->name('proposal.update-step');
             Route::post('{id}/proposal/upload-bukti', [LaporanDokumenController::class, 'uploadBukti'])->name('proposal.upload-bukti');
 

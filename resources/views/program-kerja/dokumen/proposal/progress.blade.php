@@ -22,7 +22,7 @@
                                 class="btn btn-outline-secondary me-2">
                                 <i class="bi bi-arrow-left me-1"></i> Kembali ke Program Kerja
                             </a>
-                            <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                            <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $dokumenId]) }}"
                                 class="btn btn-primary">
                                 <i class="bi bi-file-earmark-text me-1"></i> Buat Proposal
                             </a>
@@ -135,7 +135,7 @@
 
                                                 @if ($step['step_number'] === 1)
                                                     <div class="mb-3">
-                                                        <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                        <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $dokumenId]) }}"
                                                             class="btn btn-primary btn-sm">
                                                             <i class="bi bi-pencil-square me-1"></i> Buat Proposal
                                                         </a>
@@ -394,7 +394,6 @@
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('js/template.js') }}"></script>
     <script>
-        // Define URLs for AJAX requests
         // Define URLs for AJAX requests
         const updateStepUrl =
             "{{ route('program-kerja.proposal.update-step', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";

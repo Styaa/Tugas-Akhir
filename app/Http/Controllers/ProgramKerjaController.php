@@ -433,6 +433,13 @@ class ProgramKerjaController extends Controller
 
         // dd(Auth::user()->id);
 
+        $proposalId = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'proposal')
+            ->pluck('id')
+            ->first();
+
         // Buat array untuk view dengan compact
         $viewVariables = compact(
             'programKerja',
@@ -452,7 +459,8 @@ class ProgramKerjaController extends Controller
             'anggotaUntukDinilai',
             'allMembersRated',
             'notifikasiTerkirim',
-            'kode_ormawa'
+            'kode_ormawa',
+            'proposalId'
         );
 
         if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {
@@ -647,234 +655,33 @@ class ProgramKerjaController extends Controller
             ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
             ->get();
 
+        $dokumen = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'proposal')
+            ->first();
+
         return view('program-kerja.dokumen.proposal.create', [
             'programKerja' => $programKerja,
             'kode_ormawa' => $kode_ormawa,
             'anggotaProker' => $anggotaProker,
             'hariKegiatan' => $hariKegiatan,
+            'dokumen' => $dokumen,
         ]);
-    }
-
-    public function generateProposal(Request $request, $kode_ormawa, $id)
-    {
-        // Ambil data dari request
-        $data = $request->all();
-
-        // Buat instance PHPWord
-        $phpWord = new \PhpOffice\PhpWord\PhpWord();
-
-        // Konfigurasi dokumen (layout, margin, dll.)
-        $section = $phpWord->addSection([
-            'pageSizeW' => 11900, // Ukuran A4
-            'pageSizeH' => 16840,
-            'marginTop' => 1440, // 2 cm
-            'marginRight' => 1440,
-            'marginBottom' => 1440,
-            'marginLeft' => 1800, // 2.5 cm
-        ]);
-
-        // **COVER PAGE**
-        $section->addText(
-            strtoupper('Proposal Program Kerja'),
-            ['name' => 'Cambria', 'size' => 20, 'bold' => true],
-            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
-        );
-        $section->addTextBreak(2);
-        $section->addText(
-            strtoupper($request->program_kerja ?? 'Nama Program Kerja'),
-            ['name' => 'Cambria', 'size' => 16, 'bold' => true],
-            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
-        );
-        $section->addTextBreak(2);
-
-        // **1. LATAR BELAKANG**
-        $section->addText(
-            'I. LATAR BELAKANG',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            $data['latar_belakang'] ?? 'Belum ada data.',
-            ['name' => 'Cambria', 'size' => 12],
-            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH, 'lineHeight' => 1.5]
-        );
-
-        // **2. SASARAN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'II. SASARAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            $data['sasaran'] ?? 'Belum ada data.',
-            ['name' => 'Cambria', 'size' => 12],
-            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH]
-        );
-
-        // **3. TUJUAN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'III. TUJUAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        if (!empty($data['tujuan'])) {
-            foreach ($data['tujuan'] as $tujuan) {
-                $section->addListItem(
-                    $tujuan,
-                    0,
-                    ['name' => 'Cambria', 'size' => 12],
-                    ['listType' => \PhpOffice\PhpWord\Style\ListItem::TYPE_BULLET_FILLED]
-                );
-            }
-        } else {
-            $section->addText('Belum ada data.', ['name' => 'Cambria', 'size' => 12]);
-        }
-
-        // **4. BENTUK KEGIATAN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'IV. BENTUK KEGIATAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            $data['bentuk_kegiatan'] ?? 'Belum ada data.',
-            ['name' => 'Cambria', 'size' => 12]
-        );
-
-        // **5. HARI, TANGGAL, DAN TEMPAT**
-        $section->addTextBreak(1);
-        $section->addText(
-            'V. HARI, TANGGAL, DAN TEMPAT',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            'Hari, Tanggal: ' . ($data['hari_tanggal'] ?? 'Belum ada data.'),
-            ['name' => 'Cambria', 'size' => 12]
-        );
-        $section->addText(
-            'Tempat: ' . ($data['tempat'] ?? 'Belum ada data.'),
-            ['name' => 'Cambria', 'size' => 12]
-        );
-
-        // **6. RUNDOWN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'VI. RUNDOWN KEGIATAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        if (!empty($data['rundown'])) {
-            foreach ($data['rundown'] as $tanggal => $rundownItems) {
-                $section->addText(
-                    \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y'),
-                    ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-                );
-                $table = $section->addTable();
-                foreach ($rundownItems['waktu'] as $index => $waktu) {
-                    $table->addRow();
-                    $table->addCell(2000)->addText($waktu);
-                    $table->addCell(8000)->addText($rundownItems['kegiatan'][$index] ?? '');
-                }
-            }
-        } else {
-            $section->addText('Belum ada data.', ['name' => 'Cambria', 'size' => 12]);
-        }
-
-        // **7. SUSUNAN PANITIA PELAKSANA**
-        $section->addTextBreak(1);
-        $section->addText(
-            'VII. SUSUNAN PANITIA PELAKSANA',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        if (!empty($data['panitia'])) {
-            $table = $section->addTable();
-            $table->addRow();
-            $table->addCell(2000)->addText('Nama', ['bold' => true]);
-            $table->addCell(2000)->addText('NRP', ['bold' => true]);
-            $table->addCell(2000)->addText('Jabatan', ['bold' => true]);
-            foreach ($data['panitia'] as $panitia) {
-                $table->addRow();
-                $table->addCell(2000)->addText($panitia['nama']);
-                $table->addCell(2000)->addText($panitia['nrp']);
-                $table->addCell(2000)->addText($panitia['jabatan']);
-            }
-        }
-
-        // **8. INDIKATOR KEBERHASILAN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'VIII. INDIKATOR KEBERHASILAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            $data['indikator_keberhasilan'] ?? 'Belum ada data.',
-            ['name' => 'Cambria', 'size' => 12]
-        );
-
-        // **9. ANGGARAN DANA**
-        $section->addTextBreak(1);
-        $section->addText(
-            'IX. ANGGARAN DANA',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        if (!empty($data['anggaran']['komponen'])) {
-            $table = $section->addTable();
-            $table->addRow();
-            $table->addCell(2000)->addText('Komponen Biaya', ['bold' => true]);
-            $table->addCell(1000)->addText('Jumlah', ['bold' => true]);
-            $table->addCell(1000)->addText('Satuan', ['bold' => true]);
-            $table->addCell(2000)->addText('Harga', ['bold' => true]);
-            $table->addCell(2000)->addText('Total', ['bold' => true]);
-            foreach ($data['anggaran']['komponen'] as $index => $komponen) {
-                $jumlah = $data['anggaran']['jumlah'][$index];
-                $harga = $data['anggaran']['harga'][$index];
-                $total = $jumlah * $harga;
-                $table->addRow();
-                $table->addCell(2000)->addText($komponen);
-                $table->addCell(1000)->addText($jumlah);
-                $table->addCell(1000)->addText($data['anggaran']['satuan'][$index] ?? '-');
-                $table->addCell(2000)->addText(number_format($harga, 0, ',', '.'));
-                $table->addCell(2000)->addText(number_format($total, 0, ',', '.'));
-            }
-        }
-
-        // **10. PENUTUP**
-        $section->addTextBreak(1);
-        $section->addText(
-            'X. PENUTUP',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        $section->addText(
-            $data['penutup'] ?? 'Belum ada data.',
-            ['name' => 'Cambria', 'size' => 12]
-        );
-
-        // **LEMBAR PENGESAHAN**
-        $section->addTextBreak(1);
-        $section->addText(
-            'LEMBAR PENGESAHAN',
-            ['name' => 'Cambria', 'size' => 12, 'bold' => true]
-        );
-        if (!empty($data['pengesahan'])) {
-            foreach ($data['pengesahan'] as $pengesahan) {
-                $section->addText($pengesahan, ['name' => 'Cambria', 'size' => 12]);
-            }
-        }
-
-        // **SIMPAN FILE**
-        $fileName = 'Proposal_' . $kode_ormawa . '.docx';
-        $tempFile = storage_path($fileName);
-
-        $writer = IOFactory::createWriter($phpWord, 'Word2007');
-        $writer->save($tempFile);
-
-        return response()->download($tempFile)->deleteFileAfterSend(true);
     }
 
     public function progressProposal($kode_ormawa, $id)
     {
         $programKerja = ProgramKerja::findOrFail($id);
         $user = Auth::user();
+        $dokumenId = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'proposal')
+            ->pluck('id')
+            ->first();
 
-        return view('program-kerja.dokumen.proposal.progress', compact('programKerja', 'user'));
+        return view('program-kerja.dokumen.proposal.progress', compact('programKerja', 'user', 'dokumenId'));
     }
 
     public function selesaikan(Request $request, $kode_ormawa, $id)
