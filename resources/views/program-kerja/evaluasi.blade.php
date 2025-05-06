@@ -93,16 +93,19 @@
                             <h6 class="fw-bold mb-2">Bobot Kriteria Penilaian:</h6>
                             <div class="row">
                                 <div class="col-md-3">
-                                    <strong>Kehadiran:</strong> 25%
+                                    <strong>Kehadiran:</strong> 20%
                                 </div>
                                 <div class="col-md-3">
-                                    <strong>Kontribusi:</strong> 30%
+                                    <strong>Kontribusi:</strong> 25%
                                 </div>
                                 <div class="col-md-3">
-                                    <strong>Tanggung Jawab:</strong> 25%
+                                    <strong>Tanggung Jawab:</strong> 20%
                                 </div>
                                 <div class="col-md-3">
                                     <strong>Kualitas:</strong> 20%
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Penilaian Atasan:</strong> 15%
                                 </div>
                             </div>
                         </div>
@@ -121,11 +124,11 @@
                                                 <th class="py-3" width="15%">Nama Anggota</th>
                                                 <th class="py-3" width="10%">Divisi</th>
                                                 <th class="py-3" width="10%">Jabatan</th>
-                                                <th class="py-3" width="10%" class="text-center">Kehadiran (25%)</th>
-                                                <th class="py-3" width="10%" class="text-center">Kontribusi (30%)</th>
-                                                <th class="py-3" width="10%" class="text-center">Tanggung Jawab (25%)</th>
+                                                <th class="py-3" width="10%" class="text-center">Kehadiran (20%)</th>
+                                                <th class="py-3" width="10%" class="text-center">Kontribusi (25%)</th>
+                                                <th class="py-3" width="10%" class="text-center">Tanggung Jawab (20%)</th>
                                                 <th class="py-3" width="10%" class="text-center">Kualitas (20%)</th>
-                                                <th class="py-3" width="10%" class="text-center">Penilaian Atasan</th>
+                                                <th class="py-3" width="10%" class="text-center">Penilaian Atasan (15%)</th>
                                                 <th class="py-3" width="10%" class="text-center">Nilai Akhir</th>
                                             </tr>
                                         </thead>

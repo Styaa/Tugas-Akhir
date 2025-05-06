@@ -868,7 +868,7 @@
                             <div class="modal-body">
                                 <form
                                     action="{{ route('program-kerja.pilih-anggota', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'periode' => $periode]) }}"
-                                    method="post">
+                                    method="post" id="addMemberForm">
                                     @csrf
                                     {{-- <input type="hidden" name="anggota" value="">
                                     <input type="hidden" name="divisi" value="">
@@ -1012,7 +1012,7 @@
                 return new bootstrap.Dropdown(dropdownToggleEl)
             });
 
-            const form = document.querySelector('form');
+            const form = document.getElementById('addMemberForm');
             if (form) {
                 // Add submit event listener for client-side validation
                 form.addEventListener('submit', function(event) {
