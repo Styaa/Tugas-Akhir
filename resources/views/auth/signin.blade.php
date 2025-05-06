@@ -23,7 +23,7 @@
                                 </svg>
                             </div>
                             <div class="mb-5">
-                                <h2 class="color-900 text-center">Kelola Ormawa</h2>
+                                <h2 class="color-900 text-center">Kelola Ormawa - Tugas Akhir Satya</h2>
                             </div>
                             <!-- Image block -->
                             <div class="">
