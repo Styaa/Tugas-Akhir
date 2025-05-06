@@ -579,6 +579,27 @@ class ProgramKerjaController extends Controller
 
     public function pilihAnggota(Request $request, $kode_ormawa, $prokerId, $periode)
     {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'anggotas' => 'required|array',
+            'anggotas.*' => 'required|integer',
+            'divisi' => 'required|integer',
+            'jabatan' => 'required|integer',
+        ], [
+            'anggotas.required' => 'Anggota harus dipilih',
+            'divisi.required' => 'Divisi harus dipilih',
+            'jabatan.required' => 'Jabatan harus dipilih',
+        ]);
+
+        // Jika validasi gagal
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('validation_errors', $validator->errors()->all());
+        }
+
+        // Jika validasi berhasil, buat data struktur proker
         foreach ($request->anggotas as $anggota) {
             StrukturProker::create([
                 'users_id' => $anggota,
