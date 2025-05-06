@@ -734,11 +734,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                     alert('Notulen berhasil disimpan!');
 
                     // Redirect ke halaman yang sesuai
-                    if (result.id) {
-                        window.location.href = `/${ormawaCode}/notulens/${result.id}`;
-                    } else {
-                        window.location.href = `/${ormawaCode}/notulens`;
-                    }
+                    window.location.href = `/${ormawaCode}/rapat/notulen/${result.id}`;
                 } else {
                     const error = await response.json();
                     alert(`Error menyimpan notulen: ${error.message || 'Unknown error'}`);
