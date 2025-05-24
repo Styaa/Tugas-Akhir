@@ -771,7 +771,6 @@ class ProgramKerjaController extends Controller
                 'penilaian_selesai' => true,
             ]);
 
-            // Ambil data penilaian dari struktur_prokers
             $anggotaProgram = StrukturProker::whereIn('divisi_program_kerjas_id', function ($query) use ($id) {
                 $query->select('id')
                     ->from('divisi_program_kerjas')
@@ -831,42 +830,106 @@ class ProgramKerjaController extends Controller
         }
 
         // Get evaluations from the evaluasis table
-        $anggotaEvaluasi = DB::table('users as u')
-            ->select([
-                'u.id as user_id',
+        $anggotaEvaluasi = DB::table('evaluasis as e')
+            ->joinSub(
+                DB::table('evaluasis as e')
+                    ->select(
+                        DB::raw('MAX(e.updated_at) as updated_at'),
+                        'e.user_id',
+                        'e.program_kerjas_id'
+                    )
+                    ->where('e.program_kerjas_id', $id)
+                    ->groupBy('e.user_id', 'e.program_kerjas_id'),
+                't1',
+                function ($join) {
+                    $join->on('e.user_id', '=', 't1.user_id')
+                        ->on('e.program_kerjas_id', '=', 't1.program_kerjas_id')
+                        ->on('e.updated_at', '=', 't1.updated_at');
+                }
+            )
+            // Add joins for user and program names
+            ->leftJoin('users as u', 'e.user_id', '=', 'u.id')
+            ->leftJoin('program_kerjas as p', 'e.program_kerjas_id', '=', 'p.id')
+            ->select(
+                'e.*',
                 'u.name as nama_anggota',
-                'dp.nama as nama_divisi',
-                'j.nama as jabatan',
                 'p.nama as nama_program_kerja',
-                'e.kehadiran',
-                'e.kontribusi',
-                'e.tanggung_jawab',
-                'e.kualitas',
-                'e.penilaian_atasan',
-                'e.kehadiran_normalized',
-                'e.kontribusi_normalized',
-                'e.tanggung_jawab_normalized',
-                'e.kualitas_normalized',
-                'e.score as nilai_akhir',
-                'sp.keterangan_nilai'
-            ])
-            ->join('evaluasis as e', 'e.user_id', '=', 'u.id')
+                'e.score as nilai_akhir'
+            )
+            ->orderBy('e.score', 'desc')
+            ->get();
+
+        // Method 1: Get divisi and jabatan mapping for all users in this program
+        $userIds = $anggotaEvaluasi->pluck('user_id')->unique()->toArray();
+        $programId = $id; // or use $anggotaEvaluasi->first()->program_kerjas_id
+
+        // Query to get divisi mapping
+        $divisiMapping = DB::table('users as u')
             ->join('struktur_prokers as sp', 'sp.users_id', '=', 'u.id')
             ->join('divisi_program_kerjas as dpk', 'sp.divisi_program_kerjas_id', '=', 'dpk.id')
             ->join('divisi_pelaksanas as dp', 'dpk.divisi_pelaksanas_id', '=', 'dp.id')
+            ->where('dpk.program_kerjas_id', $programId)
+            ->whereIn('u.id', $userIds)
+            ->select('u.id as user_id', 'dp.nama as nama_divisi')
+            ->pluck('nama_divisi', 'user_id');
+
+        // Query to get jabatan mapping
+        $jabatanMapping = DB::table('users as u')
+            ->join('struktur_prokers as sp', 'sp.users_id', '=', 'u.id')
+            ->join('divisi_program_kerjas as dpk', 'sp.divisi_program_kerjas_id', '=', 'dpk.id')
             ->join('jabatans as j', 'sp.jabatans_id', '=', 'j.id')
-            ->join('program_kerjas as p', 'dpk.program_kerjas_id', '=', 'p.id')
-            ->where('e.program_kerjas_id', $id)
-            ->where('dpk.program_kerjas_id', $id)
-            ->groupBy([
-                'u.id', 'u.name', 'dp.nama', 'j.nama', 'e.kehadiran', 'e.kontribusi',
-                'e.tanggung_jawab', 'e.kualitas', 'e.penilaian_atasan',
-                'e.kehadiran_normalized', 'e.kontribusi_normalized',
-                'e.tanggung_jawab_normalized', 'e.kualitas_normalized',
-                'sp.keterangan_nilai', 'p.nama', 'e.score'
-            ])
-            ->orderBy('nilai_akhir', 'desc')
-            ->get();
+            ->where('dpk.program_kerjas_id', $programId)
+            ->whereIn('u.id', $userIds)
+            ->select('u.id as user_id', 'j.nama as jabatan')
+            ->pluck('jabatan', 'user_id');
+
+        // Apply the mappings to your evaluasi data
+        $anggotaEvaluasi = $anggotaEvaluasi->map(function ($item) use ($divisiMapping, $jabatanMapping) {
+            $item->nama_divisi = $divisiMapping[$item->user_id] ?? null;
+            $item->jabatan = $jabatanMapping[$item->user_id] ?? null;
+            return $item;
+        });
+
+        // dd($anggotaEvaluasi);
+
+        // $anggotaEvaluasi = DB::table('users as u')
+        //     ->select([
+        //         'u.id as user_id',
+        //         'u.name as nama_anggota',
+        //         'dp.nama as nama_divisi',
+        //         'j.nama as jabatan',
+        //         'p.nama as nama_program_kerja',
+        //         'e.kehadiran',
+        //         'e.kontribusi',
+        //         'e.tanggung_jawab',
+        //         'e.kualitas',
+        //         'e.penilaian_atasan',
+        //         'e.kehadiran_normalized',
+        //         'e.kontribusi_normalized',
+        //         'e.tanggung_jawab_normalized',
+        //         'e.kualitas_normalized',
+        //         'e.score as nilai_akhir',
+        //         'sp.keterangan_nilai'
+        //     ])
+        //     ->join('evaluasis as e', 'e.user_id', '=', 'u.id')
+        //     ->join('struktur_prokers as sp', 'sp.users_id', '=', 'u.id')
+        //     ->join('divisi_program_kerjas as dpk', 'sp.divisi_program_kerjas_id', '=', 'dpk.id')
+        //     ->join('divisi_pelaksanas as dp', 'dpk.divisi_pelaksanas_id', '=', 'dp.id')
+        //     ->join('jabatans as j', 'sp.jabatans_id', '=', 'j.id')
+        //     ->join('program_kerjas as p', 'dpk.program_kerjas_id', '=', 'p.id')
+        //     ->where('e.program_kerjas_id', $id)
+        //     ->where('dpk.program_kerjas_id', $id)
+        //     // ->groupBy([
+        //     //     'u.id', 'u.name', 'dp.nama', 'j.nama', 'e.kehadiran', 'e.kontribusi',
+        //     //     'e.tanggung_jawab', 'e.kualitas', 'e.penilaian_atasan',
+        //     //     'e.kehadiran_normalized', 'e.kontribusi_normalized',
+        //     //     'e.tanggung_jawab_normalized', 'e.kualitas_normalized',
+        //     //     'sp.keterangan_nilai', 'p.nama', 'e.score'
+        //     // ])
+        //     ->orderBy('nilai_akhir', 'desc')
+        //     ->orderBy('e.updated_at', 'desc')
+        //     ->distinct('u.id')
+        //     ->get();
 
         // dd($anggotaEvaluasi);
 

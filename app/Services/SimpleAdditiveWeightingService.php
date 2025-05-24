@@ -73,11 +73,15 @@ class SimpleAdditiveWeightingService
                 ($normalisasiKualitas[$user->id] * $this->bobotKualitas) +
                 ($normalisasiPenilaianAtasan[$user->id] * $this->bobotPenilaianAtasan);
 
-            // Simpan ke database
+            // Only use unique identifiers for matching
             Evaluasi::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'program_kerjas_id' => $proker_id,
+                    'periode' => date('F'),
+                    'tahun' => date('Y')
+                ],
+                [
                     'kehadiran' => $nilaiKehadiran[$user->id],
                     'kontribusi' => $nilaiKontribusi[$user->id],
                     'tanggung_jawab' => $nilaiTanggungJawab[$user->id],
@@ -88,13 +92,11 @@ class SimpleAdditiveWeightingService
                     'tanggung_jawab_normalized' => $normalisasiTanggungJawab[$user->id],
                     'kualitas_normalized' => $normalisasiKualitas[$user->id],
                     'penilaian_atasan_normalized' => $normalisasiPenilaianAtasan[$user->id],
-                    'score' => $skorAkhir,
-                    'periode' => date('F'), // Bulan saat ini
-                    'tahun' => date('Y')   // Tahun saat ini
+                    'score' => $skorAkhir
                 ]
             );
         }
-
+        // exit();
         return true;
     }
 
