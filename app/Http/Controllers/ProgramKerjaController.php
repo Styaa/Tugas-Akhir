@@ -440,6 +440,13 @@ class ProgramKerjaController extends Controller
             ->pluck('id')
             ->first();
 
+        $lpjId = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'lpj')
+            ->pluck('id')
+            ->first();
+
         // Buat array untuk view dengan compact
         $viewVariables = compact(
             'programKerja',
@@ -460,7 +467,8 @@ class ProgramKerjaController extends Controller
             'allMembersRated',
             'notifikasiTerkirim',
             'kode_ormawa',
-            'proposalId'
+            'proposalId',
+            'lpjId'
         );
 
         if ($programKerja->tanggal_selesai && $programKerja->tanggal_selesai != $programKerja->tanggal_mulai) {
@@ -662,6 +670,46 @@ class ProgramKerjaController extends Controller
             ->first();
 
         return view('program-kerja.dokumen.proposal.create', [
+            'programKerja' => $programKerja,
+            'kode_ormawa' => $kode_ormawa,
+            'anggotaProker' => $anggotaProker,
+            'hariKegiatan' => $hariKegiatan,
+            'dokumen' => $dokumen,
+        ]);
+    }
+
+    public function createLPJ($kode_ormawa, $id)
+    {
+        $programKerja = ProgramKerja::findOrFail($id);
+
+        // Hitung jumlah hari dari tanggal mulai hingga tanggal selesai
+        $tanggalMulai = Carbon::parse($programKerja->tanggal_mulai);
+        $tanggalSelesai = Carbon::parse($programKerja->tanggal_selesai);
+
+        $hariKegiatan = [];
+        while ($tanggalMulai <= $tanggalSelesai) {
+            $hariKegiatan[] = $tanggalMulai->format('Y-m-d'); // Format tanggal
+            $tanggalMulai->addDay(); // Increment hari
+        }
+
+        $anggotaProker = DB::table('struktur_prokers')
+            ->join('users', 'struktur_prokers.users_id', '=', 'users.id')
+            ->join('divisi_program_kerjas', 'struktur_prokers.divisi_program_kerjas_id', '=', 'divisi_program_kerjas.id')
+            ->join('divisi_pelaksanas', 'divisi_program_kerjas.divisi_pelaksanas_id', '=', 'divisi_pelaksanas.id')
+            ->join('jabatans', 'struktur_prokers.jabatans_id', '=', 'jabatans.id')
+            ->where('divisi_program_kerjas.program_kerjas_id', $id)
+            ->select('divisi_pelaksanas.nama AS nama_divisi', 'users.name AS nama_user', 'jabatans.nama AS nama_jabatan', 'users.id AS id')
+            ->orderBy('divisi_pelaksanas.nama')
+            ->orderByRaw("FIELD(jabatans.nama, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator', 'Wakil Koordinator', 'Anggota')")
+            ->get();
+
+        $dokumen = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'laporan_pertanggungjawaban')
+            ->first();
+
+        return view('program-kerja.dokumen.lpj.create', [
             'programKerja' => $programKerja,
             'kode_ormawa' => $kode_ormawa,
             'anggotaProker' => $anggotaProker,

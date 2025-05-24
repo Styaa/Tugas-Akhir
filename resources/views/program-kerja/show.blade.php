@@ -754,7 +754,7 @@
                                                                 <p class="text-muted small mb-0">Dokumen evaluasi dan
                                                                     laporan kegiatan</p>
                                                             </div>
-                                                            <a href="{{ route('program-kerja.lpj.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                                                            <a href="{{ route('program-kerja.lpj.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $lpjId]) }}"
                                                                 class="btn btn-outline-primary btn-sm">
                                                                 <i class="icofont-edit me-1"></i>Edit
                                                             </a>

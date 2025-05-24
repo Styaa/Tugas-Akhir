@@ -416,12 +416,12 @@ const editorConfig = {
             'resizeImage'
         ]
     },
-    initialData: proposalContent || `
+    initialData: lpjContent || `
         <div class="proposal-template">
             <!-- Header Section -->
             <div class="proposal-header" style="text-align:center;">
-                <h1 style="text-align:center; font-family: 'Cambria', serif; font-size: 16pt; font-weight: bold; margin-bottom: 5px;">PROPOSAL</h1>
-                <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-style: italic; margin-top: 5px; margin-bottom: 15px;">[NAMAs  KEGIATAN]</h2>
+                <h1 style="text-align:center; font-family: 'Cambria', serif; font-size: 16pt; font-weight: bold; margin-bottom: 5px;">LAPORAN PERTANGGUNGJAWABAN</h1>
+                <h2 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-style: italic; margin-top: 5px; margin-bottom: 15px;">[NAMA KEGIATAN]</h2>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">[NAMA ORGANISASI/UNIT]</h3>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 14pt; font-weight: bold; margin-top: 5px;">[TAHUN]</h3>
                 <h3 style="text-align:center; font-family: 'Cambria', serif; font-size: 12pt; font-weight: bold; margin-top: 20px;">FAKULTAS [NAMA FAKULTAS]</h3>
@@ -878,7 +878,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
                 // Extract parameters matching the database structure
                 const programKerjaId = urlParams[programKerjaIndex+1];
                 const ormawaKode = urlParams[1];
-                const tipe = 'proposal';
+                const tipe = 'laporan_pertanggungjawaban';
 
                 // Check if we're editing an existing document
                 const urlParams2 = new URLSearchParams(window.location.search);
@@ -900,8 +900,8 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
 
                 // Send the content to the server - use PUT for updates
                 const endpoint = dokumenId ?
-                    `/api/proposals/update/${dokumenId}` :
-                    `/api/proposals/save`;
+                    `/api/lpj/update/${dokumenId}` :
+                    `/api/lpj/save`;
 
                 const method = dokumenId ? 'PUT' : 'POST';
 
@@ -920,7 +920,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
 
                     // Redirect to appropriate page
                     // const ormawaCode = postData.ormawas_kode;
-                    window.location.href = `/${ormawaKode}/program-kerja/${programKerjaId}/proposal/create?dokumenId=${result.id}`;
+                    window.location.href = `/${ormawaKode}/program-kerja/${programKerjaId}/lpj/create?dokumenId=${result.id}`;
                 } else {
                     const error = await response.json();
                     alert(`Error menyimpan dokumen: ${error.message || 'Unknown error'}`);
@@ -955,7 +955,7 @@ DecoupledEditor.create(document.querySelector('#editor'), editorConfig)
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Cetak Proposal Program Kerja</title>
+            <title>Cetak Laporan Pertanggungjawaban Program Kerja</title>
             <style>
                 /* Base styling */
                 @media print {

@@ -10,7 +10,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center p-4">
                         <h3 class="fw-bold">
-                            Panduan Pengurusan Proposal dengan
+                            Panduan Pengurusan Laporan Pertanggungjawaban dengan
                             <span
                                 class="text-primary">{{ $isDanaKemahasiswaan ? 'Dana Kemahasiswaan' : 'Dana Jurusan' }}</span>
                         </h3>
@@ -22,9 +22,9 @@
                                 class="btn btn-outline-secondary me-2">
                                 <i class="bi bi-arrow-left me-1"></i> Kembali ke Program Kerja
                             </a>
-                            <a href="{{ route('program-kerja.proposal.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $dokumenId]) }}"
+                            <a href="{{ route('program-kerja.lpj.create', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id, 'dokumenId' => $dokumenId]) }}"
                                 class="btn btn-primary">
-                                <i class="bi bi-file-earmark-text me-1"></i> Buat Proposal
+                                <i class="bi bi-file-earmark-text me-1"></i> Buat LPJ
                             </a>
                         </div>
                     </div>
@@ -678,11 +678,11 @@
     <script>
         // Define URLs for AJAX requests
         const updateStepUrl =
-            "{{ route('program-kerja.proposal.update-step', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
+            "{{ route('program-kerja.lpj.update-step', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
         const uploadBuktiUrl =
-            "{{ route('program-kerja.proposal.upload-bukti', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
+            "{{ route('program-kerja.lpj.upload-bukti', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
         const getProgressUrl =
-            "{{ route('program-kerja.proposal.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
+            "{{ route('program-kerja.lpj.progress', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}";
         const csrfToken = "{{ csrf_token() }}";
 
         document.addEventListener('DOMContentLoaded', function() {

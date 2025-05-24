@@ -43,6 +43,8 @@ class AuthController extends Controller
             ]);
         }
 
+        // dd(Hash::make('password'));
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 

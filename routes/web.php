@@ -51,7 +51,9 @@ Route::prefix('auth')->group(function () {
 Route::post('/api/notulens/save', [NotulenController::class, 'apiSave'])->name('api.notulens.save');
 Route::post('/api/proposals/save', [LaporanDokumenController::class, 'saveProposal'])->name('save-proposal');
 Route::put('/api/proposals/update/{id}', [LaporanDokumenController::class, 'updateProposal'])->name('save-proposal');
-Route::post('/lpj', [LaporanDokumenController::class, 'apiSaveLPJ']);
+
+Route::post('/api/lpj/save', [LaporanDokumenController::class, 'saveLPJ'])->name('save-lpj');
+Route::put('/api/lpj/update/{id}', [LaporanDokumenController::class, 'updateLPJ'])->name('save-lpj');
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard Route
@@ -135,12 +137,15 @@ Route::middleware(['auth'])->group(function () {
                 ->name('anggota.destroy');
 
             Route::resource('rancanganAnggaranDana', RancanganAnggaranDanaController::class);
-            Route::get('{id}/proposal/create/{dokumenId?}', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
-            Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
-
+            Route::get('{id}/proposal/create', [ProgramKerjaController::class, 'createProposal'])->name('proposal.create');
             Route::get('{id}/proposal/progress/{dokumenId?}', [LaporanDokumenController::class, 'progressProposal'])->name('proposal.progress');
             Route::post('{id}/proposal/update-step', [LaporanDokumenController::class, 'updateStep'])->name('proposal.update-step');
             Route::post('{id}/proposal/upload-bukti', [LaporanDokumenController::class, 'uploadBukti'])->name('proposal.upload-bukti');
+
+            Route::get('{id}/lpj/create', [ProgramKerjaController::class, 'createLPJ'])->name('lpj.create');
+            Route::get('{id}/lpj/progress/{dokumenId?}', [LaporanDokumenController::class, 'progressLPJ'])->name('lpj.progress');
+            Route::post('{id}/lpj/update-step', [LaporanDokumenController::class, 'updateStepLPJ'])->name('lpj.update-step');
+            Route::post('{id}/lpj/upload-bukti', [LaporanDokumenController::class, 'uploadBuktiLPJ'])->name('lpj.upload-bukti');
 
             Route::prefix('{id}/files')->name('files.')->group(function () {
                 Route::get('/upload', [DocumentController::class, 'showUploadForm'])->name('upload');

@@ -366,24 +366,215 @@ class LaporanDokumenController extends Controller
         }
     }
 
+    public function progressLPJ($kode_ormawa, $id)
+    {
+        // Ambil data program kerja
+        $programKerja = ProgramKerja::findOrFail($id);
+        $user = Auth::user();
+
+        // Cek apakah program kerja ini menggunakan dana kemahasiswaan
+        $sumberDana = json_decode($programKerja->anggaran_dana);
+        $isDanaKemahasiswaan = in_array('Dana Kemahasiswaan', $sumberDana);
+
+        // Definisikan langkah-langkah berdasarkan jenis dana
+        // Daripada mengambil dari database, kita definisikan langkah-langkah secara statis
+        $steps = $this->getAlurDanaStepsLPJ($isDanaKemahasiswaan);
+
+        // Ambil progress yang sudah disimpan dari tabel LaporanDokumen
+        $laporanDokumens = LaporanDokumen::where('program_kerja_id', $id)
+            ->get();
+
+        // Inisialisasi progress dari laporan dokumen
+        $progress = $this->mapProgressFromLaporanDokumenLPJ($laporanDokumens, $steps);
+        // dd($progress);
+        // Hitung statistik progress
+        $totalSteps = count($steps);
+        $completedSteps = count(array_filter($progress, function ($item) {
+            return $item['status'] === 'selesai';
+        }));
+        $inProgressSteps = count(array_filter($progress, function ($item) {
+            return $item['status'] === 'sedang_dikerjakan';
+        }));
+        $progressPercentage = $totalSteps > 0 ? ($completedSteps / $totalSteps) * 100 : 0;
+
+        $dokumenId = DB::table('laporan_dokumens')
+            ->where('program_kerja_id', $id)
+            ->where('ormawas_kode', $kode_ormawa)
+            ->where('tipe', 'laporan_pertanggungjawaban')
+            ->pluck('id')
+            ->first();
+
+        return view('program-kerja.dokumen.lpj.progress', compact(
+            'programKerja',
+            'user',
+            'steps',
+            'progress',
+            'isDanaKemahasiswaan',
+            'totalSteps',
+            'completedSteps',
+            'inProgressSteps',
+            'progressPercentage',
+            'kode_ormawa',
+            'dokumenId'
+        ));
+    }
+
+    /**
+     * Mendapatkan definisi langkah-langkah alur dana
+     *
+     * @param bool $isDanaKemahasiswaan
+     * @return array
+     */
+    private function getAlurDanaStepsLPJ($isDanaKemahasiswaan = true)
+    {
+        if ($isDanaKemahasiswaan) {
+            return [
+                [
+                    'step_number' => 1,
+                    'nama' => 'Membuat Laporan Pertanggungjawaban',
+                    'deskripsi' => 'Buat proposal kegiatan yang akan diajukan untuk mendapatkan dana.',
+                    'icon' => 'bi-pencil-square',
+                    'requires_upload' => false
+                ]
+            ];
+        } else {
+            // Definisi langkah-langkah untuk dana jurusan
+            return [
+                // Definisikan langkah-langkah untuk dana jurusan
+                [
+                    'step_number' => 1,
+                    'nama' => 'Membuat Laporan Pertanggungjawaban',
+                    'deskripsi' => 'Buat proposal kegiatan yang akan diajukan untuk mendapatkan dana jurusan.',
+                    'icon' => 'bi-pencil-square',
+                    'requires_upload' => false
+                ],
+                // Tambahkan langkah-langkah lain untuk dana jurusan
+            ];
+        }
+    }
+
+    /**
+     * Memetakan progress dari LaporanDokumen ke format yang sesuai untuk view
+     *
+     * @param Collection $laporanDokumens
+     * @param array $steps
+     * @return array
+     */
+    private function mapProgressFromLaporanDokumenLPJ($laporanDokumens, $steps)
+    {
+        $progress = [];
+
+        // Inisialisasi semua langkah sebagai belum mulai
+        foreach ($steps as $step) {
+            $progress[$step['step_number']] = [
+                'step_number' => $step['step_number'],
+                'status' => 'belum_mulai',
+                'dokumen_id' => null,
+                'catatan' => null,
+                'completed_by' => null,
+                'completed_at' => null
+            ];
+        }
+
+        // Cari dokumen proposal
+        $proposal = $laporanDokumens->where('tipe', 'laporan_pertanggungjawaban')->first();
+
+        if ($proposal) {
+            $currentStep = $proposal->step;
+
+            // Semua langkah sebelum currentStep sudah selesai
+            for ($i = 1; $i < $currentStep; $i++) {
+                if (isset($progress[$i])) {
+                    $progress[$i]['status'] = 'selesai';
+                    $progress[$i]['dokumen_id'] = $proposal->id;
+                    $progress[$i]['catatan'] = $proposal->catatan_revisi;
+                    $progress[$i]['completed_by'] = $proposal->created_by;
+                    $progress[$i]['completed_at'] = $proposal->created_at;
+                }
+            }
+
+            // Langkah currentStep sedang dikerjakan
+            if (isset($progress[$currentStep])) {
+                $progress[$currentStep]['status'] = 'sedang_dikerjakan';
+                $progress[$currentStep]['dokumen_id'] = $proposal->id;
+            }
+        }
+
+        return $progress;
+    }
+
+    public function updateStepLPJ(Request $request, $kode_ormawa, $id)
+    {
+        $request->validate([
+            'step_number' => 'required|integer',
+            'status' => 'required|in:belum_mulai,sedang_dikerjakan,selesai',
+            'catatan' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $programKerja = ProgramKerja::findOrFail($id);
+            $stepNumber = $request->step_number;
+            $status = $request->status;
+
+            // Cari dokumen proposal untuk program kerja ini
+            $proposal = LaporanDokumen::where('program_kerja_id', $id)
+                ->where('tipe', 'laporan_pertanggungjawaban')
+                ->first();
+
+            if (!$proposal) {
+                // Jika tidak ada dokumen proposal, berarti belum ada langkah yang diselesaikan
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dokumen proposal tidak ditemukan'
+                ], 404);
+            }
+
+            // Update status step berdasarkan stepNumber
+            if ($status === 'selesai') {
+                // Jika langkah ini selesai, update step ke langkah berikutnya
+                $proposal->step = $stepNumber + 1;
+                $proposal->status = 'disetujui'; // Atau status yang sesuai
+                $proposal->catatan_revisi = $request->catatan;
+                $proposal->updated_by = Auth::id();
+                $proposal->save();
+            } else if ($status === 'sedang_dikerjakan') {
+                // Jika langkah ini sedang dikerjakan, update step ke langkah ini
+                $proposal->step = $stepNumber;
+                $proposal->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status langkah berhasil diperbarui',
+                'data' => $proposal
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Save new laporan pertanggungjawaban (LPJ) via API
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function apiSaveLPJ(Request $request)
+    public function SaveLPJ(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'program_kerjas_id' => 'required|exists:program_kerjas,id',
-            'type' => 'required|string|in:lpj', // Ensure type is lpj
+            'isi_dokumen' => 'required',
+            'program_kerja_id' => 'required|exists:program_kerjas,id', // Changed to match DB column
+            'tipe' => 'required|string|in:laporan_pertanggungjawaban', // Changed from 'type' to 'tipe'
             'status' => 'nullable|string|in:draft,submitted,approved,rejected',
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Optional file upload (10MB max)
-            'implementation_date' => 'nullable|date',
-            'budget_spent' => 'nullable|numeric',
-            'participant_count' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -395,65 +586,86 @@ class LaporanDokumenController extends Controller
 
         try {
             // Get program_kerja to fill in related data
-            $programKerja = ProgramKerja::findOrFail($request->program_kerjas_id);
-
-            // Check if program is completed - only completed programs should have LPJs
-            if ($programKerja->status !== 'completed' && $request->status === 'submitted') {
-                return response()->json([
-                    'message' => 'Cannot submit LPJ for a program that is not marked as completed',
-                ], 422);
-            }
+            $programKerja = ProgramKerja::findOrFail($request->program_kerja_id);
 
             $lpj = new LaporanDokumen();
-            $lpj->title = $request->title;
-            $lpj->content = $request->content;
-            $lpj->users_id = Auth::id();
-            $lpj->program_kerjas_id = $request->program_kerjas_id;
-            $lpj->ormawas_id = $programKerja->ormawa_id;
-            $lpj->type = 'lpj';
+            $lpj->isi_dokumen = $request->isi_dokumen; // Changed to match DB column
+            $lpj->created_by = Auth::id(); // Assuming users_id exists
+            $lpj->program_kerja_id = $request->program_kerja_id; // Changed to match DB column
+            $lpj->ormawas_kode = $programKerja->ormawas_kode; // Changed to match DB column
+            $lpj->tipe = $request->tipe; // Changed from 'type' to 'tipe'
             $lpj->status = $request->status ?? 'draft';
+            $lpj->tanggal_pengajuan = now();
 
-            // Set optional foreign keys if they exist in the request or program kerja
-            $lpj->divisi_ormawas_id = $request->divisi_ormawas_id ?? $programKerja->divisi_ormawas_id;
-            $lpj->divisi_program_kerjas_id = $request->divisi_program_kerjas_id ?? null;
+            // Set other database columns with defaults
+            $lpj->step = $request->step ?? 1;
 
-            // Add LPJ specific data
-            if ($request->has('implementation_date')) {
-                $lpj->implementation_date = $request->implementation_date;
-            }
-
-            if ($request->has('budget_spent')) {
-                $lpj->budget_spent = $request->budget_spent;
-            }
-
-            if ($request->has('participant_count')) {
-                $lpj->participant_count = $request->participant_count;
-            }
-
-            // Handle file upload if present
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = 'lpj_' . time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('lpj', $fileName, 'public');
-                $lpj->file_path = $filePath;
-            }
+            // if ($request->has('tanggal_peninjauan')) {
+            //     $proposal->tanggal_peninjauan = $request->tanggal_peninjauan;
+            // }
 
             $lpj->save();
 
             // Update program_kerja status if needed
-            if ($request->status === 'submitted' && $programKerja->status === 'completed') {
-                $programKerja->status = 'lpj_submitted';
-                $programKerja->save();
-            }
+            // if ($request->status === 'submitted' && $programKerja->status === 'planning') {
+            //     $programKerja->status = 'proposal_submitted';
+            //     $programKerja->save();
+            // }
 
             return response()->json([
-                'message' => 'Laporan Pertanggungjawaban saved successfully',
+                'message' => 'Proposal saved successfully',
                 'id' => $lpj->id,
-                'ormawa_id' => $lpj->ormawas_id
+                'ormawa_kode' => $lpj->ormawas_kode // Changed to match DB column
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to save Laporan Pertanggungjawaban',
+                'message' => 'Failed to save proposal',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UpdateLPJ(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'isi_dokumen' => 'required',
+            'program_kerja_id' => 'required|exists:program_kerjas,id',
+            'tipe' => 'required|string|in:laporan_pertanggungjawaban',
+            'status' => 'nullable|string|in:draft,submitted,approved,rejected',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Find existing proposal
+            $lpj = LaporanDokumen::findOrFail($id);
+
+            // Update fields
+            $lpj->isi_dokumen = $request->isi_dokumen;
+            $lpj->status = $request->status ?? $lpj->status;
+            $lpj->updated_by = Auth::id();
+            $lpj->step = $request->step ?? $lpj->step;
+
+            // Update other fields if needed
+            if ($request->status === 'submitted' && $lpj->tanggal_pengajuan === null) {
+                $lpj->tanggal_pengajuan = now();
+            }
+
+            $lpj->save();
+
+            return response()->json([
+                'message' => 'Proposal updated successfully',
+                'id' => $lpj->id,
+                'ormawa_kode' => $lpj->ormawas_kode
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update proposal',
                 'error' => $e->getMessage()
             ], 500);
         }
