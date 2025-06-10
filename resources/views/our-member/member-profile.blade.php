@@ -65,84 +65,390 @@
                             </div>
                         </div>
                     </div>
+                    @if ($evaluasiUsers && $evaluasiUsers->count() > 0)
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold py-3 mb-3">Evaluation Results</h6>
+                                <div class="card">
+                                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fw-bold">Performance Evaluations</h6>
+                                        <span class="badge bg-primary">{{ $evaluasiUsers->count() }} Evaluations</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Program Kerja</th>
+                                                        <th>Score & Kategori</th>
+                                                        <th>Periode</th>
+                                                        <th>Tahun</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Status</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($evaluasiUsers as $evaluasi)
+                                                        <tr>
+                                                            <td>
+                                                                <div class="d-flex flex-column">
+                                                                    <span
+                                                                        class="fw-bold small">{{ $evaluasi['program_kerja'] }}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                @php
+                                                                    $score = $evaluasi['score'];
+                                                                    $badgeClass = 'bg-secondary';
+                                                                    $kategori = 'Belum Dinilai';
+
+                                                                    if ($score >= 0.8) {
+                                                                        $badgeClass = 'bg-success';
+                                                                        $kategori = 'Sangat Baik';
+                                                                    } elseif ($score >= 0.6) {
+                                                                        $badgeClass = 'bg-primary';
+                                                                        $kategori = 'Baik';
+                                                                    } elseif ($score >= 0.4) {
+                                                                        $badgeClass = 'bg-warning';
+                                                                        $kategori = 'Cukup';
+                                                                    } elseif ($score >= 0.2) {
+                                                                        $badgeClass = 'bg-danger';
+                                                                        $kategori = 'Kurang';
+                                                                    } elseif ($score > 0) {
+                                                                        $badgeClass = 'bg-dark';
+                                                                        $kategori = 'Sangat Kurang';
+                                                                    }
+                                                                @endphp
+                                                                <span class="badge {{ $badgeClass }}">
+                                                                    {{ $score > 0 ? number_format($score * 100, 1) . '%' : 'N/A' }}
+                                                                </span>
+                                                                <br>
+                                                                <small class="text-muted">{{ $kategori }}</small>
+                                                                <br>
+                                                                <small
+                                                                    class="text-muted">({{ number_format($score, 3) }})</small>
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    class="badge bg-light text-dark">{{ $evaluasi['periode'] }}</span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="small">{{ $evaluasi['tahun'] }}</span>
+                                                            </td>
+                                                            <td>
+                                                                <small
+                                                                    class="text-muted">{{ $evaluasi['tanggal_evaluasi'] }}</small>
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    class="badge bg-success">{{ $evaluasi['status'] }}</span>
+                                                            </td>
+                                                            <td>
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-primary"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#evaluationDetail{{ $evaluasi['id'] }}">
+                                                                    <i class="icofont-eye"></i> Detail
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal untuk Detail Evaluasi -->
+                        @foreach ($evaluasiUsers as $evaluasi)
+                            <div class="modal fade" id="evaluationDetail{{ $evaluasi['id'] }}" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Detail Evaluasi - {{ $evaluasi['program_kerja'] }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row g-3">
+                                                <!-- Informasi Umum -->
+                                                <div class="col-12">
+                                                    <h6 class="fw-bold border-bottom pb-2">Informasi Umum</h6>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold">Program Kerja:</label>
+                                                    <p class="mb-2">{{ $evaluasi['program_kerja'] }}</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold">Periode:</label>
+                                                    <p class="mb-2">{{ $evaluasi['periode'] }}</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold">Tahun:</label>
+                                                    <p class="mb-2">{{ $evaluasi['tahun'] }}</p>
+                                                </div>
+
+                                                <!-- Score Total -->
+                                                <div class="col-12 mt-4">
+                                                    <h6 class="fw-bold border-bottom pb-2">Score Total</h6>
+                                                </div>
+                                                <div class="col-md-12 text-center">
+                                                    @php
+                                                        $score = $evaluasi['score'];
+                                                        $badgeClass = 'bg-secondary';
+                                                        $textClass = 'text-muted';
+                                                        $kategori = 'Belum Dinilai';
+                                                        $rentang = '-';
+
+                                                        if ($score >= 0.8) {
+                                                            $badgeClass = 'bg-success';
+                                                            $textClass = 'text-success';
+                                                            $kategori = 'Sangat Baik';
+                                                            $rentang = '0.8 - 1.0';
+                                                        } elseif ($score >= 0.6) {
+                                                            $badgeClass = 'bg-primary';
+                                                            $textClass = 'text-primary';
+                                                            $kategori = 'Baik';
+                                                            $rentang = '0.6 - 0.79';
+                                                        } elseif ($score >= 0.4) {
+                                                            $badgeClass = 'bg-warning';
+                                                            $textClass = 'text-warning';
+                                                            $kategori = 'Cukup';
+                                                            $rentang = '0.4 - 0.59';
+                                                        } elseif ($score >= 0.2) {
+                                                            $badgeClass = 'bg-danger';
+                                                            $textClass = 'text-danger';
+                                                            $kategori = 'Kurang';
+                                                            $rentang = '0.2 - 0.39';
+                                                        } elseif ($score > 0) {
+                                                            $badgeClass = 'bg-dark';
+                                                            $textClass = 'text-dark';
+                                                            $kategori = 'Sangat Kurang';
+                                                            $rentang = '0.0 - 0.19';
+                                                        }
+                                                    @endphp
+                                                    <div class="d-flex justify-content-center align-items-center mb-3">
+                                                        <div class="text-center">
+                                                            <div style="font-size: 3rem; font-weight: bold;"
+                                                                class="{{ $textClass }}">
+                                                                {{ $score > 0 ? number_format($score * 100, 1) . '%' : 'N/A' }}
+                                                            </div>
+                                                            <div class="text-muted mb-2">
+                                                                Raw Score: {{ number_format($score, 4) }}
+                                                            </div>
+                                                            <span class="badge {{ $badgeClass }} fs-6">
+                                                                {{ $kategori }}
+                                                            </span>
+                                                            <div class="mt-2">
+                                                                <small class="text-muted">
+                                                                    Rentang: {{ $rentang }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Detail Penilaian -->
+                                                <div class="col-12 mt-4">
+                                                    <h6 class="fw-bold border-bottom pb-2">Detail Penilaian</h6>
+                                                </div>
+
+                                                <!-- Raw Scores -->
+                                                <div class="col-md-6">
+                                                    <h6 class="fw-bold mb-3">Nilai Asli</h6>
+                                                    <div class="row g-2">
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kehadiran:</span>
+                                                                <span
+                                                                    class="badge bg-primary">{{ $evaluasi['kehadiran'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kontribusi:</span>
+                                                                <span
+                                                                    class="badge bg-primary">{{ $evaluasi['kontribusi'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Tanggung Jawab:</span>
+                                                                <span
+                                                                    class="badge bg-primary">{{ $evaluasi['tanggung_jawab'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kualitas:</span>
+                                                                <span
+                                                                    class="badge bg-primary">{{ $evaluasi['kualitas'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Penilaian Atasan:</span>
+                                                                <span
+                                                                    class="badge bg-primary">{{ $evaluasi['penilaian_atasan'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Normalized Scores -->
+                                                <div class="col-md-6">
+                                                    <h6 class="fw-bold mb-3">Nilai Normalized</h6>
+                                                    <div class="row g-2">
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kehadiran:</span>
+                                                                <div class="text-end">
+                                                                    <span
+                                                                        class="badge bg-success">{{ number_format($evaluasi['kehadiran_normalized'] * 100, 1) }}%</span>
+                                                                    <br><small
+                                                                        class="text-muted">({{ number_format($evaluasi['kehadiran_normalized'], 4) }})</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kontribusi:</span>
+                                                                <div class="text-end">
+                                                                    <span
+                                                                        class="badge bg-success">{{ number_format($evaluasi['kontribusi_normalized'] * 100, 1) }}%</span>
+                                                                    <br><small
+                                                                        class="text-muted">({{ number_format($evaluasi['kontribusi_normalized'], 4) }})</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Tanggung Jawab:</span>
+                                                                <div class="text-end">
+                                                                    <span
+                                                                        class="badge bg-success">{{ number_format($evaluasi['tanggung_jawab_normalized'] * 100, 1) }}%</span>
+                                                                    <br><small
+                                                                        class="text-muted">({{ number_format($evaluasi['tanggung_jawab_normalized'], 4) }})</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Kualitas:</span>
+                                                                <div class="text-end">
+                                                                    <span
+                                                                        class="badge bg-success">{{ number_format($evaluasi['kualitas_normalized'] * 100, 1) }}%</span>
+                                                                    <br><small
+                                                                        class="text-muted">({{ number_format($evaluasi['kualitas_normalized'], 4) }})</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                                                <span class="fw-bold">Penilaian Atasan:</span>
+                                                                <div class="text-end">
+                                                                    <span
+                                                                        class="badge bg-success">{{ number_format($evaluasi['penilaian_atasan_normalized'] * 100, 1) }}%</span>
+                                                                    <br><small
+                                                                        class="text-muted">({{ number_format($evaluasi['penilaian_atasan_normalized'], 4) }})</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Progress Bars untuk Visual -->
+                                                <div class="col-12 mt-4">
+                                                    <h6 class="fw-bold border-bottom pb-2">Progress Visual</h6>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold">Kehadiran</label>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar bg-primary" role="progressbar"
+                                                                    style="width: {{ $evaluasi['kehadiran_normalized'] * 100 }}%">
+                                                                    {{ number_format($evaluasi['kehadiran_normalized'] * 100, 1) }}%
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">Raw:
+                                                                {{ number_format($evaluasi['kehadiran_normalized'], 4) }}</small>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold">Kontribusi</label>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar bg-success" role="progressbar"
+                                                                    style="width: {{ $evaluasi['kontribusi_normalized'] * 100 }}%">
+                                                                    {{ number_format($evaluasi['kontribusi_normalized'] * 100, 1) }}%
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">Raw:
+                                                                {{ number_format($evaluasi['kontribusi_normalized'], 4) }}</small>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold">Tanggung Jawab</label>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar bg-warning" role="progressbar"
+                                                                    style="width: {{ $evaluasi['tanggung_jawab_normalized'] * 100 }}%">
+                                                                    {{ number_format($evaluasi['tanggung_jawab_normalized'] * 100, 1) }}%
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">Raw:
+                                                                {{ number_format($evaluasi['tanggung_jawab_normalized'], 4) }}</small>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small fw-bold">Kualitas</label>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar bg-info" role="progressbar"
+                                                                    style="width: {{ $evaluasi['kualitas_normalized'] * 100 }}%">
+                                                                    {{ number_format($evaluasi['kualitas_normalized'] * 100, 1) }}%
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">Raw:
+                                                                {{ number_format($evaluasi['kualitas_normalized'], 4) }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 mt-3">
+                                                    <label class="form-label small fw-bold">Penilaian Atasan</label>
+                                                    <div class="progress" style="height: 25px;">
+                                                        <div class="progress-bar bg-danger" role="progressbar"
+                                                            style="width: {{ $evaluasi['penilaian_atasan_normalized'] * 100 }}%">
+                                                            {{ number_format($evaluasi['penilaian_atasan_normalized'] * 100, 1) }}%
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">Raw:
+                                                        {{ number_format($evaluasi['penilaian_atasan_normalized'], 4) }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
                     <h6 class="fw-bold  py-3 mb-3">Current Work Project</h6>
                     <div class="teachercourse-list">
                         <div class="row g-3 gy-5 py-3 row-deck">
                             @foreach ($programKerjaUsers as $programKerjaUser)
-                                {{-- <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center justify-content-between mt-5">
-                                                <div class="lesson_name">
-                                                    <div class="project-block light-info-bg">
-                                                        <i class="icofont-paint"></i>
-                                                    </div>
-                                                    <span class="small text-muted project_name fw-bold"> Social Geek Made
-                                                    </span>
-                                                    <h6 class="mb-0 fw-bold  fs-6  mb-2"></h6>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-list avatar-list-stacked pt-2">
-                                                    <img class="avatar rounded-circle sm"
-                                                        src="{{ url('/') . '/images/xs/avatar2.jpg' }}" alt="">
-                                                    <img class="avatar rounded-circle sm"
-                                                        src="{{ url('/') . '/images/xs/avatar1.jpg' }}" alt="">
-                                                    <img class="avatar rounded-circle sm"
-                                                        src="{{ url('/') . '/images/xs/avatar3.jpg' }}" alt="">
-                                                    <img class="avatar rounded-circle sm"
-                                                        src="{{ url('/') . '/images/xs/avatar4.jpg' }}" alt="">
-                                                    <img class="avatar rounded-circle sm"
-                                                        src="{{ url('/') . '/images/xs/avatar8.jpg' }}" alt="">
-                                                </div>
-                                            </div>
-                                            <div class="row g-2 pt-4">
-                                                <div class="col-6">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="icofont-paper-clip"></i>
-                                                        <span class="ms-2">5 Attach</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="icofont-sand-clock"></i>
-                                                        <span class="ms-2">4 Month</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="icofont-group-students "></i>
-                                                        <span class="ms-2">5 Members</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="icofont-ui-text-chat"></i>
-                                                        <span class="ms-2">10</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="dividers-block"></div>
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <h4 class="small fw-bold mb-0">Progress</h4>
-                                                <span class="small light-danger-bg  p-1 rounded"><i
-                                                        class="icofont-ui-clock"></i> 35 Days Left</span>
-                                            </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
-                                                    aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
-                                                    style="width: 25%" aria-valuenow="30" aria-valuemin="0"
-                                                    aria-valuemax="100">
-                                                </div>
-                                                <div class="progress-bar bg-secondary ms-1" role="progressbar"
-                                                    style="width: 10%" aria-valuenow="10" aria-valuemin="0"
-                                                    aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> --}}
-
                                 <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                     <div class="card">
                                         <div class="card-body">
@@ -158,7 +464,8 @@
                                                         {{ $programKerjaUser['deskripsi_program_kerja'] }}
                                                     </h6>
                                                 </div>
-                                                <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                                <div class="btn-group" role="group"
+                                                    aria-label="Basic outlined example">
                                                     <button type="button" class="btn btn-outline-secondary edit-button"
                                                         data-bs-toggle="modal"
                                                         data-id="{{ $programKerjaUser['id_program_kerja'] }}"
@@ -222,8 +529,9 @@
                                                     Left</span>
                                             </div>
                                             <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
-                                                    aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div class="progress-bar bg-secondary" role="progressbar"
+                                                    style="width: 25%" aria-valuenow="15" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
                                                 <div class="progress-bar bg-secondary ms-1" role="progressbar"
                                                     style="width: 25%" aria-valuenow="30" aria-valuemin="0"
                                                     aria-valuemax="100">
@@ -294,59 +602,6 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-12">
-                            <div class="card">
-                                <div class="card-header py-3 d-flex justify-content-between">
-                                    <h6 class="mb-0 fw-bold ">Bank information</h6>
-                                    <button type="button" class="btn p-0" data-bs-toggle="modal"
-                                        data-bs-target="#edit2"><i class="icofont-edit text-primary fs-6"></i></button>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="row flex-wrap mb-3">
-                                            <div class="col-6">
-                                                <span class="fw-bold">Bank Name</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span class="text-muted">Kotak</span>
-                                            </div>
-                                        </li>
-                                        <li class="row flex-wrap mb-3">
-                                            <div class="col-6">
-                                                <span class="fw-bold">Account No.</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span class="text-muted">5436874596325486</span>
-                                            </div>
-                                        </li>
-                                        <li class="row flex-wrap mb-3">
-                                            <div class="col-6">
-                                                <span class="fw-bold">IFSC Code</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span class="text-muted">Kotak000021</span>
-                                            </div>
-                                        </li>
-                                        <li class="row flex-wrap mb-3">
-                                            <div class="col-6">
-                                                <span class="fw-bold">Pan No</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span class="text-muted">ACQPF6584L</span>
-                                            </div>
-                                        </li>
-                                        <li class="row flex-wrap">
-                                            <div class="col-6">
-                                                <span class="fw-bold">UPI Id</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span class="text-muted">454812kotak@upi</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div> --}}
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-12 col-md-12">
@@ -373,130 +628,10 @@
                                     </div>
                                 @endforeach
                             </div>
-                            {{-- <div class="planned_task client_task">
-                                <div class="dd" data-plugin="nestable">
-                                    <ol class="dd-list">
-                                        <li class="dd-item mb-3">
-                                            <div class="dd-handle">
-                                                <div class="task-info d-flex align-items-center justify-content-between">
-                                                    <h6
-                                                        class="light-info-bg py-1 px-2 rounded-1 d-inline-block fw-bold small-14 mb-0">
-                                                        UI/UX Design</h6>
-                                                    <div
-                                                        class="task-priority d-flex flex-column align-items-center justify-content-center">
-                                                        <div class="avatar-list avatar-list-stacked m-0">
-                                                            <img class="avatar rounded-circle small-avt sm"
-                                                                src="{{ url('/') . '/images/xs/avatar2.jpg' }}"
-                                                                alt="">
-                                                            <img class="avatar rounded-circle small-avt sm"
-                                                                src="{{ url('/') . '/images/xs/avatar1.jpg' }}"
-                                                                alt="">
-                                                        </div>
-                                                        <span class="badge bg-warning text-end mt-1">Inprogress</span>
-                                                    </div>
-                                                </div>
-                                                <p class="py-2 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing
-                                                    elit. In id
-                                                    nec scelerisque massa.</p>
-                                                <div class="tikit-info row g-3 align-items-center">
-                                                    <div class="col-sm">
-                                                    </div>
-                                                    <div class="col-sm text-end">
-                                                        <div
-                                                            class="small text-truncate light-danger-bg py-1 px-2 rounded-1 d-inline-block fw-bold small">
-                                                            Social Geek Made </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </li>
-                                        <li class="dd-item">
-                                            <div class="dd-handle">
-                                                <div class="task-info d-flex align-items-center justify-content-between">
-                                                    <h6
-                                                        class="bg-lightgreen py-1 px-2 rounded-1 d-inline-block fw-bold small-14 mb-0">
-                                                        Website Design
-                                                    </h6>
-                                                    <div
-                                                        class="task-priority d-flex flex-column align-items-center justify-content-center">
-                                                        <div class="avatar-list avatar-list-stacked m-0">
-                                                            <img class="avatar rounded-circle small-avt sm"
-                                                                src="{{ url('/') . '/images/xs/avatar7.jpg' }}"
-                                                                alt="">
-                                                        </div>
-                                                        <span class="badge bg-danger text-end mt-1">Review</span>
-                                                    </div>
-                                                </div>
-                                                <p class="py-2 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing
-                                                    elit. In id
-                                                    nec scelerisque massa.</p>
-                                                <div class="tikit-info row g-3 align-items-center">
-                                                    <div class="col-sm">
-                                                    </div>
-                                                    <div class="col-sm text-end">
-                                                        <div
-                                                            class="small text-truncate light-danger-bg py-1 px-2 rounded-1 d-inline-block fw-bold small">
-                                                            Practice to Perfect </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div> --}}
                         </div>
                     </div>
-                    {{-- <div class="card">
-                        <div class="card-header py-3">
-                            <h6 class="mb-0 fw-bold ">Experience</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="timeline-item ti-danger border-bottom ms-2">
-                                <div class="d-flex">
-                                    <span
-                                        class="avatar d-flex justify-content-center align-items-center rounded-circle light-success-bg">PW</span>
-                                    <div class="flex-fill ms-3">
-                                        <div class="mb-1"><strong>Pixel Wibes</strong></div>
-                                        <span class="d-flex text-muted">Jan 2016 - Present (5 years 2 months)</span>
-                                    </div>
-                                </div>
-                            </div> <!-- timeline item end  -->
-                            <div class="timeline-item ti-info border-bottom ms-2">
-                                <div class="d-flex">
-                                    <span
-                                        class="avatar d-flex justify-content-center align-items-center rounded-circle bg-careys-pink">CC</span>
-                                    <div class="flex-fill ms-3">
-                                        <div class="mb-1"><strong>Crest Coder</strong></div>
-                                        <span class="d-flex text-muted">Dec 2015 - 2016 (1 years)</span>
-                                    </div>
-                                </div>
-                            </div> <!-- timeline item end  -->
-                            <div class="timeline-item ti-success  ms-2">
-                                <div class="d-flex">
-                                    <span
-                                        class="avatar d-flex justify-content-center align-items-center rounded-circle bg-lavender-purple">MW</span>
-                                    <div class="flex-fill ms-3">
-                                        <div class="mb-1"><strong>Morning Wibe</strong></div>
-                                        <span class="d-flex text-muted">Nov 2014 - 2015 (1 years)</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="timeline-item ti-danger border-bottom ms-2">
-                                <div class="d-flex">
-                                    <span
-                                        class="avatar d-flex justify-content-center align-items-center rounded-circle light-success-bg">FF</span>
-                                    <div class="flex-fill ms-3">
-                                        <div class="mb-1"><strong>FebiFlue</strong></div>
-                                        <span class="d-flex text-muted">Jan 2010 - 2009 (1 years)</span>
-                                    </div>
-                                </div>
-                            </div> <!-- timeline item end  -->
-                        </div>
-                    </div> --}}
                 </div>
             </div><!-- Row End -->
-
         </div>
     </div>
 

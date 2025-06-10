@@ -324,8 +324,9 @@
                                                 </div>
                                                 <h6 class="fw-bold mb-2">{{ $programKerjaUser['nama_program_kerja'] }}
                                                 </h6>
-                                                <div class="text-muted small mb-3">
-                                                    <i class="bi bi-calendar3 me-1"></i>
+                                                <div class="text-muted small mb-3 d-flex justify-content-between">
+                                                    <div class="">
+                                                        <i class="bi bi-calendar3 me-1"></i>
                                                     @php
                                                         try {
                                                             if (
@@ -359,17 +360,22 @@
                                                             echo 'Format tanggal tidak valid';
                                                         }
                                                     @endphp
+                                                    </div>
+
+                                                    <a href="{{ route('program-kerja.show', ['kode_ormawa' => $ormawas[0]['kode'], 'id' => $programKerjaUser['id_program_kerja']]) }}"
+                                                        class="btn btn-sm btn-link p-0">Detail</a>
                                                 </div>
-                                                <div class="progress mb-2" style="height: 5px;">
+                                                {{-- <div class="progress mb-2" style="height: 5px;">
                                                     <div class="progress-bar bg-success" role="progressbar"
                                                         style="width: 65%" aria-valuenow="65" aria-valuemin="0"
-                                                        aria-valuemax="100"></div>
+                                                        aria-valuemax="100">
+                                                    </div>
                                                 </div>
                                                 <div class="d-flex justify-content-between">
                                                     <span class="small text-muted">65% selesai</span>
                                                     <a href="{{ route('program-kerja.show', ['kode_ormawa' => $ormawas[0]['kode'], 'id' => $programKerjaUser['id_program_kerja']]) }}"
                                                         class="btn btn-sm btn-link p-0">Detail</a>
-                                                </div>
+                                                </div> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -450,7 +456,8 @@
                                                             $deadline = \Carbon\Carbon::parse(
                                                                 $aktivitas->tenggat_waktu,
                                                             );
-                                                            $isOverdue = $deadline->isPast();
+                                                            $isCompleted = $aktivitas->status === 'selesai';
+                                                            $isOverdue = $deadline->isPast() && !$isCompleted;
                                                             $daysRemaining = now()->diffInDays($deadline, false);
 
                                                             // Round the days remaining
@@ -460,11 +467,18 @@
                                                             $daysRemaining = 0;
                                                         }
                                                     @endphp
-                                                    <div class="small {{ $isOverdue ? 'text-danger' : 'text-primary' }}">
-                                                        <i class="bi bi-clock me-1"></i>
-                                                        @if ($isOverdue)
+                                                    <div class="small {{ $isCompleted ? 'text-success' : ($isOverdue ? 'text-danger' : 'text-primary') }}">
+                                                        @if ($isCompleted)
+                                                            <i class="bi bi-check-circle-fill me-1"></i>
+                                                            Selesai
+                                                            @if ($aktivitas->completed_at)
+                                                                pada {{ \Carbon\Carbon::parse($aktivitas->completed_at)->format('d M Y') }}
+                                                            @endif
+                                                        @elseif ($isOverdue)
+                                                            <i class="bi bi-exclamation-triangle me-1"></i>
                                                             Terlambat {{ abs($daysRemaining) }} hari
                                                         @else
+                                                            <i class="bi bi-clock me-1"></i>
                                                             {{ $daysRemaining }} hari tersisa
                                                         @endif
                                                     </div>

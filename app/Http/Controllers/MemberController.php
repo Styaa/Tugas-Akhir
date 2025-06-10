@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AktivitasDivisiProgramKerja;
 use App\Models\DivisiProgramKerja;
+use App\Models\Evaluasi;
 use App\Models\Jabatan;
 use App\Models\ProgramKerja;
 use App\Models\RegistrasiOrmawas;
@@ -22,13 +23,13 @@ class MemberController extends Controller
     {
         $candidate = User::whereHas('registrations', function ($query) use ($kode_ormawa) {
             $query->where('ormawas_kode', $kode_ormawa)
-                  ->where('status', 'waiting');
+                ->where('status', 'waiting');
         })
-        ->with(['registrations' => function($query) use ($kode_ormawa) {
-            $query->where('ormawas_kode', $kode_ormawa)
-                  ->where('status', 'waiting');
-        }, 'registrations.divisi1', 'registrations.divisi2'])
-        ->get();
+            ->with(['registrations' => function ($query) use ($kode_ormawa) {
+                $query->where('ormawas_kode', $kode_ormawa)
+                    ->where('status', 'waiting');
+            }, 'registrations.divisi1', 'registrations.divisi2'])
+            ->get();
 
         // dd($candidate);
 
@@ -123,12 +124,8 @@ class MemberController extends Controller
 
     public function show($kode_ormawa, Request $request)
     {
-        // dd(Auth::user()->jabatan);
         $id_member = $request->id_member;
-
         $anggotaOrmawa = User::find($id_member);
-
-        // dd($request);
 
         $aktivitasUsers = AktivitasDivisiProgramKerja::with('programKerja')
             ->where('person_in_charge', $id_member)
@@ -147,7 +144,7 @@ class MemberController extends Controller
                 'tipe_program_kerja' => $programKerja->tipe,
                 'deskripsi_program_kerja' => $programKerja->deskripsi,
                 'ketua_acara' => $programKerja->ketua_acara,
-                'tanggal_mulai_program_kerja' => Carbon::parse($programKerja->tanggal_mulai)->translatedFormat('d F Y'), // Contoh: 12 Maret 2023
+                'tanggal_mulai_program_kerja' => Carbon::parse($programKerja->tanggal_mulai)->translatedFormat('d F Y'),
                 'tanggal_selesai_program_kerja' => Carbon::parse($programKerja->tanggal_selesai)->translatedFormat('d F Y'),
             ];
         });
@@ -157,11 +154,40 @@ class MemberController extends Controller
             ->where('periodes_periode', $request->periode)
             ->first();
 
-        // dd($programKerjaUsers[0]['id_program_kerja']);
-
-        // dd($divisiUser->divisiOrmawas->nama);
-
-        return view('our-member.member-profile', compact('anggotaOrmawa', 'aktivitasUsers', 'programKerjaUsers', 'divisiUser'));
+        // Ambil hasil evaluasi untuk anggota ini
+        $evaluasiUsers = Evaluasi::with(['programKerja', 'user'])
+            ->where('user_id', $id_member)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($evaluasi) {
+                return [
+                    'id' => $evaluasi->id,
+                    'program_kerja' => $evaluasi->programKerja->nama ?? 'Program Tidak Diketahui',
+                    'score' => $evaluasi->score ?? 0,
+                    'kehadiran' => $evaluasi->kehadiran ?? 0,
+                    'kontribusi' => $evaluasi->kontribusi ?? 0,
+                    'tanggung_jawab' => $evaluasi->tanggung_jawab ?? 0,
+                    'kualitas' => $evaluasi->kualitas ?? 0,
+                    'penilaian_atasan' => $evaluasi->penilaian_atasan ?? 0,
+                    'kehadiran_normalized' => $evaluasi->kehadiran_normalized ?? 0,
+                    'kontribusi_normalized' => $evaluasi->kontribusi_normalized ?? 0,
+                    'tanggung_jawab_normalized' => $evaluasi->tanggung_jawab_normalized ?? 0,
+                    'kualitas_normalized' => $evaluasi->kualitas_normalized ?? 0,
+                    'penilaian_atasan_normalized' => $evaluasi->penilaian_atasan_normalized ?? 0,
+                    'tanggal_evaluasi' => Carbon::parse($evaluasi->created_at)->translatedFormat('d F Y'),
+                    'periode' => $evaluasi->periode ?? 'Tidak diketahui',
+                    'tahun' => $evaluasi->tahun ?? date('Y'),
+                    'status' => 'Selesai' // Karena sudah ada di database
+                ];
+            });
+        // dd($evaluasiUsers);
+        return view('our-member.member-profile', compact(
+            'anggotaOrmawa',
+            'aktivitasUsers',
+            'programKerjaUsers',
+            'divisiUser',
+            'evaluasiUsers'
+        ));
     }
 
     public function manage($kode_ormawa, $prokerId)

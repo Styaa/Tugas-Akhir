@@ -27,7 +27,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-Route::controller(GoogleController::class)->group(function(){
+Route::controller(GoogleController::class)->group(function () {
     Route::get('auth/google', 'redirectToGoogle')->name('auth.google');
     Route::get('auth/google/callback', 'handleGoogleCallback');
 });
@@ -117,6 +117,9 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('{id}/destroy', [ProgramKerjaController::class, 'destroy'])->name('destroy');
             Route::post('{id}/{periode}/{userId}/pilih-ketua', [ProgramKerjaController::class, 'pilihKetua'])->name('pilih-ketua'); // Memilih ketua program kerja
             Route::post('{id}/{periode}/pilih-anggota', [ProgramKerjaController::class, 'pilihAnggota'])->name('pilih-anggota'); // Memilih ketua program kerja
+
+            Route::put('{id}/update-bobot', [ProgramKerjaController::class, 'updateBobot'])
+                ->name('update-bobot');
 
             Route::get('/{id}/evaluasi', [ProgramKerjaController::class, 'evaluasi'])->name('evaluasi');
 

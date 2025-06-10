@@ -718,7 +718,6 @@
                         }
                     }
                 });
-
             } else if (selectedType === 'Rapat Divisi Program Kerja' && selectedProgramId && selectedDivisionProkerId) {
                 console.log("Selecting participants from division:", selectedDivisionProkerId, "in program:",
                     selectedProgramId);

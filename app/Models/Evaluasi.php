@@ -45,4 +45,9 @@ class Evaluasi extends Model
     {
         return $this->belongsTo(ProgramKerja::class, 'program_kerjas_id');
     }
+
+    public function evaluator()
+    {
+        return $this->belongsTo(User::class, 'evaluated_by');
+    }
 }

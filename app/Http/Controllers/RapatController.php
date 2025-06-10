@@ -160,9 +160,9 @@ class RapatController extends Controller
             })->get();
 
             // Kirim notifikasi ke semua peserta rapat
-            foreach ($users as $user) {
-                Notification::send($user, new RapatDibuatNotification($rapat));
-            }
+            // foreach ($users as $user) {
+            //     Notification::send($user, new RapatDibuatNotification($rapat));
+            // }
 
             return response()->json(['message' => 'Rapat berhasil dibuat dan partisipasi dicatat.'], 201);
         } catch (\Exception $e) {

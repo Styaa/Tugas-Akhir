@@ -104,11 +104,12 @@
                                                 <i class="icofont-check-circled fs-4 me-2"></i>
                                                 <div>
                                                     <strong>Program kerja telah selesai!</strong>
-                                                    <p class="mb-0">Program kerja ini telah dikonfirmasi selesai dan siap untuk evaluasi.</p>
+                                                    <p class="mb-0">Program kerja ini telah dikonfirmasi selesai dan siap
+                                                        untuk evaluasi.</p>
                                                 </div>
                                             </div>
                                             <a href="{{ route('program-kerja.evaluasi', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
-                                               class="btn btn-primary">
+                                                class="btn btn-primary">
                                                 <i class="icofont-chart-bar-graph me-2"></i>Lihat Evaluasi Kinerja
                                             </a>
                                         </div>
@@ -133,13 +134,57 @@
                                                     <i class="icofont-rating me-2"></i>Buka Penilaian Anggota
                                                 </button>
                                             @else
-                                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                                    data-bs-target="#konfirmasiSelesaiModal">
-                                                    <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
-                                                </button>
+                                                <!-- Check if bobot is valid before showing confirmation button -->
+                                                @php
+                                                    $totalBobot =
+                                                        ($programKerja->bobot_kehadiran ?? 0) +
+                                                        ($programKerja->bobot_kontribusi ?? 0) +
+                                                        ($programKerja->bobot_tanggung_jawab ?? 0) +
+                                                        ($programKerja->bobot_kualitas ?? 0) +
+                                                        ($programKerja->bobot_penilaian_atasan ?? 0);
+                                                    $bobotValid = abs($totalBobot - 1.0) <= 0.001;
+                                                @endphp
+
+                                                @if ($bobotValid)
+                                                    <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                                        data-bs-target="#konfirmasiSelesaiModal">
+                                                        <i class="icofont-check-circled me-2"></i>Konfirmasi Penyelesaian
+                                                    </button>
+                                                @else
+                                                    <div class="d-flex flex-column align-items-end">
+                                                        <button type="button" class="btn btn-secondary" disabled
+                                                            title="Bobot evaluasi belum valid. Total bobot harus 100%">
+                                                            <i class="icofont-check-circled me-2"></i>Konfirmasi
+                                                            Penyelesaian
+                                                        </button>
+                                                        <small class="text-danger mt-1">
+                                                            <i class="icofont-warning-alt me-1"></i>
+                                                            Bobot evaluasi belum valid
+                                                            ({{ number_format($totalBobot * 100, 1) }}%)
+                                                        </small>
+                                                    </div>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
+
+                                    <!-- Alert for invalid weight when all members are rated -->
+                                    {{-- @if ($allMembersRated == true && !$bobotValid)
+                                        <div class="alert alert-danger mt-3 mb-0 w-100">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="icofont-warning-alt me-2"></i>
+                                                    <strong>Bobot evaluasi belum valid!</strong>
+                                                    Total bobot saat ini {{ number_format($totalBobot * 100, 1) }}%.
+                                                    Silakan atur bobot evaluasi terlebih dahulu sebelum konfirmasi
+                                                    penyelesaian.
+                                                </div>
+                                                <a href="#bobotEvaluasi" class="btn btn-outline-danger">
+                                                    <i class="icofont-settings me-2"></i>Atur Bobot
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endif --}}
                                 @elseif ($tanggalSelesaiLewat)
                                     <!-- Program Belum Selesai, Tanggal Lewat, Bukan Ketua -->
                                     <div class="alert alert-warning mb-0 w-100">
@@ -147,7 +192,8 @@
                                             <i class="icofont-warning-alt fs-4 me-2"></i>
                                             <div>
                                                 <strong>Program kerja telah melewati tanggal selesai.</strong>
-                                                <p class="mb-0">Menunggu konfirmasi penyelesaian dari ketua program kerja.
+                                                <p class="mb-0">Menunggu konfirmasi penyelesaian dari ketua program
+                                                    kerja.
                                                 </p>
                                             </div>
                                         </div>
@@ -168,6 +214,131 @@
                             </div>
                         </div>
                     </div>
+
+                    @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
+                        <div class="card mb-4">
+                            <div class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom">
+                                <h5 class="fw-bold mb-0">Pengaturan Bobot Evaluasi</h5>
+                                @if (!$programKerjaSelesai)
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#bobotModal">
+                                        <i class="icofont-settings me-1"></i>Atur Bobot
+                                    </button>
+                                @endif
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center g-3">
+                                    <!-- Bobot Kehadiran -->
+                                    <div class="col-md-2">
+                                        <div class="p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-muted mb-2">Kehadiran</h6>
+                                            <p class="fs-5 fw-bold mb-0 text-primary">
+                                                {{ $programKerja->bobot_kehadiran
+                                                    ? number_format($programKerja->bobot_kehadiran * 100, 0) . '%'
+                                                    : 'Belum diatur' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bobot Kontribusi -->
+                                    <div class="col-md-2">
+                                        <div class="p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-muted mb-2">Kontribusi</h6>
+                                            <p class="fs-5 fw-bold mb-0 text-success">
+                                                {{ $programKerja->bobot_kontribusi
+                                                    ? number_format($programKerja->bobot_kontribusi * 100, 0) . '%'
+                                                    : 'Belum diatur' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bobot Tanggung Jawab -->
+                                    <div class="col-md-2">
+                                        <div class="p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-muted mb-2">Tanggung Jawab</h6>
+                                            <p class="fs-5 fw-bold mb-0 text-info">
+                                                {{ $programKerja->bobot_tanggung_jawab
+                                                    ? number_format($programKerja->bobot_tanggung_jawab * 100, 0) . '%'
+                                                    : 'Belum diatur' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bobot Kualitas -->
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-muted mb-2">Kualitas</h6>
+                                            <p class="fs-5 fw-bold mb-0 text-warning">
+                                                {{ $programKerja->bobot_kualitas ? number_format($programKerja->bobot_kualitas * 100, 0) . '%' : 'Belum diatur' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bobot Penilaian Atasan -->
+                                    <div class="col-md-3">
+                                        <div class="p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-muted mb-2">Penilaian Atasan</h6>
+                                            <p class="fs-5 fw-bold mb-0 text-danger">
+                                                {{ $programKerja->bobot_penilaian_atasan
+                                                    ? number_format($programKerja->bobot_penilaian_atasan * 100, 0) . '%'
+                                                    : 'Belum diatur' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @php
+                                    $totalBobot =
+                                        ($programKerja->bobot_kehadiran ?? 0.2) +
+                                        ($programKerja->bobot_kontribusi ?? 0.25) +
+                                        ($programKerja->bobot_tanggung_jawab ?? 0.2) +
+                                        ($programKerja->bobot_kualitas ?? 0.2) +
+                                        ($programKerja->bobot_penilaian_atasan ?? 0.15);
+                                @endphp
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        @php
+                                            // Cek apakah ada bobot yang null
+                                            $adaBobotNull =
+                                                is_null($programKerja->bobot_kehadiran) ||
+                                                is_null($programKerja->bobot_kontribusi) ||
+                                                is_null($programKerja->bobot_tanggung_jawab) ||
+                                                is_null($programKerja->bobot_kualitas) ||
+                                                is_null($programKerja->bobot_penilaian_atasan);
+
+                                            // Hitung total bobot jika tidak ada yang null
+                                            $totalBobot = $adaBobotNull ? 0 : $totalBobot;
+                                            $bobotValid = !$adaBobotNull && abs($totalBobot - 1.0) <= 0.001;
+                                        @endphp
+
+                                        <div
+                                            class="alert {{ $bobotValid ? 'alert-success' : ($adaBobotNull ? 'alert-info' : 'alert-warning') }} mb-0">
+                                            <div class="d-flex align-items-center">
+                                                <i
+                                                    class="icofont-{{ $bobotValid ? 'check-circled' : ($adaBobotNull ? 'info-circle' : 'warning-alt') }} fs-4 me-2"></i>
+                                                <div>
+                                                    <strong>Total Bobot:
+                                                        {{ $adaBobotNull ? 'Belum lengkap' : number_format($totalBobot * 100, 1) . '%' }}
+                                                    </strong>
+
+                                                    @if ($adaBobotNull)
+                                                        <p class="mb-0">Beberapa bobot evaluasi belum diatur. Silakan
+                                                            lengkapi semua bobot terlebih dahulu.</p>
+                                                    @elseif ($bobotValid)
+                                                        <p class="mb-0">Konfigurasi bobot sudah benar.</p>
+                                                    @else
+                                                        <p class="mb-0">Total bobot harus sama dengan 100%. Silakan atur
+                                                            ulang bobot evaluasi.</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Anggaran Program Kerja --}}
                     @if (Auth::user()->jabatanOrmawa->nama !== 'Anggota' || Auth::user()->jabatanProker->nama !== 'Anggota')
@@ -285,8 +456,7 @@
                                                                     title="Preview">
                                                                     <i class="icofont-eye-alt"></i>
                                                                 </a>
-                                                                @if (Auth::user()->jabatanOrmawa->id <= 3 ||
-                                                                        Auth::user()->jabatanProker->id <= 3)
+                                                                @if (Auth::user()->jabatanOrmawa->id <= 3 || Auth::user()->jabatanProker->id <= 3)
                                                                     <button type="button"
                                                                         class="btn btn-sm btn-outline-danger delete-file"
                                                                         data-id="{{ $file->id }}"
@@ -817,23 +987,28 @@
                                                                     nilai
                                                                 </option>
                                                                 <option value="1"
-                                                                    {{ $anggota->nilai_atasan == 1 ? 'selected' : '' }}>1 -
+                                                                    {{ $anggota->nilai_atasan == 1 ? 'selected' : '' }}>1
+                                                                    -
                                                                     Sangat
                                                                     Kurang</option>
                                                                 <option value="2"
-                                                                    {{ $anggota->nilai_atasan == 2 ? 'selected' : '' }}>2 -
+                                                                    {{ $anggota->nilai_atasan == 2 ? 'selected' : '' }}>2
+                                                                    -
                                                                     Kurang
                                                                 </option>
                                                                 <option value="3"
-                                                                    {{ $anggota->nilai_atasan == 3 ? 'selected' : '' }}>3 -
+                                                                    {{ $anggota->nilai_atasan == 3 ? 'selected' : '' }}>3
+                                                                    -
                                                                     Cukup
                                                                 </option>
                                                                 <option value="4"
-                                                                    {{ $anggota->nilai_atasan == 4 ? 'selected' : '' }}>4 -
+                                                                    {{ $anggota->nilai_atasan == 4 ? 'selected' : '' }}>4
+                                                                    -
                                                                     Baik
                                                                 </option>
                                                                 <option value="5"
-                                                                    {{ $anggota->nilai_atasan == 5 ? 'selected' : '' }}>5 -
+                                                                    {{ $anggota->nilai_atasan == 5 ? 'selected' : '' }}>5
+                                                                    -
                                                                     Sangat Baik
                                                                 </option>
                                                             </select>
@@ -876,18 +1051,26 @@
                                     <div class="mb-3">
                                         <label for="anggota" class="form-label">Pilih Anggota</label>
                                         <div class="d-flex align-items-center">
-                                            <select class="form-select z-10" id="multiple-select-field"
+                                            <select class="form-select" data-width="600px" id="multiple-select-field"
                                                 data-placeholder="Choose anything" name="anggotas[]" multiple>
-                                                @if (isset($availableAnggota) && is_iterable($availableAnggota))
-                                                    @forelse ($availableAnggota as $availableAnggotas)
-                                                        <option value="{{ $availableAnggotas->id ?? '' }}">
-                                                            {{ $availableAnggotas->name ?? 'Nama tidak tersedia' }}
+                                                @if (isset($availableAnggota) && $availableAnggota->count() > 0)
+                                                    @forelse ($availableAnggota as $anggota)
+                                                        <option value="{{ $anggota->id }}">
+                                                            {{ $anggota->name }} ({{ $anggota->nrp }})
+                                                            @if (isset($anggota->rata_rata_score))
+                                                                - Skor:
+                                                                {{ number_format($anggota->rata_rata_score, 2) }}
+                                                            @else
+                                                                - Belum Dinilai
+                                                            @endif
                                                         </option>
                                                     @empty
-                                                        <option value="" disabled>Tidak ada anggota tersedia</option>
+                                                        <option value="" disabled>Tidak ada anggota tersedia
+                                                        </option>
                                                     @endforelse
                                                 @else
-                                                    <option value="" disabled>Data anggota tidak ditemukan</option>
+                                                    <option value="" disabled>Data anggota tidak ditemukan
+                                                    </option>
                                                 @endif
                                             </select>
                                         </div>
@@ -947,12 +1130,14 @@
                 </div>
 
                 <!-- Error Modal HTML -->
-                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header bg-danger text-white">
                                 <h5 class="modal-title" id="errorModalLabel">Data Belum Lengkap</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <p>Mohon lengkapi data berikut:</p>
@@ -983,7 +1168,7 @@
             // Initialize Select2
             $('#multiple-select-field').select2({
                 theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' :
+                width: $(this).data('w-100') ? $(this).data('w-100') : $(this).hasClass('w-100') ? '100%' :
                     'style',
                 placeholder: $(this).data('placeholder'),
                 closeOnSelect: false,
@@ -1151,6 +1336,116 @@
                     }
                 });
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const bobotInputs = document.querySelectorAll('.bobot-input');
+            const totalBobotDisplay = document.getElementById('totalBobot');
+            const statusText = document.getElementById('statusText');
+            const bobotStatus = document.getElementById('bobotStatus');
+            const simpanBtn = document.getElementById('simpanBobotBtn');
+            const bobotForm = document.getElementById('bobotForm');
+
+            // Preset configurations
+            const presets = {
+                'balanced': {
+                    bobot_kehadiran: 20,
+                    bobot_kontribusi: 25,
+                    bobot_tanggung_jawab: 20,
+                    bobot_kualitas: 20,
+                    bobot_penilaian_atasan: 15
+                },
+                'contribution-focus': {
+                    bobot_kehadiran: 15,
+                    bobot_kontribusi: 35,
+                    bobot_tanggung_jawab: 20,
+                    bobot_kualitas: 20,
+                    bobot_penilaian_atasan: 10
+                },
+                'attendance-focus': {
+                    bobot_kehadiran: 35,
+                    bobot_kontribusi: 20,
+                    bobot_tanggung_jawab: 20,
+                    bobot_kualitas: 15,
+                    bobot_penilaian_atasan: 10
+                }
+            };
+
+            // Function to calculate and update total
+            function updateTotal() {
+                let total = 0;
+                bobotInputs.forEach(input => {
+                    const value = parseFloat(input.value) || 0;
+                    total += value;
+                });
+
+                totalBobotDisplay.textContent = total.toFixed(1) + '%';
+
+                // Update status
+                if (Math.abs(total - 100) <= 0.1) {
+                    statusText.textContent = 'Valid ✓';
+                    statusText.className = 'text-success fw-bold';
+                    bobotStatus.className = 'mt-2';
+                    simpanBtn.disabled = false;
+                } else {
+                    statusText.textContent = `Perlu penyesuaian (selisih: ${(total - 100).toFixed(1)}%)`;
+                    statusText.className = 'text-danger fw-bold';
+                    bobotStatus.className = 'mt-2';
+                    simpanBtn.disabled = true;
+                }
+            }
+
+            // Add event listeners to all bobot inputs
+            bobotInputs.forEach(input => {
+                input.addEventListener('input', updateTotal);
+                input.addEventListener('change', updateTotal);
+            });
+
+            // Preset button handlers
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const presetName = this.getAttribute('data-preset');
+                    const preset = presets[presetName];
+
+                    if (preset) {
+                        Object.keys(preset).forEach(key => {
+                            const input = document.getElementById(key);
+                            if (input) {
+                                input.value = preset[key];
+                            }
+                        });
+                        updateTotal();
+
+                        // Visual feedback
+                        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove(
+                            'active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // Form submission validation
+            bobotForm.addEventListener('submit', function(e) {
+                let total = 0;
+                bobotInputs.forEach(input => {
+                    total += parseFloat(input.value) || 0;
+                });
+
+                if (Math.abs(total - 100) > 0.1) {
+                    e.preventDefault();
+                    toastr.error(`Total bobot harus 100%. Saat ini: ${total.toFixed(1)}%`);
+                    return false;
+                }
+
+                // Convert percentage to decimal before submission
+                bobotInputs.forEach(input => {
+                    const percentage = parseFloat(input.value) || 0;
+                    input.value = (percentage / 100).toFixed(3);
+                });
+            });
+
+            // Initial calculation
+            updateTotal();
         });
     </script>
 

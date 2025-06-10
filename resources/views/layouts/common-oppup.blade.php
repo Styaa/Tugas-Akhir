@@ -520,9 +520,14 @@ $date = \Carbon\Carbon::now();
                             <label for="dependency" class="form-label">Dependency</label>
                             <select class="form-select" id="dependency" name="dependency">
                                 <option value="">No Dependency</option>
-                                {{-- @foreach ($activities as $activity)
-                                    <option value="{{ $activity->id }}">{{ $activity->name }}</option>
-                                @endforeach --}}
+                                @foreach ($activities as $depActivity)
+                                    @if ($depActivity->id != $activity->id)
+                                        <option value="{{ $depActivity->id }}"
+                                            {{ $depActivity->id == $activity->dependency_id ? 'selected' : '' }}>
+                                            {{ $depActivity->nama }}
+                                        </option>
+                                    @endif
+                                @endforeach
                             </select>
                         </div>
                         <div class="modal-footer">
@@ -709,6 +714,158 @@ $date = \Carbon\Carbon::now();
         </div>
     </div>
 </div>
+
+@if (@isset($programKkerja))
+    <!-- Modal Pengaturan Bobot -->
+    <div class="modal fade" id="bobotModal" tabindex="-1" aria-labelledby="bobotModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bobotModalLabel">Pengaturan Bobot Evaluasi SAW</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="bobotForm"
+                    action="{{ route('program-kerja.update-bobot', ['kode_ormawa' => $kode_ormawa, 'id' => $programKerja->id]) }}"
+                    method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="icofont-info-circle me-2"></i>
+                            <strong>Petunjuk:</strong> Total semua bobot harus sama dengan 100%. Bobot menentukan
+                            seberapa
+                            besar pengaruh setiap kriteria terhadap nilai akhir evaluasi.
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Bobot Kehadiran -->
+                            <div class="col-md-6">
+                                <label for="bobot_kehadiran" class="form-label">
+                                    <i class="icofont-clock-time me-1"></i>Bobot Kehadiran
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control bobot-input" id="bobot_kehadiran"
+                                        name="bobot_kehadiran"
+                                        value="{{ old('bobot_kehadiran', ($programKerja->bobot_kehadiran ?? 0.2) * 100) }}"
+                                        min="0" max="100" step="0.1" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Mengukur tingkat kehadiran dalam rapat dan kegiatan</small>
+                            </div>
+
+                            <!-- Bobot Kontribusi -->
+                            <div class="col-md-6">
+                                <label for="bobot_kontribusi" class="form-label">
+                                    <i class="icofont-tasks me-1"></i>Bobot Kontribusi
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control bobot-input" id="bobot_kontribusi"
+                                        name="bobot_kontribusi"
+                                        value="{{ old('bobot_kontribusi', ($programKerja->bobot_kontribusi ?? 0.25) * 100) }}"
+                                        min="0" max="100" step="0.1" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Mengukur kontribusi dalam menyelesaikan tugas</small>
+                            </div>
+
+                            <!-- Bobot Tanggung Jawab -->
+                            <div class="col-md-6">
+                                <label for="bobot_tanggung_jawab" class="form-label">
+                                    <i class="icofont-shield me-1"></i>Bobot Tanggung Jawab
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control bobot-input" id="bobot_tanggung_jawab"
+                                        name="bobot_tanggung_jawab"
+                                        value="{{ old('bobot_tanggung_jawab', ($programKerja->bobot_tanggung_jawab ?? 0.2) * 100) }}"
+                                        min="0" max="100" step="0.1" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Mengukur ketepatan waktu penyelesaian tugas</small>
+                            </div>
+
+                            <!-- Bobot Kualitas -->
+                            <div class="col-md-6">
+                                <label for="bobot_kualitas" class="form-label">
+                                    <i class="icofont-star me-1"></i>Bobot Kualitas
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control bobot-input" id="bobot_kualitas"
+                                        name="bobot_kualitas"
+                                        value="{{ old('bobot_kualitas', ($programKerja->bobot_kualitas ?? 0.2) * 100) }}"
+                                        min="0" max="100" step="0.1" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Mengukur kualitas hasil kerja yang diselesaikan</small>
+                            </div>
+
+                            <!-- Bobot Penilaian Atasan -->
+                            <div class="col-md-12">
+                                <label for="bobot_penilaian_atasan" class="form-label">
+                                    <i class="icofont-user-suited me-1"></i>Bobot Penilaian Atasan
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control bobot-input"
+                                        id="bobot_penilaian_atasan" name="bobot_penilaian_atasan"
+                                        value="{{ old('bobot_penilaian_atasan', ($programKerja->bobot_penilaian_atasan ?? 0.15) * 100) }}"
+                                        min="0" max="100" step="0.1" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Penilaian subjektif dari atasan langsung</small>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Total Display -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-light border">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>Total Bobot:</strong>
+                                        <span id="totalBobot"
+                                            class="fs-5 fw-bold">{{ number_format((($programKerja->bobot_kehadiran ?? 0.2) + ($programKerja->bobot_kontribusi ?? 0.25) + ($programKerja->bobot_tanggung_jawab ?? 0.2) + ($programKerja->bobot_kualitas ?? 0.2) + ($programKerja->bobot_penilaian_atasan ?? 0.15)) * 100, 1) }}%</span>
+                                    </div>
+                                    <div id="bobotStatus" class="mt-2">
+                                        <small class="text-muted">Status: <span
+                                                id="statusText">Menghitung...</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preset Bobot -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <label class="form-label">Preset Bobot:</label>
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-outline-secondary preset-btn"
+                                        data-preset="balanced">
+                                        Seimbang
+                                        <small class="d-block text-muted">20%-25%-20%-20%-15%</small>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary preset-btn"
+                                        data-preset="contribution-focus">
+                                        Fokus Kontribusi
+                                        <small class="d-block text-muted">15%-35%-20%-20%-10%</small>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary preset-btn"
+                                        data-preset="attendance-focus">
+                                        Fokus Kehadiran
+                                        <small class="d-block text-muted">35%-20%-20%-15%-10%</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="simpanBobotBtn">
+                            <i class="icofont-save me-1"></i>Simpan Pengaturan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 
 <!-- Edit Project-->
 @if (@isset($program))
@@ -1058,12 +1215,14 @@ $date = \Carbon\Carbon::now();
 
 <!-- Modal Izin Rapat-->
 @if (isset($rapat))
-    <div class="modal fade" id="izinrapat" tabindex="-1" aria-labelledby="izinRapatModalLabel" aria-hidden="true">
+    <div class="modal fade" id="izinrapat" tabindex="-1" aria-labelledby="izinRapatModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="izinRapatModalLabel">Form Izin Rapat</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
 
                 <!-- Form Izin -->
@@ -1121,7 +1280,8 @@ $date = \Carbon\Carbon::now();
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="daftarIzinModalLabel">Daftar Izin Rapat</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">

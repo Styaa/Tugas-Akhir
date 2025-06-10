@@ -26,7 +26,9 @@ class ProgramKerja extends Model
         'pengkonfirmasi',
         'ormawas_kode',
         'periode',
-        'updated_at'
+        'updated_at',
+        'bobot_kehadiran', 'bobot_kontribusi', 'bobot_tanggung_jawab',
+        'bobot_kualitas', 'bobot_penilaian_atasan'
     ];
 
     public function divisi_pelaksanas()

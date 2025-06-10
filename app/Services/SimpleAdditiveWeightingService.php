@@ -26,11 +26,40 @@ class SimpleAdditiveWeightingService
         $this->penilaianAtasan = $penilaian;
     }
 
+    protected function setBobotFromDatabase($proker_id)
+    {
+        $proker = ProgramKerja::findOrFail($proker_id);
+
+        // Cek apakah bobot sudah diset dan valid
+        $totalBobot = ($proker->bobot_kehadiran ?? 0) +
+            ($proker->bobot_kontribusi ?? 0) +
+            ($proker->bobot_tanggung_jawab ?? 0) +
+            ($proker->bobot_kualitas ?? 0) +
+            ($proker->bobot_penilaian_atasan ?? 0);
+
+        // Jika bobot valid (total = 1.0 dengan toleransi 0.001), gunakan dari database
+        if (abs($totalBobot - 1.0) <= 0.001) {
+            $this->bobotKehadiran = $proker->bobot_kehadiran;
+            $this->bobotKontribusi = $proker->bobot_kontribusi;
+            $this->bobotTanggungJawab = $proker->bobot_tanggung_jawab;
+            $this->bobotKualitas = $proker->bobot_kualitas;
+            $this->bobotPenilaianAtasan = $proker->bobot_penilaian_atasan;
+
+            return true; // Bobot berhasil diambil dari database
+        }
+
+        // Jika bobot tidak valid, gunakan default bobot
+        // Opsional: bisa juga throw exception atau return false
+        return false; // Menggunakan bobot default
+    }
+
     /**
      * Menghitung evaluasi untuk semua panitia dalam program kerja
      */
     public function hitungEvaluasiProker($proker_id)
     {
+        $bobotFromDb = $this->setBobotFromDatabase($proker_id);
+
         // Dapatkan program kerja
         $proker = ProgramKerja::findOrFail($proker_id);
 
@@ -124,7 +153,7 @@ class SimpleAdditiveWeightingService
             ->count();
 
         // Calculate attendance value with formula: ((jumlah hadir / jumlah rapat partisipan) + ((jumlah izin / jumlah rapat partisipan) ** 0.5)) * 100
-        $nilai_kehadiran = (($hadir / $total_rapat) + (($izin / $total_rapat)* 0.5)) * 100;
+        $nilai_kehadiran = (($hadir / $total_rapat) + (($izin / $total_rapat) * 0.5)) * 100;
 
         return $nilai_kehadiran;
     }
@@ -147,7 +176,7 @@ class SimpleAdditiveWeightingService
         $total_tugas = count($aktivitas);
 
         // Now filter for only completed tasks
-        $aktivitas_selesai = $aktivitas->filter(function($aktiviti) {
+        $aktivitas_selesai = $aktivitas->filter(function ($aktiviti) {
             return $aktiviti->status == 'selesai';
         });
 
@@ -164,10 +193,18 @@ class SimpleAdditiveWeightingService
             // Assign value based on priority
             $nilai_prioritas = 0;
             switch ($aktiviti->prioritas) {
-                case 'rendah': $nilai_prioritas = 1; break;
-                case 'sedang': $nilai_prioritas = 2; break;
-                case 'tinggi': $nilai_prioritas = 3; break;
-                case 'kritikal': $nilai_prioritas = 4; break;
+                case 'rendah':
+                    $nilai_prioritas = 1;
+                    break;
+                case 'sedang':
+                    $nilai_prioritas = 2;
+                    break;
+                case 'tinggi':
+                    $nilai_prioritas = 3;
+                    break;
+                case 'kritikal':
+                    $nilai_prioritas = 4;
+                    break;
             }
 
             $total_nilai_prioritas += $nilai_prioritas;
@@ -204,8 +241,10 @@ class SimpleAdditiveWeightingService
         $selesai_tepat_waktu = 0;
 
         foreach ($aktivitas as $aktiviti) {
-            if ($aktiviti->status == 'selesai' && $aktiviti->tanggal_selesai &&
-                strtotime($aktiviti->tanggal_selesai) <= strtotime($aktiviti->tenggat_waktu)) {
+            if (
+                $aktiviti->status == 'selesai' && $aktiviti->tanggal_selesai &&
+                strtotime($aktiviti->tanggal_selesai) <= strtotime($aktiviti->tenggat_waktu)
+            ) {
                 $selesai_tepat_waktu++;
             }
         }

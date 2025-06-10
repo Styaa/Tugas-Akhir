@@ -569,7 +569,6 @@
         </div>
     @endforeach
 
-
     <!-- Jquery Page Js -->
     <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
     <script src="{{ asset('assets/bundles/dataTables.bundle.js') }}"></script>

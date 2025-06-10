@@ -262,22 +262,37 @@ class ProgramKerjaController extends Controller
         }
 
         $anggota = User::where('status', 'aktif')
-        ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
-            $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
-                $subQuery->where('program_kerjas_id', $id);
-            });
-        })
-        ->get();
+            ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
+                $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
+                    $subQuery->where('program_kerjas_id', $id);
+                });
+            })
+            ->get();
 
         $availableAnggota = User::where('status', 'aktif')
-        ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
-            $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
-                $subQuery->where('program_kerjas_id', $id);
-            });
-        })
-        ->get();
+            ->whereHas('strukturOrmawas.divisiOrmawas.ormawa', function ($query) use ($kode_ormawa) {
+                $query->where('kode', $kode_ormawa); // atau sesuai nama field kode di tabel ormawas
+            })
+            ->whereDoesntHave('strukturProkers', function ($query) use ($id) {
+                $query->whereHas('divisiProgramKerja', function ($subQuery) use ($id) {
+                    $subQuery->where('program_kerjas_id', $id);
+                });
+            })
+            ->get();
 
-        // dd($anggota);
+        $evaluasiRataRata = DB::table('evaluasis')
+            ->select('user_id', DB::raw('AVG(score) as rata_rata_score'))
+            ->groupBy('user_id')
+            ->pluck('rata_rata_score', 'user_id');
+
+        // dd($evaluasiRataRata);
+
+        $availableAnggota->transform(function ($anggota) use ($evaluasiRataRata) {
+            $anggota->rata_rata_score = $evaluasiRataRata[$anggota->id] ?? null;
+            return $anggota;
+        });
+
+        // dd($availableAnggota);
 
         $jabatans = Jabatan::all();
 
@@ -676,6 +691,68 @@ class ProgramKerjaController extends Controller
             'hariKegiatan' => $hariKegiatan,
             'dokumen' => $dokumen,
         ]);
+    }
+
+    public function updateBobot(Request $request, $kode_ormawa, $id)
+    {
+        try {
+            $request->validate([
+                'bobot_kehadiran' => 'required|numeric|between:0,1',
+                'bobot_kontribusi' => 'required|numeric|between:0,1',
+                'bobot_tanggung_jawab' => 'required|numeric|between:0,1',
+                'bobot_kualitas' => 'required|numeric|between:0,1',
+                'bobot_penilaian_atasan' => 'required|numeric|between:0,1',
+            ], [
+                'bobot_*.required' => 'Semua bobot harus diisi',
+                'bobot_*.numeric' => 'Bobot harus berupa angka',
+                'bobot_*.between' => 'Bobot harus antara 0 dan 1',
+            ]);
+
+            // Validasi total bobot = 1.00
+            $total = $request->bobot_kehadiran + $request->bobot_kontribusi +
+                $request->bobot_tanggung_jawab + $request->bobot_kualitas +
+                $request->bobot_penilaian_atasan;
+
+            if (abs($total - 1.00) > 0.001) {
+                return back()->withErrors([
+                    'total_bobot' => 'Total semua bobot harus sama dengan 100%. Saat ini: ' .
+                        number_format($total * 100, 1) . '%'
+                ])->withInput();
+            }
+
+            $programKerja = ProgramKerja::where('id', $id)
+                ->where('ormawas_kode', $kode_ormawa)
+                ->firstOrFail();
+
+            // Check authorization
+            $user = Auth::user();
+            if ($user->jabatanOrmawa->nama === 'Anggota' && $user->jabatanProker->nama === 'Anggota') {
+                return back()->with('error', 'Anda tidak memiliki akses untuk mengatur bobot evaluasi.');
+            }
+
+            // Check if program kerja sudah selesai
+            if ($programKerja->konfirmasi_penyelesaian === 'Ya') {
+                return back()->with('error', 'Tidak dapat mengubah bobot karena program kerja sudah selesai.');
+            }
+
+            // dd($request);
+
+            // Update bobot
+            $programKerja->update([
+                'bobot_kehadiran' => $request->bobot_kehadiran,
+                'bobot_kontribusi' => $request->bobot_kontribusi,
+                'bobot_tanggung_jawab' => $request->bobot_tanggung_jawab,
+                'bobot_kualitas' => $request->bobot_kualitas,
+                'bobot_penilaian_atasan' => $request->bobot_penilaian_atasan,
+            ]);
+
+            return redirect()->back()->with(
+                'success',
+                'Bobot evaluasi berhasil diperbarui dan evaluasi telah dihitung ulang.'
+            );
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat memperbarui bobot evaluasi.');
+        }
     }
 
     public function createLPJ($kode_ormawa, $id)
